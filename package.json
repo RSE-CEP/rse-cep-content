@@ -1,0 +1,24 @@
+{
+  "name": "rse-cep-proto",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "validate": "node --import tsx scripts/validate.js",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^6.0.2"
+  },
+  "devDependencies": {
+    "gray-matter": "^4.0.3",
+    "tsx": "^4.19.0",
+    "zod": "^3.24.0"
+  }
+}

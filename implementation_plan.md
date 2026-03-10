@@ -7,17 +7,25 @@
 
 ## Phase 1 — Project Scaffolding
 
+**Completed:** 2026-03-11
+
 Set up the Astro project, content collection schemas, and directory structure.
 
-- [ ] Initialise Astro project (`npm create astro@latest`)
-- [ ] Configure `astro.config.mjs` with `site` and `base` for GitHub Pages
-- [ ] Design Zod schema for patterns based on `docs/patterns/2 - Pattern_Template.md` (see design notes below)
-- [ ] Create Zod schemas in `src/content/config.ts` (patterns first; roadmap and principles out of prototype scope)
-- [ ] Create content collection directory: `src/content/patterns/`
-- [ ] Add placeholder pattern file to validate schema wiring
-- [ ] Set up `.gitignore` (include `_sources/`, `node_modules/`, `dist/`)
-- [ ] Install dev dependencies (`gray-matter`, `tsx`)
-- [ ] Create `_sources/` directory with a `.gitkeep` (directory exists but contents ignored)
+- [x] Initialise Astro project (`npm create astro@latest`)
+- [x] Configure `astro.config.mjs` with `site` and `base` for GitHub Pages
+- [x] Design Zod schema for patterns based on `docs/patterns/2 - Pattern_Template.md` (see design notes below)
+- [x] Create Zod schemas in `src/content.config.ts` (patterns first; roadmap and principles out of prototype scope)
+- [x] Create content collection directory: `src/content/patterns/`
+- [x] Add placeholder pattern file to validate schema wiring
+- [x] Set up `.gitignore` (include `_sources/`, `node_modules/`, `dist/`)
+- [x] Install dev dependencies (`gray-matter`, `tsx`)
+- [x] Create `_sources/` directory with a `.gitkeep` (directory exists but contents ignored)
+
+### Deviations
+
+- **Config file location:** Astro 6 uses `src/content.config.ts` (project root of `src/`), not `src/content/config.ts`. Updated references accordingly.
+- **Zod import:** Astro 6 provides Zod via `astro/zod` — no separate `zod` install needed at runtime, but kept as devDependency for the validation script (Phase 2).
+- **Astro version:** Scaffolded with Astro v6.0.2 (latest at time of build).
 
 ### Design Note: Pattern Schema
 

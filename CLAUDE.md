@@ -16,12 +16,12 @@ AI-assisted content pipeline prototype: source document extraction → structure
 
 ## Architecture
 
-Astro + content collections. Zod schemas in `src/content/config.ts` are the single source of truth. Validation via `scripts/validate.js` (used by CI and AI skill). GitHub Actions for PR gating and deployment.
+Astro + content collections. Zod schemas in `src/content.config.ts` are the single source of truth. Validation via `scripts/validate.js` (used by CI and AI skill). GitHub Actions for PR gating and deployment.
 
 ## Key Constraints
 
 - **Pattern template is authoritative.** `docs/patterns/2 - Pattern_Template.md` defines the pattern structure. The Zod schema, validation, and site templates derive from it.
-- **Schema is code-level truth.** `src/content/config.ts` Zod schemas are what validation actually checks. They must faithfully implement the pattern template.
+- **Schema is code-level truth.** `src/content.config.ts` Zod schemas are what validation actually checks. They must faithfully implement the pattern template.
 - **Extraction before elaboration.** AI must distinguish extracted content from generated content.
 - **Source sensitivity.** Source documents stay in `_sources/` (gitignored) or Sharepoint. Never commit them. Use `source_ref` for human-readable provenance only.
 

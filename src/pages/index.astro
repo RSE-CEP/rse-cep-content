@@ -1,0 +1,26 @@
+---
+import { getCollection } from 'astro:content';
+
+const patterns = await getCollection('patterns');
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>RSE-CEP Patterns</title>
+	</head>
+	<body>
+		<h1>RSE-CEP Patterns</h1>
+		<p>Content pipeline prototype — {patterns.length} pattern(s) loaded.</p>
+		<ul>
+			{patterns.map((p) => (
+				<li>
+					<strong>{p.data.title}</strong> ({p.data.pattern_id})
+					— {p.data.keywords.join(', ')}
+				</li>
+			))}
+		</ul>
+	</body>
+</html>
