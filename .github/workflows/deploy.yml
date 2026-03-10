@@ -1,0 +1,81 @@
+# Deploy to GitHub Pages — runs when commits are pushed to main
+#
+# This workflow builds the Astro site and deploys it to GitHub Pages.
+# It typically fires after a PR is merged into main.
+#
+# Prerequisites (one-time repo setup — see docs/github-actions-setup.md):
+#   1. GitHub Pages source must be set to "GitHub Actions" (not branch-based)
+#   2. Repository Actions permissions must allow read/write
+#   3. astro.config.mjs must have correct `site` and `base` values
+#
+# How it works:
+#   1. Checks out the repo
+#   2. Installs Node.js and runs `npm ci` to get dependencies
+#   3. Runs `npx astro build` to produce the static site in dist/
+#   4. Uploads dist/ as a GitHub Pages artifact
+#   5. Deploys the artifact — site goes live at:
+#      https://<org>.github.io/<repo-name>/
+#
+# Concurrency: only one deploy runs at a time. If a new push arrives while
+# a deploy is in progress, the new one queues (cancel-in-progress: false)
+# so we never skip a deployment.
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+# These permissions are required for GitHub Pages deployment.
+# - contents: read  — to check out the repository
+# - pages: write    — to upload the built site as a Pages artifact
+# - id-token: write — for secure authentication with the Pages environment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only allow one deployment at a time. New pushes queue rather than cancel
+# the in-progress deploy, so we never skip a deployment.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    # The `github-pages` environment links this job to your repo's Pages
+    # settings. The URL output lets GitHub show the deployment URL in the
+    # Actions UI and on the repository's Environments page.
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Astro site
+        run: npx astro build
+
+      # Upload the built site (dist/) as a GitHub Pages artifact.
+      # This packages the files in the format that deploy-pages expects.
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+
+      # Deploy the uploaded artifact to GitHub Pages.
+      # The `id: deployment` is referenced by the environment URL above.
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

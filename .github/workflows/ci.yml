@@ -1,0 +1,66 @@
+# CI Validation — runs on every pull request targeting main
+#
+# Two jobs run in sequence:
+#   1. validate — checks all content frontmatter against Zod schemas
+#   2. build    — runs a trial Astro build to catch rendering/reference errors
+#
+# Both must pass before a PR can be merged (requires branch protection setup —
+# see docs/github-actions-setup.md for instructions).
+#
+# Node version: must match the "engines" field in package.json (>=22.12.0).
+# We pin to Node 22 here because the validate script uses Node's built-in
+# fs/promises glob (available from Node 22+).
+
+name: CI Validation
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Job 1: Schema Validation ──────────────────────────────────────────
+  # Runs `npm run validate` which executes scripts/validate.js.
+  # This parses every markdown file in src/content/, extracts YAML
+  # frontmatter, and validates it against the Zod schema for that
+  # content type. Fast (seconds), gives specific field-level errors.
+  validate:
+    name: Schema Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate content schemas
+        run: npm run validate
+
+  # ── Job 2: Trial Astro Build ──────────────────────────────────────────
+  # Runs `npx astro build` to confirm the entire site compiles.
+  # Catches issues that schema validation alone can't: broken markdown,
+  # bad content references, template rendering errors.
+  # Depends on validate — no point building if schemas are broken.
+  build:
+    name: Trial Build
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Astro site
+        run: npx astro build

@@ -68,22 +68,30 @@ Build the schema validation script used by both CI and the AI extraction agent.
 
 ## Phase 3 — GitHub Actions CI/CD
 
+**Completed:** 2026-03-11
+
 Set up the PR validation and deployment workflows.
 
-- [ ] Create `.github/workflows/ci.yml` — PR validation
-  - [ ] Trigger on pull requests targeting `main`
-  - [ ] Step 1: Schema validation (`node scripts/validate.js`)
-  - [ ] Step 2: Trial Astro build (`npx astro build`)
-- [ ] Create `.github/workflows/deploy.yml` — GitHub Pages deployment
-  - [ ] Trigger on push to `main`
-  - [ ] Build Astro site
-  - [ ] Upload artifact via `actions/upload-pages-artifact`
-  - [ ] Deploy via `actions/deploy-pages`
+- [x] Create `.github/workflows/ci.yml` — PR validation
+  - [x] Trigger on pull requests targeting `main`
+  - [x] Step 1: Schema validation (`node scripts/validate.js`)
+  - [x] Step 2: Trial Astro build (`npx astro build`)
+- [x] Create `.github/workflows/deploy.yml` — GitHub Pages deployment
+  - [x] Trigger on push to `main`
+  - [x] Build Astro site
+  - [x] Upload artifact via `actions/upload-pages-artifact`
+  - [x] Deploy via `actions/deploy-pages`
 - [ ] Configure GitHub repo settings (see [docs/github-actions-setup.md](./docs/github-actions-setup.md)):
   - [ ] Enable GitHub Pages with source = GitHub Actions
   - [ ] Add branch protection on `main` requiring CI status checks
 - [ ] Test: open a PR with valid content → CI passes
 - [ ] Test: open a PR with invalid frontmatter → CI fails with clear error
+
+### Deviations
+
+- **Node version bumped to 22:** The workflow files use Node 22 (not 20 as shown in the original docs) because `scripts/validate.js` uses Node's built-in `fs/promises` glob, which requires Node 22+. The docs reference (`docs/github-actions-setup.md`) still shows Node 20 in its example YAML — this is now outdated.
+- **Repo settings are manual steps:** The GitHub Pages source and branch protection rules must be configured manually via the GitHub UI after the workflows are pushed. These are marked as incomplete above — see `docs/github-actions-setup.md` for step-by-step instructions.
+- **Testing deferred:** The PR validation tests (valid content passes, invalid content fails) can only be verified after pushing these workflows and opening test PRs. These are marked incomplete above.
 
 **Done when:** PRs are gated by schema validation + build check; merges to main auto-deploy.
 
