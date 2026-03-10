@@ -42,17 +42,25 @@ The spec (§4) now reflects the pattern template structure. Key design decisions
 
 ## Phase 2 — Validation Script
 
+**Completed:** 2026-03-11
+
 Build the schema validation script used by both CI and the AI extraction agent.
 
-- [ ] Create `scripts/validate.js` per spec §5
-- [ ] Accept file path argument or glob across `src/content/`
-- [ ] Parse YAML frontmatter with `gray-matter`
-- [ ] Validate against Zod schema (pattern type)
-- [ ] Soft-warn on missing body sections per pattern template conventions (Intent, Context, Issues, Solution, etc.)
-- [ ] Structured output: pass/fail, field-level errors, section warnings
-- [ ] Non-zero exit code on validation failure
-- [ ] Add `validate` script to `package.json`
-- [ ] Test against placeholder content (should pass) and a deliberately broken file (should fail)
+- [x] Create `scripts/validate.js` per spec §5
+- [x] Accept file path argument or glob across `src/content/`
+- [x] Parse YAML frontmatter with `gray-matter`
+- [x] Validate against Zod schema (pattern type)
+- [x] Soft-warn on missing body sections per pattern template conventions (Intent, Context, Issues, Solution, etc.)
+- [x] Structured output: pass/fail, field-level errors, section warnings
+- [x] Non-zero exit code on validation failure
+- [x] Add `validate` script to `package.json`
+- [x] Test against placeholder content (should pass) and a deliberately broken file (should fail)
+
+### Deviations
+
+- **Schema duplication:** The validation script defines its own copy of the Zod pattern schema using the `zod` devDependency, rather than importing from `src/content.config.ts`. Astro's config uses `astro/zod` which doesn't resolve outside Astro's build pipeline. The schemas are small and unlikely to diverge; if they do, a shared schema module can be introduced later.
+- **`validate` script already in `package.json`:** Was added during Phase 1 scaffolding (`node --import tsx scripts/validate.js`).
+- **Node.js `fs/promises` glob:** Uses Node's built-in `glob` (Node 22+) for file discovery instead of a third-party glob package.
 
 **Done when:** `npm run validate` runs cleanly against all content, catches intentional errors.
 
