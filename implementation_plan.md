@@ -11,12 +11,31 @@ Set up the Astro project, content collection schemas, and directory structure.
 
 - [ ] Initialise Astro project (`npm create astro@latest`)
 - [ ] Configure `astro.config.mjs` with `site` and `base` for GitHub Pages
-- [ ] Create Zod schemas in `src/content/config.ts` (patterns type first; roadmap and principles stubs)
-- [ ] Create content collection directories: `src/content/patterns/`, `src/content/roadmap/`, `src/content/principles/`
+- [ ] Design Zod schema for patterns based on `docs/patterns/2 - Pattern_Template.md` (see design notes below)
+- [ ] Create Zod schemas in `src/content/config.ts` (patterns first; roadmap and principles out of prototype scope)
+- [ ] Create content collection directory: `src/content/patterns/`
 - [ ] Add placeholder pattern file to validate schema wiring
 - [ ] Set up `.gitignore` (include `_sources/`, `node_modules/`, `dist/`)
 - [ ] Install dev dependencies (`gray-matter`, `tsx`)
 - [ ] Create `_sources/` directory with a `.gitkeep` (directory exists but contents ignored)
+
+### Design Note: Pattern Schema
+
+The spec (§4) assumed simple YAML frontmatter with body sections like Context, Problem, Solution. The actual pattern template (`docs/patterns/2 - Pattern_Template.md`) is substantially richer:
+
+**Structural differences from spec:**
+- **Metadata** uses a table in the body, not YAML frontmatter fields (Pattern ID, Keywords, Maturity Level, etc.)
+- **Maturity levels** are Foundational/Recommended/Emerging/Experimental (not draft/reviewed/published as spec assumed)
+- **Body sections** are: Intent, Context (When/When NOT/Prerequisites), Issues (not "Problem"), Motivating Example, Solution (Core Idea/Key Principles/Structure), Implementation Examples, Context-Specific Guidance (HASS/Indigenous/Scale), Consequences, Known Uses, Related Patterns, Common Variations, Pitfalls, Resources, Validation Checklist, Citation, Metadata, Acknowledgments, Key References
+- **No `confidence` field** in the pattern template
+- **No `source_type` or `source_ref`** in the pattern template — these were spec-level concerns for tracking extraction provenance, not pattern-level metadata
+
+**Decision needed:** How to reconcile the spec's YAML frontmatter approach (needed for Astro content collections) with the pattern template's body-embedded metadata table. Options:
+1. **Frontmatter for Astro, body for display:** Use YAML frontmatter with key fields (title, pattern_id, maturity, keywords) for Astro queries/filtering, and keep the full template structure in the body. The metadata table in the body is rendered on the page.
+2. **Frontmatter only:** Move all metadata into YAML frontmatter, remove the body metadata table. Simpler for Astro, but diverges from the pattern template format.
+3. **Minimal frontmatter + body-driven:** Only `title` and `pattern_id` in frontmatter (Astro minimum), everything else stays in the body. Limits Astro's ability to filter/query by metadata fields.
+
+**Recommendation:** Option 1. Key queryable fields in frontmatter (for Astro collections, filtering, and validation), full template structure preserved in body (for human readability and rendering). The frontmatter fields should be drawn from the pattern template's metadata table, not the spec's original field list.
 
 **Done when:** `npm run dev` starts, placeholder pattern renders without errors.
 
@@ -29,8 +48,8 @@ Build the schema validation script used by both CI and the AI extraction agent.
 - [ ] Create `scripts/validate.js` per spec §5
 - [ ] Accept file path argument or glob across `src/content/`
 - [ ] Parse YAML frontmatter with `gray-matter`
-- [ ] Validate against appropriate Zod schema (looked up by `type` field)
-- [ ] Soft-warn on missing H2 body sections (per content type conventions)
+- [ ] Validate against Zod schema (pattern type)
+- [ ] Soft-warn on missing body sections per pattern template conventions (Intent, Context, Issues, Solution, etc.)
 - [ ] Structured output: pass/fail, field-level errors, section warnings
 - [ ] Non-zero exit code on validation failure
 - [ ] Add `validate` script to `package.json`
@@ -68,16 +87,14 @@ Set up the PR validation and deployment workflows.
 Build the Claude Code skill that performs AI-assisted content extraction.
 
 - [ ] Create `tools/claude-skill.md` — skill definition with tool declarations
-- [ ] Create prompt templates in `tools/prompt-templates/`:
-  - [ ] `pattern.md` — pattern extraction template
-  - [ ] `roadmap-item.md` — roadmap item template (stub)
-  - [ ] `principle.md` — principle template (stub)
+- [ ] Create prompt template `tools/prompt-templates/pattern.md` referencing the canonical pattern template (`docs/patterns/2 - Pattern_Template.md`)
 - [ ] Implement the four-stage extraction flow (classify → extract → elaborate → validate)
+- [ ] Ensure the skill populates both YAML frontmatter (for Astro) and the full body template structure
 - [ ] Ensure the skill invokes `scripts/validate.js` after writing output
 - [ ] Test with a real source document from `_sources/`
 - [ ] Document the skill usage in [docs/ai-authorship-workflow.md](./docs/ai-authorship-workflow.md)
 
-**Done when:** Running the skill against a source document produces a valid pattern file that passes schema validation.
+**Done when:** Running the skill against a source document produces a valid pattern file that passes schema validation and follows the pattern template structure.
 
 ---
 
@@ -85,14 +102,14 @@ Build the Claude Code skill that performs AI-assisted content extraction.
 
 Create Astro page templates that render content collection items.
 
-- [ ] Create index page listing all patterns
-- [ ] Create individual pattern page template
+- [ ] Create index page listing all patterns (filterable by maturity level, keywords)
+- [ ] Create individual pattern page template that renders the full pattern structure
 - [ ] Basic layout with navigation (minimal styling — functional, not pretty)
-- [ ] Render frontmatter metadata (maturity, domains, confidence, etc.)
-- [ ] Render markdown body content
+- [ ] Render pattern metadata table from frontmatter
+- [ ] Render the rich body structure (Intent, Context, Issues, Solution, etc.)
 - [ ] Verify the built site works on GitHub Pages (correct base path handling)
 
-**Done when:** Patterns are browsable on the deployed site with metadata visible.
+**Done when:** Patterns are browsable on the deployed site with metadata and full body structure visible.
 
 ---
 
