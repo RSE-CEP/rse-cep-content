@@ -21,21 +21,12 @@ Set up the Astro project, content collection schemas, and directory structure.
 
 ### Design Note: Pattern Schema
 
-The spec (§4) assumed simple YAML frontmatter with body sections like Context, Problem, Solution. The actual pattern template (`docs/patterns/2 - Pattern_Template.md`) is substantially richer:
+The spec (§4) now reflects the pattern template structure. Key design decisions:
 
-**Structural differences from spec:**
-- **Metadata** uses a table in the body, not YAML frontmatter fields (Pattern ID, Keywords, Maturity Level, etc.)
-- **Maturity levels** are Foundational/Recommended/Emerging/Experimental (not draft/reviewed/published as spec assumed)
-- **Body sections** are: Intent, Context (When/When NOT/Prerequisites), Issues (not "Problem"), Motivating Example, Solution (Core Idea/Key Principles/Structure), Implementation Examples, Context-Specific Guidance (HASS/Indigenous/Scale), Consequences, Known Uses, Related Patterns, Common Variations, Pitfalls, Resources, Validation Checklist, Citation, Metadata, Acknowledgments, Key References
-- **No `confidence` field** in the pattern template
-- **No `source_type` or `source_ref`** in the pattern template — these were spec-level concerns for tracking extraction provenance, not pattern-level metadata
-
-**Decision needed:** How to reconcile the spec's YAML frontmatter approach (needed for Astro content collections) with the pattern template's body-embedded metadata table. Options:
-1. **Frontmatter for Astro, body for display:** Use YAML frontmatter with key fields (title, pattern_id, maturity, keywords) for Astro queries/filtering, and keep the full template structure in the body. The metadata table in the body is rendered on the page.
-2. **Frontmatter only:** Move all metadata into YAML frontmatter, remove the body metadata table. Simpler for Astro, but diverges from the pattern template format.
-3. **Minimal frontmatter + body-driven:** Only `title` and `pattern_id` in frontmatter (Astro minimum), everything else stays in the body. Limits Astro's ability to filter/query by metadata fields.
-
-**Recommendation:** Option 1. Key queryable fields in frontmatter (for Astro collections, filtering, and validation), full template structure preserved in body (for human readability and rendering). The frontmatter fields should be drawn from the pattern template's metadata table, not the spec's original field list.
+- **Frontmatter for Astro, body for template structure.** Queryable fields (`title`, `pattern_id`, `keywords`, `hass_domains`, etc.) live in YAML frontmatter for Astro content collections. The full pattern template structure (Intent, Context, Issues, Solution, etc.) lives in the markdown body.
+- **Provenance fields are separate from pattern metadata.** `source_type`, `source_ref`, and `confidence` are extraction-pipeline fields populated by the AI tool, not part of the pattern template itself. They are optional in the schema.
+- **Body sections follow the pattern template.** Essential sections: Intent, Context, Issues, Solution, Implementation Examples, Context-Specific Guidance, Consequences, Known Uses, Related Patterns. Additional sections are optional.
+- **No maturity field.** Maturity judgements are out of scope for this pipeline.
 
 **Done when:** `npm run dev` starts, placeholder pattern renders without errors.
 
@@ -102,7 +93,7 @@ Build the Claude Code skill that performs AI-assisted content extraction.
 
 Create Astro page templates that render content collection items.
 
-- [ ] Create index page listing all patterns (filterable by maturity level, keywords)
+- [ ] Create index page listing all patterns (filterable by keywords, hass_domains)
 - [ ] Create individual pattern page template that renders the full pattern structure
 - [ ] Basic layout with navigation (minimal styling — functional, not pretty)
 - [ ] Render pattern metadata table from frontmatter

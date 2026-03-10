@@ -59,67 +59,111 @@ rsecep-site/                          # Astro project root
 
 ## 4. Output File Format
 
-Markdown with YAML frontmatter. Example for a pattern:
+Markdown with YAML frontmatter. The pattern template (`docs/patterns/2 - Pattern_Template.md`) is the authoritative reference for pattern structure. YAML frontmatter captures key queryable fields for Astro content collections; the full template structure lives in the markdown body.
+
+Example for a pattern:
 
 ```markdown
 ---
 title: "Named Entity Recognition for Historical Newspapers"
-type: pattern
-category: text-processing
-maturity: draft
+pattern_id: RSE-HASS-012
+alternative_names:
+  - "Historical NER"
+  - "Newspaper Entity Extraction"
+keywords:
+  - named-entity-recognition
+  - digital-history
+  - text-mining
 hass_domains:
   - digital-history
   - media-studies
+version: "1.0.0"
+author: mat-bettinson
+last_updated: 2026-03-10
 source_type: interview-transcript
 source_ref: "Interview with J. Example, 2026-02-15"
 confidence: 0.7
-related_technologies:
-  - spaCy
-  - Hugging Face Transformers
-author: mat-bettinson
-last_updated: 2026-03-10
 ---
+
+## Intent
+
+[One or two sentences describing the core purpose...]
 
 ## Context
 
+### When This Pattern Applies
 [Extracted/elaborated prose...]
 
-## Problem
+### When This Pattern Does NOT Apply
+[Extracted/elaborated prose...]
 
+### Prerequisites
+[Extracted/elaborated prose...]
+
+## Issues
+
+### Issue 1: [Name]
 [Extracted/elaborated prose...]
 
 ## Solution
 
+### Core Idea
 [Extracted/elaborated prose...]
 
-## HASS Considerations
-
+### Key Principles
 [Extracted/elaborated prose...]
 
-## Examples
+## Implementation Examples
+[Extracted/elaborated prose...]
 
-[Extracted/elaborated prose, potentially including code...]
+## Context-Specific Guidance
+
+### For HASS Research
+[Extracted/elaborated prose...]
+
+### For Indigenous Research
+[Extracted/elaborated prose...]
+
+## Consequences
+[Extracted/elaborated prose...]
+
+## Known Uses
+[Extracted/elaborated prose...]
+
+## Related Patterns
+[Extracted/elaborated prose...]
 ```
 
 ### Frontmatter Fields (Common)
 
-These fields appear across all content types. Type-specific fields to be defined per schema.
+These fields appear across all content types. Type-specific fields are defined per schema.
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `title` | string | yes | Human-readable title |
-| `type` | enum | yes | `pattern`, `roadmap-item`, `principle` |
-| `maturity` | enum | yes | `draft`, `reviewed`, `published` |
 | `hass_domains` | string[] | yes | Relevant HASS disciplines |
-| `source_type` | enum | yes | `interview-transcript`, `talk-transcript`, `manual-notes`, `slides`, `mixed` |
-| `source_ref` | string | yes | Identifies source document (human-readable, no Sharepoint URLs) |
-| `confidence` | number | no | 0–1 indicating how much was extracted vs elaborated |
 | `author` | string | yes | Team member who ran extraction and reviewed |
 | `last_updated` | date | yes | ISO date |
+| `source_type` | enum | no | `interview-transcript`, `talk-transcript`, `manual-notes`, `slides`, `mixed` |
+| `source_ref` | string | no | Identifies source document (human-readable, no Sharepoint URLs) |
+| `confidence` | number | no | 0–1 indicating how much was extracted vs elaborated |
+
+Note: `source_type`, `source_ref`, and `confidence` are extraction-pipeline provenance fields, not pattern metadata. They track how the content was produced and are populated by the AI extraction tool.
+
+### Pattern-Specific Frontmatter Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `pattern_id` | string | yes | Unique identifier (e.g. `RSE-HASS-001`) |
+| `alternative_names` | string[] | no | Other terms used in the community |
+| `keywords` | string[] | yes | Discovery tags (broader than `hass_domains`) |
+| `version` | string | no | Semver (e.g. `1.0.0`) |
 
 ### Body Conventions
 
-Patterns should include the following H2 sections: Context, Problem, Solution, HASS Considerations, Examples. Roadmap items and principles will have their own section conventions (TBD when schemas are finalised). Section presence should be validated with a soft warning, not a hard failure.
+Patterns follow the structure defined in the pattern template (`docs/patterns/2 - Pattern_Template.md`). The essential H2 sections are: Intent, Context, Issues, Solution, Implementation Examples, Context-Specific Guidance, Consequences, Known Uses, Related Patterns. Additional sections (Motivating Example, Common Variations, Pitfalls, Resources, Validation Checklist, Citation, Acknowledgments, Key References) are encouraged but optional.
+
+Roadmap items and principles will have their own section conventions (TBD when schemas are finalised). Section presence should be validated with a soft warning, not a hard failure.
 
 ## 5. Validation Script
 
@@ -205,7 +249,7 @@ File reading (for source documents in `_sources/`) is handled through standard f
 |---|---|
 | **Canonical storage** | Institutional Sharepoint with appropriate access controls |
 | **Working copies** | Pulled to local `_sources/` directory (gitignored) for extraction runs |
-| **Provenance in outputs** | `source_ref` frontmatter field identifies the source document by human-readable description |
+| **Provenance in outputs** | `source_ref` and `source_type` frontmatter fields identify the source document; `confidence` records extraction vs elaboration ratio. These are pipeline provenance, not pattern metadata |
 | **Sensitivity** | Interview transcripts are research participant data — never committed to the public repo |
 
 ## 9. Schema Migration Workflow
@@ -263,7 +307,6 @@ The prototype should demonstrate the full cycle with minimal but real content. S
 
 - [ ] Finalise Zod schemas for all three content types (patterns, roadmap items, principles) — do collaboratively with Peter, Junran, and James
 - [ ] Define body section conventions for roadmap items and architectural principles
-- [ ] Decide on type-specific frontmatter fields beyond the common set
 - [ ] Evaluate Pagefind or similar for client-side search over the built site (may be out of scope for the prototype, but good to test early)
 - [ ] Determine which Astro features to use for filtering/faceting content by metadata fields
 - [ ] Determine if prototype repo becomes the production repo or if it's throwaway
