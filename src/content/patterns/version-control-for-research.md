@@ -14,7 +14,7 @@ hass_domains:
   - linguistics
 version: "0.1.0"
 author: mat-bettinson
-last_updated: 2026-03-11
+last_updated: "not-a-date"
 ---
 
 ## Intent
