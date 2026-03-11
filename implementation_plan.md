@@ -123,14 +123,21 @@ Build the Claude Code skill that performs AI-assisted content extraction.
 
 ## Phase 5 — Minimal Site Templates
 
+**Completed:** 2026-03-11
+
 Create Astro page templates that render content collection items.
 
-- [ ] Create index page listing all patterns (filterable by keywords, hass_domains)
-- [ ] Create individual pattern page template that renders the full pattern structure
-- [ ] Basic layout with navigation (minimal styling — functional, not pretty)
-- [ ] Render pattern metadata table from frontmatter
-- [ ] Render the rich body structure (Intent, Context, Issues, Solution, etc.)
-- [ ] Verify the built site works on GitHub Pages (correct base path handling)
+- [x] Create index page listing all patterns (filterable by keywords, hass_domains)
+- [x] Create individual pattern page template that renders the full pattern structure
+- [x] Basic layout with navigation (minimal styling — functional, not pretty)
+- [x] Render pattern metadata table from frontmatter
+- [x] Render the rich body structure (Intent, Context, Issues, Solution, etc.)
+- [x] Verify the built site works on GitHub Pages (correct base path handling)
+
+### Deviations
+
+- **Client-side filtering only.** The index page uses checkbox filters with client-side JavaScript (no server-side filtering). This is appropriate for the expected small number of patterns and keeps the site fully static.
+- **Global styles.** The Base layout uses `<style is:global>` so that typography and table styles apply to rendered markdown content (which lacks Astro's scoped data attributes).
 
 **Done when:** Patterns are browsable on the deployed site with metadata and full body structure visible.
 

@@ -1,0 +1,47 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const patterns = await getCollection('patterns');
+  return patterns.map((pattern) => ({
+    params: { slug: pattern.id },
+    props: { pattern },
+  }));
+}
+
+const { pattern } = Astro.props;
+const { Content } = await render(pattern);
+const d = pattern.data;
+---
+
+<Base title={d.title}>
+  <h1>{d.title}</h1>
+
+  <table>
+    <tbody>
+      <tr><th>Pattern ID</th><td>{d.pattern_id}</td></tr>
+      {d.alternative_names && d.alternative_names.length > 0 && (
+        <tr><th>Also known as</th><td>{d.alternative_names.join(', ')}</td></tr>
+      )}
+      <tr><th>Author</th><td>{d.author}</td></tr>
+      <tr><th>Last updated</th><td>{d.last_updated.toISOString().slice(0, 10)}</td></tr>
+      {d.version && <tr><th>Version</th><td>{d.version}</td></tr>}
+      <tr>
+        <th>Keywords</th>
+        <td>{d.keywords.map((kw: string) => <span class="tag">{kw}</span>)}</td>
+      </tr>
+      <tr>
+        <th>HASS Domains</th>
+        <td>{d.hass_domains.map((dom: string) => <span class="tag tag--domain">{dom}</span>)}</td>
+      </tr>
+      {d.source_type && <tr><th>Source type</th><td>{d.source_type}</td></tr>}
+      {d.source_ref && <tr><th>Source ref</th><td>{d.source_ref}</td></tr>}
+      {d.confidence != null && <tr><th>Confidence</th><td>{d.confidence}</td></tr>}
+    </tbody>
+  </table>
+
+  <article>
+    <Content />
+  </article>
+</Base>

@@ -1,26 +1,87 @@
 ---
 import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
 
 const patterns = await getCollection('patterns');
+
+// Collect all unique keywords and domains for filter controls
+const allKeywords = [...new Set(patterns.flatMap((p) => p.data.keywords))].sort();
+const allDomains = [...new Set(patterns.flatMap((p) => p.data.hass_domains))].sort();
+
+const base = import.meta.env.BASE_URL;
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>RSE-CEP Patterns</title>
-	</head>
-	<body>
-		<h1>RSE-CEP Patterns</h1>
-		<p>Content pipeline prototype — {patterns.length} pattern(s) loaded.</p>
-		<ul>
-			{patterns.map((p) => (
-				<li>
-					<strong>{p.data.title}</strong> ({p.data.pattern_id})
-					— {p.data.keywords.join(', ')}
-				</li>
-			))}
-		</ul>
-	</body>
-</html>
+<Base title="Patterns">
+  <h1>RSE-CEP Patterns</h1>
+  <p>{patterns.length} pattern(s) in the collection.</p>
+
+  <div id="filters">
+    <details>
+      <summary>Filter by keyword / domain</summary>
+      <div style="margin-top:0.5rem;">
+        <strong>Keywords</strong>
+        <div id="keyword-filters" style="margin-bottom:0.5rem;">
+          {allKeywords.map((kw) => (
+            <label style="margin-right:0.75rem;cursor:pointer;">
+              <input type="checkbox" class="filter-kw" value={kw} /> {kw}
+            </label>
+          ))}
+        </div>
+        <strong>HASS Domains</strong>
+        <div id="domain-filters">
+          {allDomains.map((d) => (
+            <label style="margin-right:0.75rem;cursor:pointer;">
+              <input type="checkbox" class="filter-domain" value={d} /> {d}
+            </label>
+          ))}
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <ul id="pattern-list" style="list-style:none;margin-top:1rem;">
+    {patterns.map((p) => (
+      <li
+        class="pattern-item"
+        data-keywords={p.data.keywords.join(',')}
+        data-domains={p.data.hass_domains.join(',')}
+        style="border:1px solid #ddd;padding:0.75rem;margin-bottom:0.5rem;border-radius:4px;"
+      >
+        <a href={`${base}/patterns/${p.id}/`} style="font-size:1.1rem;font-weight:600;">
+          {p.data.title}
+        </a>
+        <span style="color:#666;margin-left:0.5rem;">({p.data.pattern_id})</span>
+        <div style="margin-top:0.25rem;">
+          {p.data.keywords.map((kw: string) => <span class="tag">{kw}</span>)}
+          {p.data.hass_domains.map((d: string) => <span class="tag tag--domain">{d}</span>)}
+        </div>
+      </li>
+    ))}
+  </ul>
+
+  <script>
+    function applyFilters() {
+      const checkedKw = [...document.querySelectorAll<HTMLInputElement>('.filter-kw:checked')].map(
+        (el) => el.value,
+      );
+      const checkedDomains = [
+        ...document.querySelectorAll<HTMLInputElement>('.filter-domain:checked'),
+      ].map((el) => el.value);
+
+      document.querySelectorAll<HTMLElement>('.pattern-item').forEach((item) => {
+        const kws = (item.dataset.keywords ?? '').split(',');
+        const domains = (item.dataset.domains ?? '').split(',');
+
+        const kwMatch = checkedKw.length === 0 || checkedKw.some((k) => kws.includes(k));
+        const domainMatch =
+          checkedDomains.length === 0 || checkedDomains.some((d) => domains.includes(d));
+
+        item.style.display = kwMatch && domainMatch ? '' : 'none';
+      });
+    }
+
+    document.querySelectorAll('.filter-kw, .filter-domain').forEach((el) => {
+      el.addEventListener('change', applyFilters);
+    });
+  </script>
+</Base>
