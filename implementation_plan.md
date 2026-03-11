@@ -108,7 +108,7 @@ Build the Claude Code skill that performs AI-assisted content extraction.
 - [x] Implement the four-stage extraction flow (classify → extract → elaborate → validate)
 - [x] Ensure the skill populates both YAML frontmatter (for Astro) and the full body template structure
 - [x] Ensure the skill invokes `scripts/validate.js` after writing output
-- [ ] Test with a real source document from `_sources/`
+- [x] Test with a real source document from `_sources/`
 - [x] Document the skill usage in [docs/ai-authorship-workflow.md](./docs/ai-authorship-workflow.md)
 
 ### Deviations
