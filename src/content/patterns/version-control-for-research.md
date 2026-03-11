@@ -19,7 +19,7 @@ last_updated: 2026-03-11
 
 ## Intent
 
-Enable researchers to track, share, and reproduce their work by applying version control practices adapted to HASS research contexts.
+Enable researchers to track, share, and reproduce their work by applying version control practices adapted to HASS research contexts...
 
 ## Context
 
