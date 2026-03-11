@@ -81,10 +81,10 @@ Set up the PR validation and deployment workflows.
   - [x] Build Astro site
   - [x] Upload artifact via `actions/upload-pages-artifact`
   - [x] Deploy via `actions/deploy-pages`
-- [ ] Configure GitHub repo settings (see [docs/github-actions-setup.md](./docs/github-actions-setup.md)):
-  - [ ] Enable GitHub Pages with source = GitHub Actions
-  - [ ] Add branch protection on `master` requiring CI status checks
-- [ ] Test: open a PR with valid content → CI passes
+- [x] Configure GitHub repo settings (see [docs/github-actions-setup.md](./docs/github-actions-setup.md)):
+  - [x] Enable GitHub Pages with source = GitHub Actions
+  - [x] Add branch protection on `master` requiring CI status checks
+- [x] Test: open a PR with valid content → CI passes
 - [ ] Test: open a PR with invalid frontmatter → CI fails with clear error
 
 ### Deviations
@@ -93,7 +93,7 @@ Set up the PR validation and deployment workflows.
 - **Repo settings are manual steps:** The GitHub Pages source and branch protection rules must be configured manually via the GitHub UI after the workflows are pushed. These are marked as incomplete above — see `docs/github-actions-setup.md` for step-by-step instructions.
 - **Testing deferred:** The PR validation tests (valid content passes, invalid content fails) can only be verified after pushing these workflows and opening test PRs. These are marked incomplete above.
 
-**Done when:** PRs are gated by schema validation + build check; merges to master auto-deploy.
+**Done when:** PRs are gated by schema validation + build check; merges to main auto-deploy.
 
 ---
 
