@@ -61,8 +61,8 @@ The classification determines the extraction strategy.
 #### Stage 2 — Template-Aware Extraction
 
 Claude extracts content into the target format (pattern, roadmap item, or principle), populating:
-- **Frontmatter fields** according to the Zod schema in `src/content/config.ts`
-- **Body sections** according to the content type conventions (e.g., Context, Problem, Solution, HASS Considerations, Examples for patterns)
+- **Frontmatter fields** according to the Zod schema in `src/content.config.ts`
+- **Body sections** according to the content type conventions (e.g., Intent, Context, Issues, Solution, Context-Specific Guidance, Examples for patterns)
 
 For each field and section, Claude indicates whether the content was:
 - **Extracted from source** — with citation of where in the source it came from
@@ -132,7 +132,7 @@ When Claude Code starts in this project, it reads:
 1. **`CLAUDE.md`** — project context, architecture, conventions, and constraints
 2. **`tools/claude-skill.md`** — the skill definition with the four-stage extraction flow
 3. **`tools/prompt-templates/*.md`** — per-content-type templates specifying expected fields and sections
-4. **`src/content/config.ts`** — the Zod schemas (the authoritative field definitions)
+4. **`src/content.config.ts`** — the Zod schemas (the authoritative field definitions)
 
 The skill definition tells Claude to use `scripts/validate.js` as a check on its own output. This creates a feedback loop: generate → validate → fix → re-validate.
 

@@ -99,15 +99,23 @@ Set up the PR validation and deployment workflows.
 
 ## Phase 4 — Claude Skill / AI Extraction Tooling
 
+**Completed:** 2026-03-11
+
 Build the Claude Code skill that performs AI-assisted content extraction.
 
-- [ ] Create `tools/claude-skill.md` — skill definition with tool declarations
-- [ ] Create prompt template `tools/prompt-templates/pattern.md` referencing the canonical pattern template (`docs/patterns/2 - Pattern_Template.md`)
-- [ ] Implement the four-stage extraction flow (classify → extract → elaborate → validate)
-- [ ] Ensure the skill populates both YAML frontmatter (for Astro) and the full body template structure
-- [ ] Ensure the skill invokes `scripts/validate.js` after writing output
+- [x] Create `tools/claude-skill.md` — skill definition with four-stage extraction flow
+- [x] Create prompt template `tools/prompt-templates/pattern.md` referencing the canonical pattern template (`docs/patterns/2 - Pattern_Template.md`)
+- [x] Implement the four-stage extraction flow (classify → extract → elaborate → validate)
+- [x] Ensure the skill populates both YAML frontmatter (for Astro) and the full body template structure
+- [x] Ensure the skill invokes `scripts/validate.js` after writing output
 - [ ] Test with a real source document from `_sources/`
-- [ ] Document the skill usage in [docs/ai-authorship-workflow.md](./docs/ai-authorship-workflow.md)
+- [x] Document the skill usage in [docs/ai-authorship-workflow.md](./docs/ai-authorship-workflow.md)
+
+### Deviations
+
+- **No tool declarations in skill definition.** The spec (§7) proposed explicit `write_file` and `validate_content` tool declarations. Instead, the skill instructs Claude Code to use its built-in file writing and bash execution capabilities directly. This is simpler and avoids maintaining a separate tool abstraction layer.
+- **Testing deferred to Phase 6.** Testing with a real source document requires a source document in `_sources/`. This will be exercised as part of Phase 6 (End-to-End Validation).
+- **Stale file path references fixed.** `docs/ai-authorship-workflow.md` referenced `src/content/config.ts` (old Astro convention). Updated to `src/content.config.ts` (Astro 6). Also updated body section terminology from "Problem" to "Issues" to match project conventions.
 
 **Done when:** Running the skill against a source document produces a valid pattern file that passes schema validation and follows the pattern template structure.
 
