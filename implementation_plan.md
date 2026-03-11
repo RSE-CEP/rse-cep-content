@@ -85,7 +85,7 @@ Set up the PR validation and deployment workflows.
   - [x] Enable GitHub Pages with source = GitHub Actions
   - [x] Add branch protection on `master` requiring CI status checks
 - [x] Test: open a PR with valid content → CI passes
-- [ ] Test: open a PR with invalid frontmatter → CI fails with clear error
+- [x] Test: open a PR with invalid frontmatter → CI fails with clear error
 
 ### Deviations
 
