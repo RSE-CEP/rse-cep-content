@@ -2,6 +2,8 @@
 
 AI-assisted content pipeline prototype for the CDL Research Software Engineering Capacity Enhancement Project (RSE-CEP). Source document extraction → structured markdown → PR/CI validation → GitHub Pages deployment.
 
+**Live site:** https://ANU-HDRH.github.io/rse-cep-proto/
+
 See [docs/spec.md](./docs/spec.md) for the full specification and [implementation_plan.md](./implementation_plan.md) for the phased build plan.
 
 ## Prerequisites

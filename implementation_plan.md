@@ -147,12 +147,12 @@ Create Astro page templates that render content collection items.
 
 Prove the full cycle works with real content.
 
-- [ ] Author at least one pattern via the extraction tool from a real source document
-- [ ] Create a feature branch, commit the pattern, push, open a PR
-- [ ] Verify CI runs and passes (schema validation + build)
-- [ ] Merge the PR
-- [ ] Verify the deploy workflow triggers and the site updates on GitHub Pages
-- [ ] Document any issues encountered and update this plan
+- [x] Author at least one pattern via the extraction tool from a real source document
+- [x] Create a feature branch, commit the pattern, push, open a PR
+- [x] Verify CI runs and passes (schema validation + build)
+- [x] Merge the PR
+- [x] Verify the deploy workflow triggers and the site updates on GitHub Pages
+- [x] Document any issues encountered and update this plan
 
 **Done when:** The full cycle described in spec §10 has been exercised successfully.
 
