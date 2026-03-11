@@ -184,17 +184,17 @@ This script serves double duty: invoked by the AI extraction agent during author
 
 ### 6.1 PR Validation — `.github/workflows/ci.yml`
 
-Triggered on pull requests targeting `main`. Two sequential steps:
+Triggered on pull requests targeting `master`. Two sequential steps:
 
 **Step 1 — Schema validation.** Run `scripts/validate.js` across all content files in `src/content/`. Fast, gives immediate feedback on frontmatter errors. Fails the check if any file doesn't conform to its Zod schema.
 
 **Step 2 — Trial Astro build.** Run `astro build` to confirm the site compiles successfully. Catches problems that schema validation alone won't find: broken markdown, bad content references, template errors. Slower, but necessary.
 
-Both steps must pass before a PR is mergeable. Use branch protection rules on `main` to enforce this.
+Both steps must pass before a PR is mergeable. Use branch protection rules on `master` to enforce this.
 
 ### 6.2 Deployment — `.github/workflows/deploy.yml`
 
-Triggered on push to `main` (i.e. after PR merge). Builds the Astro site and deploys to GitHub Pages using the `actions/deploy-pages` action with the official Astro GitHub Pages workflow:
+Triggered on push to `master` (i.e. after PR merge). Builds the Astro site and deploys to GitHub Pages using the `actions/deploy-pages` action with the official Astro GitHub Pages workflow:
 
 1. Checkout repo.
 2. Install dependencies.
@@ -207,7 +207,7 @@ Triggered on push to `main` (i.e. after PR merge). Builds the Astro site and dep
 ### 6.3 GitHub repo settings
 
 - Enable GitHub Pages, source set to GitHub Actions (not branch-based).
-- Branch protection on `main`: require status checks to pass (both CI steps), require PR reviews (optional for prototype, recommended for production).
+- Branch protection on `master`: require status checks to pass (both CI steps), require PR reviews (optional for prototype, recommended for production).
 
 ## 7. Claude Skill Design
 
@@ -287,7 +287,7 @@ AUTHORING:
 REVIEW & PUBLISH:
 6.  CI: schema validation (fast) → trial Astro build (thorough)
 7.  Team: review PR → approve
-8.  Merge to main → deploy workflow triggers → site published to GitHub Pages
+8.  Merge to master → deploy workflow triggers → site published to GitHub Pages
 ```
 
 ## 11. Prototype Scope
@@ -298,8 +298,8 @@ The prototype should demonstrate the full cycle with minimal but real content. S
 - [ ] At least one pattern authored via the extraction tool from a real source document
 - [ ] Validation script working locally and in CI
 - [ ] GitHub Actions: PR validation workflow (schema check + build)
-- [ ] GitHub Actions: deploy workflow to GitHub Pages on merge to main
-- [ ] Branch protection configured on main
+- [ ] GitHub Actions: deploy workflow to GitHub Pages on merge to master
+- [ ] Branch protection configured on master
 - [ ] Minimal site template that renders pattern content (doesn't need to be pretty, needs to work)
 - [ ] End-to-end run: author pattern → PR → CI passes → merge → site updates
 

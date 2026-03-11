@@ -1,7 +1,7 @@
-# Deploy to GitHub Pages — runs when commits are pushed to main
+# Deploy to GitHub Pages — runs when commits are pushed to master
 #
 # This workflow builds the Astro site and deploys it to GitHub Pages.
-# It typically fires after a PR is merged into main.
+# It typically fires after a PR is merged into master.
 #
 # Prerequisites (one-time repo setup — see docs/github-actions-setup.md):
 #   1. GitHub Pages source must be set to "GitHub Actions" (not branch-based)
@@ -24,7 +24,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [master]
 
 # These permissions are required for GitHub Pages deployment.
 # - contents: read  — to check out the repository

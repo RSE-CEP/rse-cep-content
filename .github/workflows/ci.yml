@@ -1,4 +1,4 @@
-# CI Validation — runs on every pull request targeting main
+# CI Validation — runs on every pull request targeting master
 #
 # Two jobs run in sequence:
 #   1. validate — checks all content frontmatter against Zod schemas
@@ -15,7 +15,7 @@ name: CI Validation
 
 on:
   pull_request:
-    branches: [main]
+    branches: [master]
 
 jobs:
   # ── Job 1: Schema Validation ──────────────────────────────────────────

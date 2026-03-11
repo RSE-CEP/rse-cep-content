@@ -119,11 +119,11 @@ git commit -m "Add NER for historical newspapers pattern"
 git push -u origin feature/pattern-ner-newspapers
 ```
 
-Then open a pull request on GitHub targeting `main`. CI will automatically run schema validation and a trial site build.
+Then open a pull request on GitHub targeting `master`. CI will automatically run schema validation and a trial site build.
 
 ### 7. Review and merge
 
-Team members review the PR. Once CI passes and the content is approved, merge to `main`. The deployment workflow will automatically build and publish the site to GitHub Pages.
+Team members review the PR. Once CI passes and the content is approved, merge to `master`. The deployment workflow will automatically build and publish the site to GitHub Pages.
 
 ## What Claude Code Sees
 

@@ -8,24 +8,24 @@ The project uses two GitHub Actions workflows:
 
 | Workflow | File | Trigger | Purpose |
 |---|---|---|---|
-| **CI Validation** | `.github/workflows/ci.yml` | Pull requests to `main` | Validates content schemas and runs a trial Astro build |
-| **Deploy** | `.github/workflows/deploy.yml` | Push to `main` (i.e., PR merge) | Builds the site and deploys to GitHub Pages |
+| **CI Validation** | `.github/workflows/ci.yml` | Pull requests to `master` | Validates content schemas and runs a trial Astro build |
+| **Deploy** | `.github/workflows/deploy.yml` | Push to `master` (i.e., PR merge) | Builds the site and deploys to GitHub Pages |
 
 ## How the Workflows Work
 
 ### CI Validation (`ci.yml`)
 
-Runs on every pull request targeting `main`. Two sequential steps:
+Runs on every pull request targeting `master`. Two sequential jobs:
 
-1. **Schema validation** — Runs `node scripts/validate.js` against all content files in `src/content/`. This checks that every markdown file's YAML frontmatter conforms to its Zod schema. Fast (seconds). Gives immediate, specific feedback on frontmatter errors.
+1. **Schema validation** (`validate` job) — Runs `node scripts/validate.js` against all content files in `src/content/`. This checks that every markdown file's YAML frontmatter conforms to its Zod schema. Fast (seconds). Gives immediate, specific feedback on frontmatter errors.
 
-2. **Trial Astro build** — Runs `npx astro build` to confirm the entire site compiles. Catches problems that schema validation alone misses: broken markdown syntax, bad content references, template rendering errors. Slower (tens of seconds) but necessary.
+2. **Trial Astro build** (`build` job) — Runs `npx astro build` to confirm the entire site compiles. Catches problems that schema validation alone misses: broken markdown syntax, bad content references, template rendering errors. Slower (tens of seconds) but necessary. Only runs if `validate` passes.
 
-Both steps must pass for the PR to be mergeable.
+Both jobs must pass for the PR to be mergeable.
 
 ### Deployment (`deploy.yml`)
 
-Runs when commits are pushed to `main` (typically via PR merge). Steps:
+Runs when commits are pushed to `master` (typically via PR merge). Steps:
 
 1. Checkout the repository
 2. Install Node.js and project dependencies
@@ -37,7 +37,7 @@ The site is then live at `https://{org}.github.io/{repo-name}/`.
 
 ## Initial Setup — Repository Configuration
 
-These steps are performed once when setting up the repository on GitHub.
+These steps are performed once when setting up the repository on GitHub. Do them in order.
 
 ### 1. Enable GitHub Pages
 
@@ -47,21 +47,7 @@ These steps are performed once when setting up the repository on GitHub.
 
 This tells GitHub to expect deployments from a workflow rather than a static branch.
 
-### 2. Configure Branch Protection
-
-1. Go to **Settings** → **Branches** → **Add branch protection rule**
-2. Branch name pattern: `main`
-3. Enable:
-   - **Require a pull request before merging** (optional for prototype, recommended for production)
-   - **Require status checks to pass before merging**
-   - Under status checks, search for and add:
-     - `validate` (the schema validation job name from `ci.yml`)
-     - `build` (the trial build job name from `ci.yml`)
-4. Save
-
-This prevents direct pushes to `main` and ensures all content passes validation before merge.
-
-### 3. Set Repository Permissions for Actions
+### 2. Set Repository Permissions for Actions
 
 1. Go to **Settings** → **Actions** → **General**
 2. Under **Workflow permissions**, select **Read and write permissions**
@@ -70,7 +56,7 @@ This prevents direct pushes to `main` and ensures all content passes validation 
 
 The deploy workflow needs write permissions to publish to GitHub Pages.
 
-### 4. Verify Astro Configuration
+### 3. Verify Astro Configuration
 
 In `astro.config.mjs`, ensure `site` and `base` are set correctly:
 
@@ -84,6 +70,63 @@ export default defineConfig({
 
 Replace `{org}` with the GitHub organisation and `{repo-name}` with the repository name.
 
+### 4. Push the Workflows and Open a Test PR
+
+**Important:** Branch protection (step 5) requires the CI workflow to have run at least once — GitHub doesn't know about the status check names (`Schema Validation`, `Trial Build`) until it has seen them. So you must do this step first:
+
+1. Push the workflow files to `master` (either directly or via a PR)
+2. Create a feature branch with a small change (e.g., edit a content file)
+3. Open a pull request targeting `master`
+4. Wait for the CI workflow to run — watch the **Actions** tab
+5. Verify both checks (`Schema Validation` and `Trial Build`) appear and pass
+
+Once the CI has run at least once, the check names will be available for branch protection in the next step.
+
+### 5. Configure Branch Protection
+
+GitHub offers two options: **Rulesets** (newer) and **Classic branch protection rules**. Either works. Use whichever you see in your repo settings.
+
+#### Option A: Rulesets (newer GitHub UI)
+
+1. Go to **Settings** → **Rules** → **Rulesets** → **New ruleset** → **New branch ruleset**
+2. Give it a name (e.g., "Protect master")
+3. Set **Enforcement status** to **Active**
+4. Under **Target branches**, click **Add target** → **Include by pattern** → enter `master`
+5. Under **Branch rules**, enable:
+   - **Require a pull request before merging** (optional for prototype, recommended for production)
+   - **Require status checks to pass** — then click **Add checks** and search for:
+     - `Schema Validation` (this is the `name:` field from the validate job in `ci.yml`)
+     - `Trial Build` (this is the `name:` field from the build job in `ci.yml`)
+   - If the checks don't appear in the search, the CI workflow hasn't run yet — go back to step 4
+6. Click **Create**
+
+#### Option B: Classic branch protection rules
+
+1. Go to **Settings** → **Branches** → **Add classic branch protection rule**
+2. Branch name pattern: `master`
+3. Enable:
+   - **Require a pull request before merging** (optional for prototype, recommended for production)
+   - **Require status checks to pass before merging**
+   - Under status checks, search for and add:
+     - `Schema Validation`
+     - `Trial Build`
+   - If the checks don't appear in the search, the CI workflow hasn't run yet — go back to step 4
+4. Save
+
+#### Why can't I find the status checks?
+
+The status check names (`Schema Validation`, `Trial Build`) only appear in GitHub's search dropdown **after the CI workflow has run at least once** on the repository. This is a GitHub limitation — it doesn't know what checks a workflow produces until it has actually executed.
+
+If you can't find them:
+1. Make sure the workflow files are committed and pushed
+2. Open a test PR targeting `master`
+3. Wait for the CI to run (check the **Actions** tab)
+4. Then come back to branch protection settings and try searching again
+
+The names to search for match the `name:` field in each job in `ci.yml`:
+- Job key `validate` has `name: Schema Validation` → search for **Schema Validation**
+- Job key `build` has `name: Trial Build` → search for **Trial Build**
+
 ## Deploying Workflow Changes
 
 The workflow files (`.github/workflows/*.yml`) are versioned in the repository like any other code. To update them:
@@ -91,9 +134,9 @@ The workflow files (`.github/workflows/*.yml`) are versioned in the repository l
 1. Edit the workflow YAML file(s) locally
 2. Commit and push to a feature branch
 3. Open a PR — note that changes to `ci.yml` take effect on the PR itself (the updated workflow runs against the PR that contains it)
-4. Merge to `main`
+4. Merge to `master`
 
-**Important:** Changes to `deploy.yml` only take effect after merging to `main`, since the deploy workflow is triggered by pushes to `main`.
+**Important:** Changes to `deploy.yml` only take effect after merging to `master`, since the deploy workflow is triggered by pushes to `master`.
 
 ### Testing Workflow Changes
 
@@ -111,10 +154,11 @@ The workflow files (`.github/workflows/*.yml`) are versioned in the repository l
 name: CI Validation
 on:
   pull_request:
-    branches: [main]
+    branches: [master]
 
 jobs:
   validate:
+    name: Schema Validation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -125,6 +169,7 @@ jobs:
       - run: npm run validate
 
   build:
+    name: Trial Build
     runs-on: ubuntu-latest
     needs: validate
     steps:
@@ -142,7 +187,7 @@ jobs:
 name: Deploy to GitHub Pages
 on:
   push:
-    branches: [main]
+    branches: [master]
 
 permissions:
   contents: read
@@ -177,8 +222,9 @@ jobs:
 
 | Problem | Solution |
 |---|---|
-| CI validation passes locally but fails in Actions | Check Node.js version matches. Check that `npm ci` installs the same dependencies (ensure `package-lock.json` is committed). |
+| CI validation passes locally but fails in Actions | Check Node.js version matches (must be 22+). Check that `npm ci` installs the same dependencies (ensure `package-lock.json` is committed). |
 | Deploy workflow runs but site shows 404 | Verify `base` in `astro.config.mjs` matches the repo name. Verify GitHub Pages source is set to "GitHub Actions". |
-| Status checks don't appear in branch protection settings | The workflow must have run at least once for its job names to appear in the status check list. Open a test PR first. |
+| Status checks don't appear in branch protection settings | The workflow must have run at least once for its job names to appear in the search. Open a test PR first, wait for CI to complete, then configure branch protection. See "Why can't I find the status checks?" above. |
 | `actions/deploy-pages` fails with permission error | Check repository Settings → Actions → General → Workflow permissions are set to "Read and write". |
 | Workflow file has YAML syntax errors | Use a YAML linter locally before committing. VS Code with the YAML extension catches most issues. |
+| Deploy workflow doesn't trigger after merge | Check that `deploy.yml` triggers on `push: branches: [master]` — must match your actual default branch name. |

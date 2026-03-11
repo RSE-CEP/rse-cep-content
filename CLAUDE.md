@@ -35,7 +35,7 @@ npm run validate     # Schema validation
 
 ## Git Workflow
 
-Feature branches → PR to `main` → CI (validate + build) → merge → auto-deploy. Branch naming: `feature/{type}-{slug}`.
+Feature branches → PR to `master` → CI (validate + build) → merge → auto-deploy. Branch naming: `feature/{type}-{slug}`.
 
 ## AI Authorship
 
