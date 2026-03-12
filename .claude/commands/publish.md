@@ -45,7 +45,26 @@ Verify all 9 expected body sections are present (H2 headings):
 
 **FAIL if any section is missing.** This is a hard requirement for publication (unlike validation, which soft-warns).
 
-### 4. Quality Review
+### 4. URL Verification
+
+Find all URLs in the draft (markdown links, bare URLs, `→ https://...` references). For each URL:
+
+1. **Fetch the URL** using WebFetch (or curl as fallback) to confirm it resolves (HTTP 200 or redirect to 200).
+2. **Verify the destination matches what the link text claims.** For example, if the link text says "CARE Principles" the page should actually be about the CARE Principles, not an unrelated page or a generic 404-styled landing page.
+
+**Report results as a table:**
+
+```
+| URL | Status | Matches Description? | Notes |
+|-----|--------|---------------------|-------|
+| ... | 200    | Yes                 |       |
+```
+
+**FAIL if any URL returns a hard error (4xx, 5xx, connection failure).** Report broken URLs with their line numbers and suggest corrections or removal.
+
+**WARN (non-blocking) if a URL resolves but the page content doesn't match what the link text claims.** The operator decides whether to fix or accept.
+
+### 5. Quality Review
 
 Review the draft against the pattern quality criteria from `docs/patterns/1 - Pattern_Definition_Guide.md`. Flag obvious issues:
 - Empty or placeholder sections
@@ -70,5 +89,6 @@ Report quality concerns but do not block publication for them — the operator d
 - Report which checks failed with details
 - If annotations remain: list them with line numbers and type
 - If sections are missing: list which ones
+- If URLs are broken: list them with line numbers and HTTP status
 - **Do NOT move the file**
 - Suggest next steps (e.g., "remove remaining annotations", "add the missing sections")
