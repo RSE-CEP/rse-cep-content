@@ -19,6 +19,10 @@ cd rse-cep-proto
 npm install
 ```
 
+## The AI Authorship Workflow
+
+Documented in [docs/ai-authorship-workflow.md](./docs/ai-authorship-workflow.md).
+
 ## Development
 
 ```bash
