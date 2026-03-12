@@ -37,6 +37,13 @@ npm run validate     # Schema validation
 
 Feature branches → PR to `master` → CI (validate + build) → merge → auto-deploy. Branch naming: `feature/{type}-{slug}`.
 
-## AI Authorship
+## AI Authorship Commands
 
-Source doc in `_sources/` → Claude skill (`tools/claude-skill.md`) → four stages: classify source → extract → elaborate gaps → write + validate → operator reviews via `git diff`.
+- **`/extract`** — Extract patterns from source documents. Four stages: classify → extract → elaborate → validate. Outputs to `drafts/patterns/`.
+- **`/publish`** — Validate a draft and move it from `drafts/patterns/` to `src/content/patterns/`. Checks: schema validation, annotation removal, section completeness, quality review.
+
+Workflow: source doc in `_sources/` → `/extract` → draft with inline annotations → human review (delete annotations as verified) → `/publish` → production content.
+
+Draft annotations use structured syntax: `[EXTRACTED | source: "..." | ref: ... | "quote"]` and `[ELABORATED | basis: "..."]`. All must be removed before publishing.
+
+The original skill definition (`tools/claude-skill.md`) is archived as reference.

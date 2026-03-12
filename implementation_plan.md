@@ -158,6 +158,67 @@ Prove the full cycle works with real content.
 
 ---
 
+## Phase 7 — Command Refactoring
+
+**Completed:** 2026-03-12
+
+Convert the Claude skill into user-invocable slash commands and establish the command-based workflow.
+
+- [x] Create `/extract` command (`.claude/commands/extract.md`) — same 4-stage flow, conversational Git integration
+- [x] Create `/publish` command stub (`.claude/commands/publish.md`) — runs validation, placeholder for Phase 9 expansion
+- [x] Retire `tools/claude-skill.md` as a skill — keep as reference documentation, add archival notice
+- [x] Update `docs/ai-authorship-workflow.md` — reference `/extract` and `/publish` commands
+- [x] Update `CLAUDE.md` — add AI Authorship Commands section
+- [x] Update `implementation_plan.md` — add phases 7-9
+
+### Deviations
+
+- None.
+
+**Done when:** `/extract` command follows the 4-stage flow. `/publish` stub runs validation. Documentation updated.
+
+---
+
+## Phase 8 — Draft Pipeline & Annotation System
+
+**Completed:** 2026-03-12
+
+Establish a formal draft stage with machine-parseable annotations supporting multi-source citation.
+
+- [x] Create `drafts/patterns/` directory (committable, not gitignored)
+- [x] Define annotation syntax: `[EXTRACTED | source: "..." | ref: ... | "quote"]` and `[ELABORATED | basis: "..."]`
+- [x] Update `/extract` command — output to `drafts/patterns/`, use structured annotation syntax
+- [x] Create `scripts/check-draft.js` — scans for annotation markers, reports count/locations, exit code 0/1
+- [x] Update `scripts/validate.js` — recognise `drafts/patterns/` path, add `--publish` mode for hard-fail on missing sections
+- [x] Update `docs/ai-authorship-workflow.md` — document draft review workflow and annotation syntax
+
+### Deviations
+
+- None.
+
+**Done when:** Extraction outputs to `drafts/patterns/` with structured annotations. `check-draft.js` detects annotations. Validation supports draft paths.
+
+---
+
+## Phase 9 — Publish Command
+
+**Completed:** 2026-03-12
+
+Full publish gate that validates a draft is production-ready and moves it into the content collection.
+
+- [x] Expand `/publish` command with three-check gate: schema validation, annotation check, section completeness
+- [x] Add model-assisted quality review step (flags obvious issues against pattern definition guide)
+- [x] Publish action: move file from `drafts/patterns/` to `src/content/patterns/`, re-validate, offer to commit
+- [x] Publish failure: report which checks failed with details, do not move file
+
+### Deviations
+
+- None.
+
+**Done when:** `/publish` on a draft with annotations fails and reports them. `/publish` on a clean draft passes, moves file, and validation succeeds.
+
+---
+
 ## Updating This Plan
 
 When a phase is complete:

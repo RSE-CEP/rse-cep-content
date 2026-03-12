@@ -100,7 +100,10 @@ async function collectFiles(args) {
 // ---------------------------------------------------------------------------
 
 function schemaForFile(filePath) {
-  if (filePath.includes(path.join('content', 'patterns'))) {
+  if (
+    filePath.includes(path.join('content', 'patterns')) ||
+    filePath.includes(path.join('drafts', 'patterns'))
+  ) {
     return { name: 'pattern', schema: patternSchema };
   }
   return null;
@@ -110,7 +113,7 @@ function schemaForFile(filePath) {
 // Validate a single file
 // ---------------------------------------------------------------------------
 
-function validateFile(filePath) {
+function validateFile(filePath, { publishMode = false } = {}) {
   const raw = fs.readFileSync(filePath, 'utf-8');
   const relativePath = path.relative(process.cwd(), filePath);
 
@@ -142,12 +145,16 @@ function validateFile(filePath) {
     }
   }
 
-  // Soft-warn on missing body sections
+  // Check missing body sections (soft-warn normally, hard-fail in --publish mode)
   if (info.name === 'pattern') {
     const headings = extractH2Headings(parsed.content);
     for (const section of EXPECTED_SECTIONS) {
       if (!headings.includes(section)) {
-        warnings.push(`Missing section: ${section}`);
+        if (publishMode) {
+          errors.push(`Missing section (required for publish): ${section}`);
+        } else {
+          warnings.push(`Missing section: ${section}`);
+        }
       }
     }
   }
@@ -160,7 +167,8 @@ function validateFile(filePath) {
 // ---------------------------------------------------------------------------
 
 async function main() {
-  const args = process.argv.slice(2);
+  const publishMode = process.argv.includes('--publish');
+  const args = process.argv.slice(2).filter((a) => a !== '--publish');
   const files = await collectFiles(args);
 
   if (files.length === 0) {
@@ -172,7 +180,7 @@ async function main() {
   let failed = 0;
 
   for (const filePath of files) {
-    const { file, errors, warnings } = validateFile(filePath);
+    const { file, errors, warnings } = validateFile(filePath, { publishMode });
     const ok = errors.length === 0;
 
     if (ok) {
