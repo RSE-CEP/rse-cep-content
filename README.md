@@ -39,12 +39,23 @@ rse-cep-proto/
 ├── src/
 │   ├── content.config.ts          # Zod schemas (single source of truth)
 │   ├── content/
-│   │   └── patterns/              # Pattern markdown files
+│   │   └── patterns/              # Published pattern markdown files
 │   └── pages/                     # Astro page templates
+├── drafts/
+│   ├── patterns/                  # Full pattern drafts (with inline annotations)
+│   └── protopatterns/             # Proto-pattern evidence files
+│       ├── index.md             # Proto-pattern index (for semantic matching)
+│       └── *.md                   # Individual proto-pattern files
 ├── scripts/
-│   └── validate.js                # Frontmatter validation script (Phase 2)
+│   ├── validate.js                # Frontmatter validation script
+│   └── check-draft.js             # Annotation scanner for draft files
+├── .claude/commands/              # AI authorship slash commands
+│   ├── extract.md                 # /extract — mine proto-patterns from sources
+│   ├── draft.md                   # /draft — create full pattern drafts
+│   └── publish.md                 # /publish — validate and publish drafts
 ├── docs/                          # Project documentation
 │   ├── spec.md                    # Authoritative specification
+│   ├── ai-authorship-workflow.md  # AI authorship process guide
 │   └── patterns/                  # Pattern template and examples
 ├── _sources/                      # GITIGNORED — local source documents
 ├── astro.config.mjs               # Astro configuration

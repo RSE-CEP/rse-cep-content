@@ -219,6 +219,30 @@ Full publish gate that validates a draft is production-ready and moves it into t
 
 ---
 
+## Phase 10 — Proto-Pattern Mining
+
+**Completed:** 2026-03-16
+
+Add incremental pattern discovery via proto-patterns: lightweight freeform evidence sketches that accumulate material from multiple source documents before committing to a full draft.
+
+- [x] 10a — Create `drafts/protopatterns/` directory with `.gitkeep` and empty `index.md`
+- [x] 10b — Create new `/extract` command (`.claude/commands/extract.md`) for proto-pattern mining (4-stage: analyse → match index → create/update → report)
+- [x] 10c — Rename old `/extract` to `/draft` (`.claude/commands/draft.md`), add proto-pattern input mode alongside existing source document mode
+- [x] 10d — Update documentation:
+  - [x] `docs/spec.md` — sections 1 (purpose), 3 (repo structure), 7 (commands), 10 (workflow)
+  - [x] `CLAUDE.md` — AI Authorship Commands section
+  - [x] `docs/ai-authorship-workflow.md` — proto-pattern lifecycle, renamed commands, troubleshooting
+  - [x] `implementation_plan.md` — this phase
+- [x] 10e — Verification: commands register correctly, documentation is consistent
+
+### Deviations
+
+- None.
+
+**Done when:** `/extract` mines proto-patterns, `/draft` accepts both source docs and proto-patterns, `/publish` unchanged, all documentation updated.
+
+---
+
 ## Updating This Plan
 
 When a phase is complete:

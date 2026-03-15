@@ -17,6 +17,7 @@ The prototype serves to:
 - Confirm the Astro content collections + Zod schema architecture works as expected.
 - Shake out the GitHub Actions CI/CD pipeline (validation, build, deploy).
 - Demonstrate the complete authoring-to-publication workflow to the team and stakeholders.
+- Support incremental pattern discovery via proto-patterns — lightweight evidence sketches accumulated across multiple source documents before committing to a full pattern draft.
 
 ## 2. Design Principles
 
@@ -50,6 +51,11 @@ rsecep-site/                          # Astro project root
 │   └── workflows/
 │       ├── ci.yml                    # PR validation (schema + build check)
 │       └── deploy.yml                # Main branch deploy to GitHub Pages
+├── drafts/
+│   ├── patterns/                    # Full pattern drafts (with inline annotations)
+│   └── protopatterns/               # Proto-pattern evidence files
+│       ├── index.md               # Proto-pattern index (for semantic matching)
+│       └── *.md                     # Individual proto-pattern files
 ├── _sources/                         # GITIGNORED — local working copies of source docs
 ├── astro.config.mjs
 ├── package.json
@@ -209,39 +215,35 @@ Triggered on push to `master` (i.e. after PR merge). Builds the Astro site and d
 - Enable GitHub Pages, source set to GitHub Actions (not branch-based).
 - Branch protection on `master`: require status checks to pass (both CI steps), require PR reviews (optional for prototype, recommended for production).
 
-## 7. Claude Skill Design
+## 7. Claude Commands
 
-The skill operates in stages:
+Three slash commands implement the authoring pipeline:
 
-### Stage 1 — Source Classification
-Characterise the input: is it a transcript (structured by interview questions), manual notes (sparse, telegraphic), slides (fragmentary claims), or a talk transcript (narrative)? Adapt extraction strategy accordingly.
+### `/extract` — Proto-Pattern Mining
 
-### Stage 2 — Template-Aware Extraction
-Given the target output type and its expected schema/sections, extract content from the source material. For each frontmatter field and body section:
-- **Populated from source:** cite where in the source the content came from.
-- **Flagged as absent/thin:** explicitly mark gaps rather than silently filling them.
+Analyses a source document to identify candidate patterns and accumulate evidence in lightweight proto-pattern files (`drafts/protopatterns/`). Four stages:
 
-The skill should be disciplined here — extract, don't hallucinate.
+1. **Source Analysis** — Read source, identify candidate patterns with working names, descriptions, exemplifying projects, and key evidence.
+2. **Index Matching** — Semantic match candidates against existing proto-patterns in `index.md`. Present match table for operator confirmation.
+3. **Create or Update** — For matches: add projects and evidence to existing proto-pattern. For new: create file and index entry.
+4. **Write and Report** — Write all files, report summary (created N, updated N, total in index).
 
-### Stage 3 — Guided Elaboration
-For gaps identified in Stage 2, propose content clearly marked as model-generated. The operator can accept, reject, or rewrite each elaboration. This is where generic technical detail gets added, which the operator then edits for HASS context.
+Proto-patterns are freeform markdown with projects, sources table, and dated notes sections. They are not structured pattern drafts.
 
-### Stage 4 — Output and Validation
-1. Write the markdown file to the appropriate content collection directory (e.g. `src/content/patterns/{slug}.md`).
-2. Invoke `scripts/validate.js` against the written file.
-3. If validation fails, read the errors and iterate — fix frontmatter issues and re-validate.
-4. Report final status to the operator.
+### `/draft` — Full Pattern Drafting
 
-### Skill Tool Definitions
+The 4-stage extraction flow that produces a full structured pattern draft. Accepts two input modes:
 
-The skill requires two tools:
+- **Source document** (from `_sources/`) — direct single-source drafting (original workflow)
+- **Proto-pattern** (from `drafts/protopatterns/`) — uses accumulated multi-source evidence as input
 
-| Tool | Description |
-|---|---|
-| `write_file` | Write content to a specified file path in the repo |
-| `validate_content` | Execute `node scripts/validate.js <path>` and return stdout/stderr |
+Stages: classify source → template-aware extraction → guided elaboration → output with annotations and validation. Outputs to `drafts/patterns/` with inline `[EXTRACTED]` and `[ELABORATED]` annotations.
 
-File reading (for source documents in `_sources/`) is handled through standard file access in the agent environment.
+When drafting from a proto-pattern, offers to clean up the proto-pattern entry on success.
+
+### `/publish` — Publication Gate
+
+Validates a draft in `drafts/patterns/` and moves it to `src/content/patterns/`. Checks: schema validation, annotation removal, section completeness, URL verification, quality review.
 
 ## 8. Source Document Management
 
@@ -274,17 +276,24 @@ When a schema change is needed (e.g. adding a new required field):
 ## 10. Operator Workflow Summary
 
 ```
-AUTHORING:
+PATTERN DISCOVERY (incremental, recommended):
 1.  Pull source document from Sharepoint → _sources/
-2.  Run extraction tool, specifying:
-      - Target type (pattern | roadmap-item | principle)
-      - Source file path
-      - Brief context statement ("extract NER patterns from this Trove interview")
-3.  Agent: classifies source → extracts → elaborates gaps → writes file → validates → iterates
-4.  Operator: git diff → review output → edit for HASS context
-5.  Operator: git checkout -b feature/pattern-ner-newspapers → commit → push → open PR
+2.  /extract — mine proto-patterns from the source
+      Agent: analyses source → identifies candidates → matches index → creates/updates proto-patterns
+3.  Repeat steps 1-2 with additional sources to accumulate evidence
+4.  When a proto-pattern has sufficient evidence:
+      /draft drafts/protopatterns/slug.md — create full pattern draft from accumulated material
+5.  Operator: review draft, delete annotations as verified
+6.  /publish — validate and move to production
 
-REVIEW & PUBLISH:
+DIRECT DRAFTING (single source, still supported):
+1.  Pull source document from Sharepoint → _sources/
+2.  /draft _sources/document.docx — 4-stage extraction directly to full draft
+3.  Operator: review draft, delete annotations as verified
+4.  /publish — validate and move to production
+
+REVIEW & DEPLOY:
+5.  Operator: git checkout -b feature/pattern-slug → commit → push → open PR
 6.  CI: schema validation (fast) → trial Astro build (thorough)
 7.  Team: review PR → approve
 8.  Merge to master → deploy workflow triggers → site published to GitHub Pages

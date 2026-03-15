@@ -1,137 +1,177 @@
-# /extract — AI-Assisted Pattern Extraction
+# /extract — Mine Proto-Patterns from Source Material
 
-Extract structured pattern content from a source document in `_sources/` and produce a validated draft markdown file.
+Analyse a source document in `_sources/` to identify candidate patterns, then create or update proto-pattern files in `drafts/protopatterns/`.
 
 ## Arguments
 
 The operator should specify:
-- Which source document(s) to extract from (path in `_sources/`)
-- Optional focus guidance (e.g., "focus on NER patterns", "extract the data management aspects")
-- Optional `pattern_id` and `author` (will be prompted if not provided)
-
-## Authoritative References
-
-Before starting, read these files to understand the expected output format:
-
-1. **`docs/patterns/2 - Pattern_Template.md`** — The canonical pattern template. Your output must follow this structure.
-2. **`src/content.config.ts`** — The Zod schema defining required and optional frontmatter fields.
-3. **`tools/prompt-templates/pattern.md`** — Quick reference for frontmatter fields, body sections, and provenance conventions.
-4. **`docs/patterns/1 - Pattern_Definition_Guide.md`** — What patterns are, quality criteria, how they differ from best practices/principles/tutorials.
-
-For a worked example, see: `src/content/patterns/version-control-for-research.md`
+- Which source document to mine (path in `_sources/`)
 
 ## Key Principles
 
-- **Extraction before elaboration.** Always distinguish what comes from the source document versus what you generate to fill gaps.
-- **Patterns are not prescriptive recipes.** They describe issues and solutions, providing guidance and principles rather than step-by-step instructions.
-- **"Issues" not "Problems".** Use the project's inclusive terminology — issues may be requirements, principles, goals, challenges, or technical problems.
-- **Source sensitivity.** Never include file paths, Sharepoint URLs, or identifying details about research participants in the output. Use `source_ref` for human-readable provenance only.
-- **Schema is law.** The Zod schema in `src/content.config.ts` determines what passes validation. Your output must conform to it.
+- **Discovery, not drafting.** This command identifies and accumulates evidence for patterns. It does not produce full pattern drafts — use `/draft` for that.
+- **Freeform notes.** Proto-patterns are lightweight sketches, not structured templates. Capture evidence, quotes, and observations without forcing them into the pattern template.
+- **Incremental accumulation.** Each `/extract` run may add new projects and evidence to existing proto-patterns. The value grows over multiple sources.
+- **Source sensitivity.** Never include file paths, Sharepoint URLs, or identifying details about research participants. Use `source_ref` for human-readable provenance only.
 
 ## Extraction Flow
 
 Operate in four stages. Report your progress to the operator at each stage.
 
-### Stage 1 — Source Classification
+### Stage 1 — Source Analysis
 
-Read the source document(s) provided by the operator. Characterise the input:
+Read the source document from `_sources/`. Identify candidate patterns — recurring practices, solutions to common problems, named approaches, or implicit methodologies.
 
-| Source Type | Characteristics | Extraction Strategy |
-|---|---|---|
-| `interview-transcript` | Structured by questions, rich contextual detail | Extract directly from answers, use questions for section mapping |
-| `talk-transcript` | Narrative flow, may reference slides | Restructure narrative into template sections |
-| `manual-notes` | Sparse, telegraphic | More elaboration needed, flag gaps prominently |
-| `slides` | Fragmentary claims, bullet points | Significant elaboration needed, low confidence |
-| `mixed` | Combination of the above | Adapt per-section |
+For each candidate, note:
+- **Working name** — a descriptive label for the pattern
+- **Description** — 1-2 sentences summarising what the pattern addresses
+- **Exemplifying projects** — which projects in the source demonstrate this pattern
+- **Key evidence** — quotes, examples, or observations that support this as a pattern
 
-Report the classification to the operator before proceeding.
-
-### Stage 2 — Template-Aware Extraction
-
-Extract content from the source into the pattern template structure. For each section:
-
-1. **Map source content to template sections.** Find passages in the source that correspond to Intent, Context, Issues, Solution, etc.
-2. **Extract faithfully.** Use the source's own language and ideas. Restructure for clarity but do not invent content.
-3. **Track provenance.** For each section, note whether it was:
-   - **EXTRACTED** — Content directly from the source
-   - **THIN** — Some relevant content exists but insufficient for a complete section
-   - **ABSENT** — No relevant content in the source for this section
-
-Present the extraction results to the operator as a structured report before proceeding:
+Present the candidates to the operator:
 
 ```
-## Extraction Report
+## Candidate Patterns
 
-### Frontmatter
-- title: [proposed] — [source/elaborated]
-- pattern_id: [proposed] — [needs operator input]
+| # | Working Name | Description | Projects | Strength |
+|---|-------------|-------------|----------|----------|
+| 1 | ... | ... | ... | Strong/Moderate/Weak |
+| 2 | ... | ... | ... | Strong/Moderate/Weak |
 ...
 
-### Body Sections
-| Section | Status | Source Location |
-|---|---|---|
-| Intent | EXTRACTED | Q2 response, paragraphs 3-4 |
-| Context | EXTRACTED | Q1 and Q5 responses |
-| Issues | THIN | Mentioned in Q3 but not elaborated |
+Shall I proceed with all candidates, or would you like to select specific ones?
+```
+
+Wait for operator confirmation before proceeding.
+
+### Stage 2 — Index Matching
+
+Load `drafts/protopatterns/index.md`. For each confirmed candidate, perform semantic matching against existing proto-pattern entries:
+
+- Compare names, descriptions, and subject matter
+- A match means the candidate is describing the same pattern as an existing entry (even if the name differs)
+- Consider partial overlaps — the candidate might be a sub-pattern or broader version of an existing entry
+
+Present the match results to the operator:
+
+```
+## Index Matching
+
+| Candidate | Match? | Existing Entry | Action |
+|-----------|--------|---------------|--------|
+| Pattern A | YES — strong match | PP-003: "Similar Name" | Update existing |
+| Pattern B | POSSIBLE — partial overlap | PP-007: "Related Topic" | Operator decides |
+| Pattern C | NO — new pattern | — | Create new |
+...
+
+Please confirm the actions, especially for partial matches.
+```
+
+Wait for operator confirmation before proceeding.
+
+### Stage 3 — Create or Update
+
+For each candidate, based on operator-confirmed actions:
+
+**Creating a new proto-pattern:**
+1. Assign the next available ID (PP-NNN, sequential from index)
+2. Generate a kebab-case filename from the working name
+3. Create the proto-pattern file with the structure below
+4. Add an entry to `index.md`
+
+**Updating an existing proto-pattern:**
+1. Read the existing proto-pattern file
+2. Add new projects to the Projects section
+3. Add a new source entry to the Sources table
+4. Add new notes under a dated heading in the Notes section
+5. Update `last_updated` and `project_count` in both the file and `index.md`
+
+Present the proposed changes to the operator before writing.
+
+### Stage 4 — Write and Report
+
+Write all files (proto-pattern markdown files and updated `index.md`).
+
+Report summary:
+```
+## Extraction Complete
+
+- **Source:** [source_ref]
+- **Created:** N new proto-pattern(s)
+- **Updated:** N existing proto-pattern(s)
+- **Total in index:** N proto-patterns
+
+### New
+- PP-NNN: "Name" → drafts/protopatterns/slug.md
+
+### Updated
+- PP-NNN: "Name" — added N projects, N notes
+```
+
+### Draft Readiness Assessment
+
+After reporting, review **all** proto-patterns in the index (not just those touched in this run) and assess which, if any, have accumulated enough evidence for a full `/draft`. Consider:
+
+- **Source diversity** — evidence from multiple independent sources is stronger than one
+- **Section coverage** — can the accumulated material plausibly populate most of the 9 essential pattern sections (Intent, Context, Issues, Solution, Implementation Examples, Context-Specific Guidance, Consequences, Known Uses, Related Patterns)?
+- **Project count** — patterns with known uses across multiple projects are stronger candidates
+
+Present the assessment:
+
+```
+### Draft Readiness
+
+| Proto-Pattern | Sources | Projects | Coverage | Ready? |
+|--------------|---------|----------|----------|--------|
+| PP-001: "Name" | 3 | 4 | Good — most sections coverable | Yes — consider `/draft drafts/protopatterns/slug.md` |
+| PP-002: "Name" | 1 | 1 | Thin — only Intent and Context | Not yet — needs more sources |
 ...
 ```
 
-### Stage 3 — Guided Elaboration
+This is advisory only — the operator decides when to draft.
 
-For sections marked THIN or ABSENT, propose content to fill the gaps. Clearly mark all elaborated content.
+## Proto-Pattern File Structure
 
-Present elaboration proposals to the operator. Wait for the operator to accept, reject, or modify each proposal before proceeding. If the operator instructs you to proceed without review, combine accepted defaults and continue.
+```markdown
+# {Pattern Name}
 
-### Stage 4 — Output and Validation
+**ID:** PP-NNN
+**Description:** One or two sentences.
+**Created:** YYYY-MM-DD
+**Last updated:** YYYY-MM-DD
 
-1. **Compose the final markdown file.** Combine frontmatter and body sections.
+## Projects
+- **{Project Name}** — how it relates (Source: {source_ref})
 
-2. **Use structured annotations.** All content must use the annotation syntax:
-   - Extracted content: `[EXTRACTED | source: "description" | ref: location | "key quote"]`
-   - Elaborated content: `[ELABORATED | basis: "reason for elaboration"]`
+## Sources
+| Source | Date Mined | Key Contributions |
+|--------|-----------|-------------------|
+| {source_ref} | YYYY-MM-DD | Brief note on what this source contributed |
 
-   These annotations are visible inline for reviewer verification and machine-parseable for the publish workflow.
+## Notes
+### From: {source_ref} ({date})
+{Freeform notes, evidence, quotes, observations}
+```
 
-3. **Determine the output path.** Use kebab-case slug: `drafts/patterns/{slug}.md`
+## index.md Structure
 
-4. **Write the file** to the drafts directory.
+The index is a markdown file with a table. Each row is one proto-pattern:
 
-5. **Run validation:**
-   ```bash
-   node --import tsx scripts/validate.js drafts/patterns/{slug}.md
-   ```
+```markdown
+# Proto-Pattern Index
 
-6. **If validation fails:** Read the error output, fix the issues, re-validate. Repeat until validation passes.
+| ID | Name | Description | File | Created | Updated | Projects |
+|----|------|-------------|------|---------|---------|----------|
+| PP-001 | Pattern Name | Short description for semantic matching | slug.md | 2026-03-16 | 2026-03-16 | 1 |
+```
 
-7. **Report final status:**
-   ```
-   ## Extraction Complete
-
-   - **File:** drafts/patterns/{slug}.md
-   - **Validation:** PASS
-   - **Confidence:** 0.X (proportion extracted vs elaborated)
-   - **Sections extracted:** N of 9 essential sections
-   - **Sections elaborated:** N sections
-   - **Annotations:** N [EXTRACTED], N [ELABORATED] markers for reviewer verification
-   - **Operator review needed:** [list any areas needing attention]
-   ```
-
-### Git Integration
-
-After successful extraction, offer to:
-1. Create a feature branch (`feature/pattern-{slug}`)
-2. Commit the draft file
-3. The operator decides — do not auto-commit without confirmation.
-
-## Multiple Patterns
-
-If the source document contains material for multiple patterns, identify them in Stage 1 and ask the operator which to extract first. Process one pattern at a time.
+When creating or updating proto-patterns, add or modify rows in this table. Keep rows sorted by ID.
 
 ## What NOT To Do
 
+- Do not produce full pattern drafts — that is `/draft`'s job.
+- Do not force proto-pattern notes into the formal pattern template structure.
 - Do not commit source documents or include source file paths in output.
-- Do not silently fill gaps — always use annotation syntax to flag elaborated content.
 - Do not include identifying details about research participants.
-- Do not skip validation — always run `scripts/validate.js` after writing.
-- Do not invent Known Uses or Implementation Examples — these must be real.
-- Do not add a maturity level field — maturity judgements are out of scope.
+- Do not auto-merge candidates with existing entries without operator confirmation.
+- Do not skip the matching step — always check the index for existing entries.

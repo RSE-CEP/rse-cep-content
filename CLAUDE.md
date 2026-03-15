@@ -39,10 +39,15 @@ Feature branches → PR to `master` → CI (validate + build) → merge → auto
 
 ## AI Authorship Commands
 
-- **`/extract`** — Extract patterns from source documents. Four stages: classify → extract → elaborate → validate. Outputs to `drafts/patterns/`.
-- **`/publish`** — Validate a draft and move it from `drafts/patterns/` to `src/content/patterns/`. Checks: schema validation, annotation removal, section completeness, quality review.
+- **`/extract`** — Mine proto-patterns from source documents. Identifies candidate patterns, matches against existing proto-patterns, creates or updates lightweight evidence files in `drafts/protopatterns/`.
+- **`/draft`** — Create a full pattern draft. Four stages: classify → extract → elaborate → validate. Accepts either a source document (from `_sources/`) or a proto-pattern (from `drafts/protopatterns/`). Outputs to `drafts/patterns/`.
+- **`/publish`** — Validate a draft and move it from `drafts/patterns/` to `src/content/patterns/`. Checks: schema validation, annotation removal, section completeness, URL verification, quality review.
 
-Workflow: source doc in `_sources/` → `/extract` → draft with inline annotations → human review (delete annotations as verified) → `/publish` → production content.
+### Workflow
+
+**Via proto-patterns (incremental):** source docs → `/extract` → proto-pattern(s) accumulate evidence → `/draft` from proto-pattern → draft with annotations → human review → `/publish` → production.
+
+**Direct drafting:** source doc in `_sources/` → `/draft` → draft with annotations → human review → `/publish` → production.
 
 Draft annotations use structured syntax: `[EXTRACTED | source: "..." | ref: ... | "quote"]` and `[ELABORATED | basis: "..."]`. All must be removed before publishing.
 
