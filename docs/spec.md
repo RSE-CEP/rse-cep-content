@@ -52,6 +52,7 @@ rsecep-site/                          # Astro project root
 │       ├── ci.yml                    # PR validation (schema + build check)
 │       └── deploy.yml                # Main branch deploy to GitHub Pages
 ├── drafts/
+│   ├── pattern-index.md             # Published pattern index (agent-maintained, for /draft)
 │   ├── patterns/                    # Full pattern drafts (with inline annotations)
 │   └── protopatterns/               # Proto-pattern evidence files
 │       ├── index.md               # Proto-pattern index (for semantic matching)
@@ -239,11 +240,13 @@ The 4-stage extraction flow that produces a full structured pattern draft. Accep
 
 Stages: classify source → template-aware extraction → guided elaboration → output with annotations and validation. Outputs to `drafts/patterns/` with inline `[EXTRACTED]` and `[ELABORATED]` annotations.
 
+**Related pattern proposals:** During Stage 3 (guided elaboration), the `/draft` command reads the published pattern index (`drafts/pattern-index.md`) and proposes related patterns for the Related Patterns section (section 9 of the template). The index contains agent-written summaries alongside structured metadata (ID, type, keywords, domains), enabling semantic matching. Proposed relationships are presented to the operator for confirmation before inclusion.
+
 When drafting from a proto-pattern, offers to clean up the proto-pattern entry on success.
 
 ### `/publish` — Publication Gate
 
-Validates a draft in `drafts/patterns/` and moves it to `src/content/patterns/`. Checks: schema validation, annotation removal, section completeness, URL verification, quality review.
+Validates a draft in `drafts/patterns/` and moves it to `src/content/patterns/`. Checks: schema validation, annotation removal, section completeness, URL verification, quality review. On successful publication, appends an entry to `drafts/pattern-index.md` with the pattern's metadata and a one-line agent-written summary.
 
 ## 8. Source Document Management
 

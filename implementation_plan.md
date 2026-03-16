@@ -280,6 +280,38 @@ Introduce a three-type classification (Implementation, Architectural, Design) as
 
 ---
 
+## Phase 12 — Published Pattern Index & Related Pattern Proposals
+
+Introduce an agent-maintained index of published patterns (`drafts/pattern-index.md`) and use it during `/draft` to propose related patterns for section 9 (Related Patterns) of the template. The index is a markdown table — same approach as the proto-pattern index — with an agent-written summary column for semantic matching.
+
+- [ ] 12a — Create `drafts/pattern-index.md`:
+  - Markdown table with columns: ID, Type, Title, Keywords, HASS Domains, Summary
+  - Summary is a one-line agent-written description (not mechanically extracted) — compact enough for the `/draft` agent to reason about relationships
+  - Seed with entries for any currently published patterns (if none, create with header row only)
+- [ ] 12b — Update `/publish` command (`.claude/commands/publish.md`):
+  - After successful publication, append a row to `drafts/pattern-index.md`
+  - Agent writes a concise one-line summary capturing the pattern's essence for relationship matching
+  - If `drafts/pattern-index.md` doesn't exist, create it with the header row first
+- [ ] 12c — Update `/draft` command (`.claude/commands/draft.md`):
+  - In Stage 3 (Guided Elaboration), read `drafts/pattern-index.md`
+  - Match the draft pattern against published patterns using the index (shared keywords, domains, type, and semantic relevance of summaries)
+  - Present a table of proposed related patterns with relationship type (Works Well With / Alternative Approaches / Typical Sequence) and rationale
+  - Operator confirms, rejects, or edits proposals before inclusion in the Related Patterns section
+  - If `drafts/pattern-index.md` is missing or empty, skip gracefully with a note
+- [ ] 12d — Update documentation:
+  - [x] `docs/spec.md` — repo structure, `/draft` and `/publish` command descriptions
+  - [ ] `CLAUDE.md` — note index in Architecture section, add `drafts/pattern-index.md` to key files
+  - [ ] `docs/ai-authorship-workflow.md` — document related pattern proposal step in draft workflow
+  - [ ] `implementation_plan.md` — this phase
+- [ ] 12e — Manual testing:
+  - Publish a pattern via `/publish`, verify row appended to `drafts/pattern-index.md` with good summary
+  - Run `/draft` with published patterns present, verify related pattern proposals appear
+  - Run `/draft` with no published patterns, verify graceful skip
+
+**Done when:** `/publish` appends to the pattern index on publication. `/draft` reads the index and proposes related patterns during elaboration. Index is committed to repo.
+
+---
+
 ## Updating This Plan
 
 When a phase is complete:
