@@ -56,17 +56,19 @@ Patterns help RSE practitioners by: - **Accelerating Development**: Avoid reinve
 
 ### Types of Patterns in RSE
 
-Patterns in research software engineering can operate at multiple levels:
+Patterns in research software engineering can operate at multiple levels. The RSE-CEP prototype uses three active types, with two deferred:
 
-**Architectural Patterns** - High-level system organization - Example: Microservices vs monolithic architecture for research platforms
+**Implementation Patterns (I)** — Specific technologies, tools, and engineering techniques. Example: RO-Crate packaging for research data, Git workflows for HASS researchers.
 
-**Design Patterns** - Mid-level component interactions - Example: Observer pattern for real-time data updates
+**Architectural Patterns (A)** — System shapes, structural principles, workflows, and data governance architectures. Example: Community-delegated access control, provider-agnostic LLM abstraction.
 
-**Implementation Patterns** - Specific coding techniques - Example: Configuration management for multi-environment deployments
+**Design Patterns (D)** — Research problem framing, methodology, evaluation design, and decision frameworks. Example: Inter-rater reliability framework for AI evaluation, semantic load testing criteria.
 
-**Process Patterns** - Development workflows and practices - Example: Continuous integration for research software
+**Process Patterns** *(deferred)* — Development workflows and practices. Example: Continuous integration for research software.
 
-**Organizational Patterns** - Team structures and collaboration models - Example: Embedded RSE support model
+**Organizational Patterns** *(deferred)* — Team structures and collaboration models. Example: Embedded RSE support model.
+
+For full typology definitions, classification guidance, and section-by-section emphasis per type, see `docs/pattern_typology.md`.
 
 ## Pattern Quality Criteria
 

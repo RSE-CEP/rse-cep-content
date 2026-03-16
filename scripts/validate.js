@@ -8,29 +8,38 @@ import { z } from 'zod';
 // Schema — mirrors src/content.config.ts (uses zod directly, not astro/zod)
 // ---------------------------------------------------------------------------
 
-const patternSchema = z.object({
-  title: z.string(),
-  pattern_id: z.string(),
-  alternative_names: z.array(z.string()).optional(),
-  keywords: z.array(z.string()).min(1),
-  hass_domains: z.array(z.string()).min(1),
-  version: z.string().optional(),
-  author: z.string(),
-  last_updated: z.coerce.date(),
+const patternSchema = z
+  .object({
+    title: z.string(),
+    pattern_id: z.string().regex(/^[IADP]-\d{3}$/, 'Pattern ID must match {I|A|D|P}-NNN format'),
+    pattern_type: z.enum(['implementation', 'architectural', 'design', 'process']),
+    alternative_names: z.array(z.string()).optional(),
+    keywords: z.array(z.string()).min(1),
+    hass_domains: z.array(z.string()).min(1),
+    version: z.string().optional(),
+    author: z.string(),
+    last_updated: z.coerce.date(),
 
-  // Extraction-pipeline provenance (optional)
-  source_type: z
-    .enum([
-      'interview-transcript',
-      'talk-transcript',
-      'manual-notes',
-      'slides',
-      'mixed',
-    ])
-    .optional(),
-  source_ref: z.string().optional(),
-  confidence: z.number().min(0).max(1).optional(),
-});
+    // Extraction-pipeline provenance (optional)
+    source_type: z
+      .enum([
+        'interview-transcript',
+        'talk-transcript',
+        'manual-notes',
+        'slides',
+        'mixed',
+      ])
+      .optional(),
+    source_ref: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      const prefix = data.pattern_id.charAt(0);
+      const expected = { I: 'implementation', A: 'architectural', D: 'design', P: 'process' };
+      return expected[prefix] === data.pattern_type;
+    },
+    { message: 'pattern_id prefix must match pattern_type (I=implementation, A=architectural, D=design, P=process)' },
+  );
 
 // ---------------------------------------------------------------------------
 // Expected body sections (soft warnings)

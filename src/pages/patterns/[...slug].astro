@@ -21,6 +21,7 @@ const d = pattern.data;
   <table>
     <tbody>
       <tr><th>Pattern ID</th><td>{d.pattern_id}</td></tr>
+      <tr><th>Pattern Type</th><td style="text-transform:capitalize;">{d.pattern_type}</td></tr>
       {d.alternative_names && d.alternative_names.length > 0 && (
         <tr><th>Also known as</th><td>{d.alternative_names.join(', ')}</td></tr>
       )}
@@ -37,7 +38,6 @@ const d = pattern.data;
       </tr>
       {d.source_type && <tr><th>Source type</th><td>{d.source_type}</td></tr>}
       {d.source_ref && <tr><th>Source ref</th><td>{d.source_ref}</td></tr>}
-      {d.confidence != null && <tr><th>Confidence</th><td>{d.confidence}</td></tr>}
     </tbody>
   </table>
 

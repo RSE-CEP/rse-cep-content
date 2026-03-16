@@ -1,4 +1,10 @@
 # Proto-Pattern Index
 
-| ID | Name | Description | File | Created | Updated | Projects |
-|----|------|-------------|------|---------|---------|----------|
+| ID | Type | Name | Description | File | Created | Updated | Projects |
+|----|------|------|-------------|------|---------|---------|----------|
+| I-004 | I | Hybrid Search for Historical Text Corpora | Combining BM25 lexical search with dense vector retrieval via RRF, using period-specific fine-tuned embedding models, to improve retrieval quality for historical text where vocabulary diverges from modern language | hybrid-search-historical-text-corpora.md | 2026-03-16 | 2026-03-16 | 1 |
+| A-003 | A | Swappable Research Corpus Architecture | Corpus-agnostic RAG architecture separating query/generation pipeline from corpus-specific content, enabling substitution of different document collections without modifying core application code | swappable-research-corpus-architecture.md | 2026-03-16 | 2026-03-16 | 1 |
+| P-001 | P | Training Data Provenance Audit for Community-Sensitive AI | Systematic pre-adoption audit of pre-trained models' training data for provenance, consent history, and community alignment before deployment in HASS contexts | training-data-provenance-audit.md | 2026-03-16 | 2026-03-16 | 2 |
+| P-002 | P | Community Governance Workflow for AI Model Release | Structured community sign-off and governance workflow for AI model selection, review, and release in Indigenous/community-sensitive HASS contexts, grounded in OCAP and CARE principles | community-ai-governance-workflow.md | 2026-03-16 | 2026-03-16 | 1 |
+| P-003 | P | Inter-rater Reliability Workflow for AI-Assisted Research Evaluation | Structured process applying formal inter-rater reliability methodology to AI system output evaluation — deterministic allocation, self-exclusion, multi-rater collection across structured evaluation dimensions | inter-rater-reliability-workflow-ai-evaluation.md | 2026-03-16 | 2026-03-16 | 1 |
+| D-001 | D | Community-Co-Developed Model Cards | Model cards co-developed with community representatives to communicate AI model provenance, limitations, and ethical considerations in language accessible to non-technical community stakeholders | community-co-developed-model-cards.md | 2026-03-16 | 2026-03-16 | 1 |

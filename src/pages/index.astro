@@ -8,6 +8,19 @@ const patterns = await getCollection('patterns');
 const allKeywords = [...new Set(patterns.flatMap((p) => p.data.keywords))].sort();
 const allDomains = [...new Set(patterns.flatMap((p) => p.data.hass_domains))].sort();
 
+const typeLabels: Record<string, string> = {
+  implementation: 'Implementation',
+  architectural: 'Architectural',
+  design: 'Design',
+  process: 'Process',
+};
+const typeAbbrev: Record<string, string> = {
+  implementation: 'I',
+  architectural: 'A',
+  design: 'D',
+  process: 'P',
+};
+
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -16,6 +29,18 @@ const base = import.meta.env.BASE_URL;
   <p>{patterns.length} pattern(s) in the collection.</p>
 
   <div id="filters">
+    <div id="type-filters" style="margin-bottom:0.75rem;">
+      <strong>Type:</strong>
+      {Object.entries(typeLabels).map(([value, label]) => (
+        <button
+          class="type-toggle"
+          data-type={value}
+          style="margin-left:0.5rem;padding:0.25rem 0.75rem;border:1px solid #999;border-radius:3px;cursor:pointer;background:#fff;"
+        >
+          {label}
+        </button>
+      ))}
+    </div>
     <details>
       <summary>Filter by keyword / domain</summary>
       <div style="margin-top:0.5rem;">
@@ -45,12 +70,16 @@ const base = import.meta.env.BASE_URL;
         class="pattern-item"
         data-keywords={p.data.keywords.join(',')}
         data-domains={p.data.hass_domains.join(',')}
+        data-type={p.data.pattern_type}
         style="border:1px solid #ddd;padding:0.75rem;margin-bottom:0.5rem;border-radius:4px;"
       >
         <a href={`${base}/patterns/${p.id}/`} style="font-size:1.1rem;font-weight:600;">
           {p.data.title}
         </a>
         <span style="color:#666;margin-left:0.5rem;">({p.data.pattern_id})</span>
+        <span class={`tag tag--type tag--type-${p.data.pattern_type}`}>
+          {typeAbbrev[p.data.pattern_type]} &mdash; {typeLabels[p.data.pattern_type]}
+        </span>
         <div style="margin-top:0.25rem;">
           {p.data.keywords.map((kw: string) => <span class="tag">{kw}</span>)}
           {p.data.hass_domains.map((d: string) => <span class="tag tag--domain">{d}</span>)}
@@ -60,6 +89,8 @@ const base = import.meta.env.BASE_URL;
   </ul>
 
   <script>
+    const activeTypes = new Set<string>();
+
     function applyFilters() {
       const checkedKw = [...document.querySelectorAll<HTMLInputElement>('.filter-kw:checked')].map(
         (el) => el.value,
@@ -71,17 +102,35 @@ const base = import.meta.env.BASE_URL;
       document.querySelectorAll<HTMLElement>('.pattern-item').forEach((item) => {
         const kws = (item.dataset.keywords ?? '').split(',');
         const domains = (item.dataset.domains ?? '').split(',');
+        const type = item.dataset.type ?? '';
 
+        const typeMatch = activeTypes.size === 0 || activeTypes.has(type);
         const kwMatch = checkedKw.length === 0 || checkedKw.some((k) => kws.includes(k));
         const domainMatch =
           checkedDomains.length === 0 || checkedDomains.some((d) => domains.includes(d));
 
-        item.style.display = kwMatch && domainMatch ? '' : 'none';
+        item.style.display = typeMatch && kwMatch && domainMatch ? '' : 'none';
       });
     }
 
     document.querySelectorAll('.filter-kw, .filter-domain').forEach((el) => {
       el.addEventListener('change', applyFilters);
+    });
+
+    document.querySelectorAll<HTMLButtonElement>('.type-toggle').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const type = btn.dataset.type!;
+        if (activeTypes.has(type)) {
+          activeTypes.delete(type);
+          btn.style.background = '#fff';
+          btn.style.fontWeight = 'normal';
+        } else {
+          activeTypes.add(type);
+          btn.style.background = '#e0e7ff';
+          btn.style.fontWeight = '600';
+        }
+        applyFilters();
+      });
     });
   </script>
 </Base>

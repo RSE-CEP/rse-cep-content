@@ -32,7 +32,7 @@ Set up the Astro project, content collection schemas, and directory structure.
 The spec (§4) now reflects the pattern template structure. Key design decisions:
 
 - **Frontmatter for Astro, body for template structure.** Queryable fields (`title`, `pattern_id`, `keywords`, `hass_domains`, etc.) live in YAML frontmatter for Astro content collections. The full pattern template structure (Intent, Context, Issues, Solution, etc.) lives in the markdown body.
-- **Provenance fields are separate from pattern metadata.** `source_type`, `source_ref`, and `confidence` are extraction-pipeline fields populated by the AI tool, not part of the pattern template itself. They are optional in the schema.
+- **Provenance fields are separate from pattern metadata.** `source_type` and `source_ref` are extraction-pipeline fields populated by the AI tool, not part of the pattern template itself. They are optional in the schema.
 - **Body sections follow the pattern template.** Essential sections: Intent, Context, Issues, Solution, Implementation Examples, Context-Specific Guidance, Consequences, Known Uses, Related Patterns. Additional sections are optional.
 - **No maturity field.** Maturity judgements are out of scope for this pipeline.
 
@@ -240,6 +240,43 @@ Add incremental pattern discovery via proto-patterns: lightweight freeform evide
 - None.
 
 **Done when:** `/extract` mines proto-patterns, `/draft` accepts both source docs and proto-patterns, `/publish` unchanged, all documentation updated.
+
+---
+
+## Phase 11 — Pattern Typology System
+
+**Completed:** 2026-03-16
+
+Introduce a three-type classification (Implementation, Architectural, Design) as a first-class property throughout the pipeline. Also fixes duplicate `RSE-HASS-002` ID on two published patterns.
+
+- [x] 11a — Create `docs/pattern_typology.md` (type definitions, prior work, ID conventions, section guidance, classification decision guide)
+- [x] 11b — Schema changes:
+  - [x] `src/content.config.ts` — add `pattern_type` enum, typed `pattern_id` regex, `.refine()` cross-validation
+  - [x] `scripts/validate.js` — mirror schema changes
+- [x] 11c — Reclassify published patterns:
+  - [x] `version-control-for-research.md` — RSE-HASS-001 → I-001 (implementation)
+  - [x] `community-delegated-access-control.md` — RSE-HASS-002 → A-001 (architectural)
+  - [x] `ro-crate-for-research-data-packaging.md` — RSE-HASS-002 (duplicate!) → I-002 (implementation)
+  - [x] Validation passes for all 3
+- [x] 11d — Update `/extract` command (type column in candidates, typed IDs, type in proto-pattern files and index)
+- [x] 11e — Update `/draft` command (type confirmation step, type-aware extraction, `pattern_type` in output)
+- [x] 11f — Update `/publish` command (type-content consistency check in quality review)
+- [x] 11g — Update site rendering:
+  - [x] `index.astro` — type filter toggle buttons, type badge on cards
+  - [x] `[...slug].astro` — Pattern Type row in metadata table
+- [x] 11h — Update documentation:
+  - [x] `docs/spec.md` — updated frontmatter example and field table
+  - [x] `docs/ai-authorship-workflow.md` — type classification step, updated stage descriptions
+  - [x] `docs/patterns/1 - Pattern_Definition_Guide.md` — updated Types section, reference to typology doc
+  - [x] `docs/patterns/2 - Pattern_Template.md` — added Pattern Type to metadata table, updated example ID
+  - [x] `CLAUDE.md` — typology in Architecture section, added typology doc to Documentation
+  - [x] `implementation_plan.md` — this phase
+
+### Deviations
+
+- None.
+
+**Done when:** All 3 patterns validate with new schema, site builds with type display, commands reference typology throughout.
 
 ---
 

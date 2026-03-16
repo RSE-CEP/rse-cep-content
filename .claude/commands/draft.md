@@ -5,8 +5,8 @@ Create a full structured pattern draft from either a source document in `_source
 ## Arguments
 
 The operator should specify one of:
-- **Source document mode:** A source document path in `_sources/`, plus optional focus guidance
-- **Proto-pattern mode:** A proto-pattern file path in `drafts/protopatterns/`
+- **Source document mode:** A source document path in `_sources/`, plus optional focus guidance and target pattern type (I/A/D/P)
+- **Proto-pattern mode:** A proto-pattern file path in `drafts/protopatterns/` (type and ID are inherited from the proto-pattern)
 - Optional `pattern_id` and `author` (will be prompted if not provided)
 
 ## Input Modes
@@ -33,9 +33,10 @@ When given a path in `drafts/protopatterns/`, use the accumulated material in th
 Before starting, read these files to understand the expected output format:
 
 1. **`docs/patterns/2 - Pattern_Template.md`** — The canonical pattern template. Your output must follow this structure.
-2. **`src/content.config.ts`** — The Zod schema defining required and optional frontmatter fields.
-3. **`tools/prompt-templates/pattern.md`** — Quick reference for frontmatter fields, body sections, and provenance conventions.
-4. **`docs/patterns/1 - Pattern_Definition_Guide.md`** — What patterns are, quality criteria, how they differ from best practices/principles/tutorials.
+2. **`src/content.config.ts`** — The Zod schema defining required and optional frontmatter fields (including `pattern_type` and typed `pattern_id`).
+3. **`docs/pattern_typology_agents.md`** — Pattern type definitions, classification decision tree, and borderline heuristics for agents. For detailed section-by-section guidance per type, see `docs/pattern_typology.md`.
+4. **`tools/prompt-templates/pattern.md`** — Quick reference for frontmatter fields, body sections, and provenance conventions.
+5. **`docs/patterns/1 - Pattern_Definition_Guide.md`** — What patterns are, quality criteria, how they differ from best practices/principles/tutorials.
 
 For a worked example, see: `src/content/patterns/version-control-for-research.md`
 
@@ -51,7 +52,7 @@ For a worked example, see: `src/content/patterns/version-control-for-research.md
 
 Operate in four stages. Report your progress to the operator at each stage.
 
-### Stage 1 — Source Classification
+### Stage 1 — Source Classification and Type Confirmation
 
 Read the source document(s) provided by the operator. Characterise the input:
 
@@ -64,13 +65,18 @@ Read the source document(s) provided by the operator. Characterise the input:
 | `proto-pattern` | Accumulated evidence from multiple sources | Rich multi-source material, cross-reference evidence |
 | `mixed` | Combination of the above | Adapt per-section |
 
-Report the classification to the operator before proceeding.
+**Type confirmation:**
+- **From a typed proto-pattern:** Carry forward the type (I/A/D/P) and ID from the proto-pattern file. Report to the operator: "This proto-pattern is typed as [type] with ID [ID]. Proceeding with this classification."
+- **From a source document:** Propose a pattern type (I/A/D/P) using the classification decision tree in `docs/pattern_typology_agents.md`. Report to the operator and wait for confirmation.
+- **Type mismatch guard:** If the proto-pattern has an assigned type but the operator requests a different type, warn: "This proto-pattern is typed as [X] but you've requested [Y]. The ID will remain [ID] (assigned at proto-pattern stage). Confirm?" The ID never changes once assigned.
+
+Report the classification and type to the operator before proceeding.
 
 ### Stage 2 — Template-Aware Extraction
 
-Extract content from the source into the pattern template structure. For each section:
+Extract content from the source into the pattern template structure. **Consult the section-by-section guidance table in `docs/pattern_typology.md`** to understand how each section should be emphasised for this pattern's type (I/A/D/P). For each section:
 
-1. **Map source content to template sections.** Find passages in the source that correspond to Intent, Context, Issues, Solution, etc.
+1. **Map source content to template sections.** Find passages in the source that correspond to Intent, Context, Issues, Solution, etc. Use the type-specific guidance to determine what emphasis each section should have.
 2. **Extract faithfully.** Use the source's own language and ideas. Restructure for clarity but do not invent content.
 3. **Track provenance.** For each section, note whether it was:
    - **EXTRACTED** — Content directly from the source
@@ -104,7 +110,7 @@ Present elaboration proposals to the operator. Wait for the operator to accept, 
 
 ### Stage 4 — Output and Validation
 
-1. **Compose the final markdown file.** Combine frontmatter and body sections.
+1. **Compose the final markdown file.** Combine frontmatter and body sections. Frontmatter must include `pattern_type` (implementation/architectural/design) and a correctly-formatted typed `pattern_id` (e.g., `I-001`, `A-003`, `D-002`). The ID prefix must match the type.
 
 2. **Use structured annotations.** All content must use the annotation syntax:
    - Extracted content: `[EXTRACTED | source: "description" | ref: location | "key quote"]`
@@ -130,7 +136,6 @@ Present elaboration proposals to the operator. Wait for the operator to accept, 
    - **File:** drafts/patterns/{slug}.md
    - **Source:** [source document path or proto-pattern ID]
    - **Validation:** PASS
-   - **Confidence:** 0.X (proportion extracted vs elaborated)
    - **Sections extracted:** N of 9 essential sections
    - **Sections elaborated:** N sections
    - **Annotations:** N [EXTRACTED], N [ELABORATED] markers for reviewer verification

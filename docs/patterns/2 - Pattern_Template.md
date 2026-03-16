@@ -10,7 +10,8 @@
 
 | Field | Value |
 |-------|-------|
-| **Pattern ID** | [e.g., RSE-HASS-001] |
+| **Pattern ID** | [e.g., I-001, A-001, D-001] |
+| **Pattern Type** | [Implementation \| Architectural \| Design] |
 | **Keywords** | [keyword1, keyword2, keyword3, Indigenous-data, FAIR, etc.] |
 | **Maturity Level** | [Foundational \| Recommended \| Emerging \| Experimental] |
 | **Author(s)** | [Name(s) and affiliation(s)] |

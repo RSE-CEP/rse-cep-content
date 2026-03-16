@@ -27,7 +27,6 @@ version: "1.0.0"                 # Semver
 # Extraction provenance (populated by AI tool)
 source_type: interview-transcript  # One of: interview-transcript, talk-transcript, manual-notes, slides, mixed
 source_ref: "Description of source document"
-confidence: 0.7                  # 0–1, proportion extracted vs elaborated
 ---
 ```
 
@@ -89,8 +88,6 @@ When extracting content, track provenance at the section level:
 - **[EXTRACTED]** — Content directly sourced from the input document. Include a brief citation of where in the source it came from.
 - **[ELABORATED]** — Content proposed by the AI to fill gaps. Clearly marked for operator review.
 - **[ABSENT]** — Section where the source document provides no relevant content. Left minimal or empty for operator to fill.
-
-The `confidence` frontmatter field should reflect the overall ratio: 1.0 = fully extracted, 0.0 = fully elaborated.
 
 ## Output Path
 

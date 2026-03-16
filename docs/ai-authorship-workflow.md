@@ -8,6 +8,8 @@ The authoring pipeline uses Claude Code (Anthropic's CLI tool for AI-assisted de
 
 The key principle is **extraction before elaboration**: the AI first mines content from real source material (interview transcripts, talk transcripts, notes, slides), then separately proposes content for any gaps — clearly marking what is extracted vs. generated using structured inline annotations.
 
+All patterns are classified by type — **Implementation (I)**, **Architectural (A)**, **Design (D)**, or **Process (P)** — at the proto-pattern stage. The type determines emphasis across sections and is encoded in the pattern ID (e.g., `I-001`, `A-002`, `P-001`). See `docs/pattern_typology.md` for the full typology.
+
 ### Two Paths to a Pattern
 
 - **Incremental (recommended):** Run `/extract` on multiple source documents to build up proto-patterns — lightweight evidence sketches in `drafts/protopatterns/`. When a proto-pattern has enough evidence, run `/draft` to create a full pattern draft.
@@ -53,7 +55,7 @@ The command operates in four stages:
 
 #### Stage 1 — Source Analysis
 
-Claude reads the source and identifies candidate patterns — recurring practices, solutions, named approaches.
+Claude reads the source and identifies candidate patterns — recurring practices, solutions, named approaches. Each candidate is assigned a type (I/A/D/P) using the classification decision guide from `docs/pattern_typology.md`. Extracting multiple types from one source is expected.
 
 #### Stage 2 — Index Matching
 
@@ -61,7 +63,7 @@ Claude compares candidates against existing proto-patterns in `drafts/protopatte
 
 #### Stage 3 — Create or Update
 
-For new candidates, Claude creates a proto-pattern file and index entry. For matches with existing entries, Claude adds new projects and evidence to the existing proto-pattern.
+For new candidates, Claude assigns a typed ID (`{I|A|D|P}-NNN`) and creates a proto-pattern file and index entry. This ID is permanent — it follows the pattern through draft and publication. For matches with existing entries, Claude adds new projects and evidence to the existing proto-pattern.
 
 #### Stage 4 — Write and Report
 
@@ -86,7 +88,7 @@ Focus on NER and text processing patterns for historical newspapers.
 
 The command operates in four stages:
 
-#### Stage 1 — Source Classification
+#### Stage 1 — Source Classification and Type Confirmation
 
 Claude characterises the input:
 - **Interview transcript:** structured by questions, rich in contextual detail
@@ -96,7 +98,9 @@ Claude characterises the input:
 - **Proto-pattern:** accumulated evidence from multiple sources
 - **Mixed:** combination of the above
 
-The classification determines the extraction strategy.
+Claude also confirms the pattern type (I/A/D/P). If drafting from a typed proto-pattern, the type is inherited. If drafting from a source document, Claude proposes a type and waits for confirmation.
+
+The classification and type determine the extraction strategy and section emphasis.
 
 #### Stage 2 — Template-Aware Extraction
 

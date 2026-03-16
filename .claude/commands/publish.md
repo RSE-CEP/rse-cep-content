@@ -72,6 +72,12 @@ Review the draft against the pattern quality criteria from `docs/patterns/1 - Pa
 - Content that reads like a tutorial or step-by-step guide rather than a pattern
 - Missing or clearly wrong frontmatter values
 
+**Type-content consistency check** (consult `docs/pattern_typology_agents.md`):
+- **Architectural (A) pattern** naming specific technologies in the Solution section → flag: "A patterns should describe structural principles, not specific technologies. Consider whether this is better typed as Implementation."
+- **Implementation (I) pattern** with no technology references in Solution or Implementation Examples → flag: "I patterns should name specific technologies. Consider whether this is better typed as Architectural or Design."
+- **Design (D) pattern** describing system components rather than methodology or decision frameworks → flag: "D patterns should describe analytical approaches. Consider whether this is better typed as Architectural."
+- **Process (P) pattern** describing artefact structure rather than human workflow → flag: "P patterns should describe how people and agents work together, not what artefacts they produce. Consider whether this is better typed as Design or Architectural. A strong P pattern, such as AI spec-driven development, centres on the iterative workflow between practitioners and agents, not on the spec itself."
+
 Report quality concerns but do not block publication for them — the operator decides.
 
 ## On All Checks Passing

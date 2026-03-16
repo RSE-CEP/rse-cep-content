@@ -78,7 +78,7 @@ Required frontmatter fields:
 | `author` | string | Author identifier |
 | `last_updated` | date | ISO date |
 
-Optional fields: `alternative_names`, `version`, `source_type`, `source_ref`, `confidence`.
+Optional fields: `alternative_names`, `version`, `source_type`, `source_ref`.
 
 The markdown body follows the pattern template structure defined in [docs/patterns/2 - Pattern_Template.md](./docs/patterns/2%20-%20Pattern_Template.md).
 

@@ -72,7 +72,8 @@ Example for a pattern:
 ```markdown
 ---
 title: "Named Entity Recognition for Historical Newspapers"
-pattern_id: RSE-HASS-012
+pattern_id: I-012
+pattern_type: implementation
 alternative_names:
   - "Historical NER"
   - "Newspaper Entity Extraction"
@@ -88,7 +89,6 @@ author: mat-bettinson
 last_updated: 2026-03-10
 source_type: interview-transcript
 source_ref: "Interview with J. Example, 2026-02-15"
-confidence: 0.7
 ---
 
 ## Intent
@@ -152,15 +152,15 @@ These fields appear across all content types. Type-specific fields are defined p
 | `last_updated` | date | yes | ISO date |
 | `source_type` | enum | no | `interview-transcript`, `talk-transcript`, `manual-notes`, `slides`, `mixed` |
 | `source_ref` | string | no | Identifies source document (human-readable, no Sharepoint URLs) |
-| `confidence` | number | no | 0–1 indicating how much was extracted vs elaborated |
 
-Note: `source_type`, `source_ref`, and `confidence` are extraction-pipeline provenance fields, not pattern metadata. They track how the content was produced and are populated by the AI extraction tool.
+Note: `source_type` and `source_ref` are extraction-pipeline provenance fields, not pattern metadata. They track how the content was produced and are populated by the AI extraction tool.
 
 ### Pattern-Specific Frontmatter Fields
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
-| `pattern_id` | string | yes | Unique identifier (e.g. `RSE-HASS-001`) |
+| `pattern_id` | string | yes | Typed identifier (e.g. `I-001`, `A-001`, `D-001`). Prefix encodes type: I=implementation, A=architectural, D=design. See `docs/pattern_typology.md`. |
+| `pattern_type` | enum | yes | `implementation`, `architectural`, or `design`. Must match `pattern_id` prefix. |
 | `alternative_names` | string[] | no | Other terms used in the community |
 | `keywords` | string[] | yes | Discovery tags (broader than `hass_domains`) |
 | `version` | string | no | Semver (e.g. `1.0.0`) |
@@ -251,7 +251,7 @@ Validates a draft in `drafts/patterns/` and moves it to `src/content/patterns/`.
 |---|---|
 | **Canonical storage** | Institutional Sharepoint with appropriate access controls |
 | **Working copies** | Pulled to local `_sources/` directory (gitignored) for extraction runs |
-| **Provenance in outputs** | `source_ref` and `source_type` frontmatter fields identify the source document; `confidence` records extraction vs elaboration ratio. These are pipeline provenance, not pattern metadata |
+| **Provenance in outputs** | `source_ref` and `source_type` frontmatter fields identify the source document. These are pipeline provenance, not pattern metadata |
 | **Sensitivity** | Interview transcripts are research participant data — never committed to the public repo |
 
 ## 9. Schema Migration Workflow
