@@ -258,8 +258,6 @@ Contrast with external metadata store:
 
 ## Related Patterns
 
-No published patterns in the index — skipping related pattern proposals.
-
 ### Works Well With
 
 - **RO-Crate for Research Data Packaging (I-005):** RO-Crate is the leading implementation of this architectural principle — a JSON-LD metadata file co-located with data, using schema.org vocabularies. Applying A-004 architecturally and I-005 as the implementation is a natural pairing.
