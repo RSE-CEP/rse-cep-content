@@ -199,3 +199,4 @@ If the source document contains material for multiple patterns, identify them in
 - Do not skip validation — always run `scripts/validate.js` after writing.
 - Do not invent Known Uses or Implementation Examples — these must be real.
 - Do not add a maturity level field — maturity judgements are out of scope.
+- Do not use `[square brackets]` in the pattern body except for annotation syntax (`[EXTRACTED | ...]` and `[ELABORATED | ...]`). Avoid bracket-style placeholders, labels, or diagram shorthand in prose and code blocks — use plain text, italics, or indentation instead.
