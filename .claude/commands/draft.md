@@ -110,7 +110,7 @@ Present elaboration proposals to the operator. Wait for the operator to accept, 
 
 #### Related Pattern Proposals
 
-After elaboration, read `drafts/pattern-index.md` to propose entries for the Related Patterns section. If the file is missing or contains no data rows, skip this step with a note: "No published patterns in the index — skipping related pattern proposals."
+After elaboration, read `drafts/pattern-index.md` to propose entries for the Related Patterns section. If the file is missing or contains no data rows, skip this step and report to the operator: "No published patterns in the index — skipping related pattern proposals." **Do NOT write this message into the pattern file.** The Related Patterns section should be left empty (with just the `## Related Patterns` heading) if there are no proposals — never include operator status messages in the pattern body.
 
 If the index has entries, match the draft pattern against published patterns using:
 - Shared keywords or HASS domains
