@@ -82,7 +82,7 @@ Report quality concerns but do not block publication for them — the operator d
 
 ## On All Checks Passing
 
-1. **Move the file** from `drafts/patterns/{slug}.md` to `src/content/patterns/{slug}.md`
+1. **Move the file** from `drafts/patterns/{slug}.md` to `src/content/patterns/{slug}.md`. This means: write the file to the new location, then **delete** `drafts/patterns/{slug}.md`. The draft must not remain after publishing.
 2. **Run validation again** against the new location to confirm:
    ```bash
    node --import tsx scripts/validate.js src/content/patterns/{slug}.md
