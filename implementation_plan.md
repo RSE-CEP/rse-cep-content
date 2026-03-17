@@ -305,7 +305,7 @@ Introduce an agent-maintained index of published patterns (`drafts/pattern-index
   - [x] `CLAUDE.md` — note index in Architecture section, updated `/draft` and `/publish` descriptions
   - [x] `docs/ai-authorship-workflow.md` — document related pattern proposal step in draft workflow, index update on publish
   - [x] `implementation_plan.md` — this phase
-- [ ] 12e — Manual testing:
+- [x] 12e — Manual testing:
   - Publish a pattern via `/publish`, verify row appended to `drafts/pattern-index.md` with good summary
   - Run `/draft` with published patterns present, verify related pattern proposals appear
   - Run `/draft` with no published patterns, verify graceful skip
