@@ -22,7 +22,7 @@ function warn() {
   console.error('!!   ⚠️  DEVELOPMENT TOOL — DESTRUCTIVE OPERATION ⚠️                !!');
   console.error('!!                                                                   !!');
   console.error('!!   This script PERMANENTLY REMOVES all annotation markers from     !!');
-  console.error('!!   the target file. FOR DEVELOPMENT / TESTING ONLY.               !!');
+  console.error('!!   the target file. FOR DEVELOPMENT / TESTING ONLY.                !!');
   console.error('!!                                                                   !!');
   console.error('!!   DO NOT run this on a real draft you intend to publish.          !!');
   console.error('!!   Annotations are provenance records — stripping them means       !!');
