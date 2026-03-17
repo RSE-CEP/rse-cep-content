@@ -171,7 +171,18 @@ The operator confirms, rejects, or edits each proposal before inclusion in the R
 
 ### Git Integration
 
-After successful drafting, offer to:
+Before creating the feature branch, check the state of local master:
+
+```bash
+git fetch origin master && git rev-list --left-right --count origin/master...HEAD
+```
+
+Interpret the output (`<left>\t<right>`):
+- **Right > 0** (local master has unpushed commits): Warn the operator — "Local master has N unpushed commit(s). Push them before creating the feature branch to avoid a divergent master." Do not proceed until the operator confirms they have pushed or explicitly accepts the risk.
+- **Left > 0** (local master is behind origin): Warn the operator — "Local master is N commit(s) behind origin/master. Consider pulling before branching." Offer to run `git pull --rebase origin master`.
+- **Both 0**: Proceed silently.
+
+After the check (or operator confirmation), offer to:
 1. Create a feature branch (`feature/pattern-{slug}`)
 2. Commit the draft file
 3. The operator decides — do not auto-commit without confirmation.
