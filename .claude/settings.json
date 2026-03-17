@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --import tsx scripts/validate.js *)",
+      "Bash(node scripts/check-draft.js *)",
+      "Bash(git fetch *)",
+      "Bash(git rev-list *)",
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git branch *)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git status *)",
+      "Bash(ls *)",
+      "Bash(curl -s -o /dev/null -w *)",
+      "WebFetch(domain:github.com)",
+      "WebSearch",
+      "mcp__ide__getDiagnostics"
+    ]
+  }
+}
