@@ -186,8 +186,8 @@ ro-crate-metadata.json structure:
 }
 
 Publication pathway (no server required):
-[RO-Crate directory] → GitHub Pages → static website
-[RO-Crate directory] → archival repository → persistent access
+  RO-Crate directory → GitHub Pages → static website
+  RO-Crate directory → archival repository → persistent access
 ```
 
 ### How the Issues Are Balanced
@@ -362,8 +362,8 @@ Publication pathway (no server required):
 ### Typical Sequence
 
 ```
-[Co-Located Metadata and Data (A-004)] → [RO-Crate for Research Data Packaging (I-005)]
-Architectural principle chosen              Concrete technology selected
+Co-Located Metadata and Data (A-004) → RO-Crate for Research Data Packaging (I-005)
+Architectural principle chosen             Concrete technology selected
 ```
 
 ---
