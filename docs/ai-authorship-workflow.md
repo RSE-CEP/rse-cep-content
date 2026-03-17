@@ -114,6 +114,8 @@ For each section, Claude indicates whether the content was extracted from source
 
 For gaps identified in Stage 2, Claude proposes content that is clearly marked as model-generated. The operator can accept, reject, or rewrite each proposal.
 
+**Related pattern proposals:** If published patterns exist in `drafts/pattern-index.md`, Claude matches the draft against the index using shared keywords, domains, type relationships, and semantic relevance. It presents a table of proposed related patterns with relationship types (Works Well With, Alternative Approaches, Typical Sequence) and rationale. The operator confirms or rejects each proposal before it is included in the Related Patterns section. If no published patterns exist, this step is skipped gracefully.
+
 #### Stage 4 — Output and Validation
 
 Claude writes the draft file to `drafts/patterns/{slug}.md` with structured inline annotations, then runs schema validation.
@@ -155,12 +157,9 @@ Once all annotations are removed and the content is verified:
 /publish drafts/patterns/{slug}.md
 ```
 
-The publish command runs three checks:
-1. **Schema validation** — frontmatter conforms to the Zod schema
-2. **Annotation check** — no `[EXTRACTED |` or `[ELABORATED |` markers remain
-3. **Section completeness** — all 9 essential sections are present
+The publish command runs checks including schema validation, annotation check, section completeness, URL verification, and quality review.
 
-If all checks pass, the file is moved from `drafts/patterns/` to `src/content/patterns/` and you're offered to commit.
+If all checks pass, the file is moved from `drafts/patterns/` to `src/content/patterns/`, a row is appended to the published pattern index (`drafts/pattern-index.md`) with an agent-written summary for future relationship matching, and you're offered to commit.
 
 If any check fails, the command reports what needs fixing and does not move the file.
 

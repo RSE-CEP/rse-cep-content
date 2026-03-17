@@ -108,6 +108,33 @@ For sections marked THIN or ABSENT, propose content to fill the gaps. Clearly ma
 
 Present elaboration proposals to the operator. Wait for the operator to accept, reject, or modify each proposal before proceeding. If the operator instructs you to proceed without review, combine accepted defaults and continue.
 
+#### Related Pattern Proposals
+
+After elaboration, read `drafts/pattern-index.md` to propose entries for the Related Patterns section. If the file is missing or contains no data rows, skip this step with a note: "No published patterns in the index — skipping related pattern proposals."
+
+If the index has entries, match the draft pattern against published patterns using:
+- Shared keywords or HASS domains
+- Type relationships (e.g., an Implementation pattern that implements an Architectural pattern)
+- Semantic relevance of summaries (does this pattern complement, sequence with, or offer an alternative to a published pattern?)
+
+Present a table of proposed related patterns:
+
+```
+## Related Pattern Proposals
+
+| Published Pattern | Relationship | Rationale |
+|-------------------|-------------|-----------|
+| I-001: Version Control for Research | Works Well With | Both address research data management workflows |
+| A-001: Community Access Control | Typical Sequence | Access control is often established before ... |
+```
+
+Relationship types:
+- **Works Well With** — patterns that complement each other
+- **Alternative Approaches** — patterns that address similar issues differently
+- **Typical Sequence** — patterns commonly applied before or after this one
+
+The operator confirms, rejects, or edits each proposal before inclusion in the Related Patterns section of the draft. Confirmed entries should be written into the Related Patterns body section using the pattern's title and ID, with a brief description of the relationship.
+
 ### Stage 4 — Output and Validation
 
 1. **Compose the final markdown file.** Combine frontmatter and body sections. Frontmatter must include `pattern_type` (implementation/architectural/design) and a correctly-formatted typed `pattern_id` (e.g., `I-001`, `A-003`, `D-002`). The ID prefix must match the type.

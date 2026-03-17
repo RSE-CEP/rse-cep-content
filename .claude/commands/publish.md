@@ -87,8 +87,19 @@ Report quality concerns but do not block publication for them — the operator d
    ```bash
    node --import tsx scripts/validate.js src/content/patterns/{slug}.md
    ```
-3. **Report success** with a summary of what was published
-4. **Offer to commit** — create a commit with the new pattern file. The operator decides.
+3. **Update the published pattern index** (`drafts/pattern-index.md`):
+   - If the file doesn't exist, create it with the header row:
+     ```
+     # Published Pattern Index
+
+     | ID | Type | Title | Keywords | HASS Domains | Summary |
+     |----|------|-------|----------|--------------|---------|
+     ```
+   - Append a row for the newly published pattern. The **Summary** column should be a concise one-line description you write capturing the pattern's essence — not mechanically extracted from a field, but written for semantic matching (i.e., another agent reading this summary should be able to judge whether this pattern is related to a different pattern). Keep it under ~150 characters.
+   - **Keywords** and **HASS Domains** columns should be comma-separated values from the frontmatter fields.
+   - Example row: `| I-001 | Implementation | Version Control for Research | version control, git | digital humanities, archaeology | Using Git-based version control workflows adapted for HASS research outputs and collaborative authoring |`
+4. **Report success** with a summary of what was published
+5. **Offer to commit** — create a commit with the new pattern file and the updated index. The operator decides.
 
 ## On Check Failure
 

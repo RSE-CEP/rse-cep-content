@@ -17,7 +17,7 @@ AI-assisted content pipeline prototype: source document extraction → structure
 
 ## Architecture
 
-Astro + content collections. Zod schemas in `src/content.config.ts` are the single source of truth. Validation via `scripts/validate.js` (used by CI and AI skill). GitHub Actions for PR gating and deployment. Patterns are classified by type — Implementation (I), Architectural (A), Design (D), Process (P) — see `docs/pattern_typology.md`. Type is encoded in the pattern ID (`{I|A|D|P}-NNN`) and cross-validated with `pattern_type` in the schema.
+Astro + content collections. Zod schemas in `src/content.config.ts` are the single source of truth. Validation via `scripts/validate.js` (used by CI and AI skill). GitHub Actions for PR gating and deployment. Patterns are classified by type — Implementation (I), Architectural (A), Design (D), Process (P) — see `docs/pattern_typology.md`. Type is encoded in the pattern ID (`{I|A|D|P}-NNN`) and cross-validated with `pattern_type` in the schema. A published pattern index (`drafts/pattern-index.md`) is maintained by the `/publish` command and consumed by `/draft` to propose related patterns.
 
 ## Key Constraints
 
@@ -41,8 +41,8 @@ Feature branches → PR to `master` → CI (validate + build) → merge → auto
 ## AI Authorship Commands
 
 - **`/extract`** — Mine proto-patterns from source documents. Identifies candidate patterns, matches against existing proto-patterns, creates or updates lightweight evidence files in `drafts/protopatterns/`.
-- **`/draft`** — Create a full pattern draft. Four stages: classify → extract → elaborate → validate. Accepts either a source document (from `_sources/`) or a proto-pattern (from `drafts/protopatterns/`). Outputs to `drafts/patterns/`.
-- **`/publish`** — Validate a draft and move it from `drafts/patterns/` to `src/content/patterns/`. Checks: schema validation, annotation removal, section completeness, URL verification, quality review.
+- **`/draft`** — Create a full pattern draft. Four stages: classify → extract → elaborate → validate. Accepts either a source document (from `_sources/`) or a proto-pattern (from `drafts/protopatterns/`). Reads `drafts/pattern-index.md` during elaboration to propose related patterns. Outputs to `drafts/patterns/`.
+- **`/publish`** — Validate a draft and move it from `drafts/patterns/` to `src/content/patterns/`. Checks: schema validation, annotation removal, section completeness, URL verification, quality review. On success, appends the pattern to the published pattern index (`drafts/pattern-index.md`).
 
 ### Workflow
 
