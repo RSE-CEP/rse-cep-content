@@ -319,6 +319,50 @@ Introduce an agent-maintained index of published patterns (`drafts/pattern-index
 
 ---
 
+## Phase 13 — Published Pattern Update Command
+
+Add an `/update` command for interactive editing of published patterns, with validation checks and index/cross-reference maintenance.
+
+- [ ] 13a — Create `/update` command (`.claude/commands/update.md`):
+  - Accept file path or pattern ID (resolve ID via `drafts/pattern-index.md`)
+  - Load pattern, schema, and index entry into context
+  - Interactive editing with selective annotation:
+    - Operator-directed edits (typos, URL fixes, rewordings dictated by operator) — no annotations
+    - Model-generated substantive content (new Known Uses, expanded sections, new narrative) — must use `[ELABORATED | basis: "..."]` annotations
+    - Rule: when in doubt, annotate. Bias toward caution.
+  - Exit gate on operator signal: schema validation, section completeness, annotation check via `check-draft.js` (operator must review and remove any annotations), diff-aware URL verification
+- [ ] 13b — Index sync:
+  - Detect changes to title, keywords, hass_domains, type, or pattern essence
+  - Update the corresponding row in `drafts/pattern-index.md`
+  - Rewrite summary if the pattern's nature has shifted
+- [ ] 13c — Cross-reference maintenance:
+  - If Related Patterns section changed, update back-references in affected published patterns
+  - Same logic as `/publish` cross-referencing, but operating on changes rather than new additions
+- [ ] 13d — Git integration:
+  - Offer to create feature branch and commit (pattern file, updated index, any cross-referenced patterns)
+- [ ] 13e — Update documentation:
+  - `docs/ai-authorship-workflow.md` — add update workflow section
+  - `CLAUDE.md` — add `/update` to AI Authorship Commands
+  - `implementation_plan.md` — this phase
+- [ ] 13f — Manual testing:
+  - Edit a published pattern via `/update`, verify exit gate catches a deliberately broken field
+  - Change keywords, verify index row updates
+  - Add a Related Pattern entry, verify back-reference created in the target pattern
+  - Ask model to generate new substantive content, verify it is annotated
+  - Verify exit gate blocks completion while annotations remain
+  - Remove annotations, verify exit gate passes
+
+### Design Decisions
+
+- **No return to draft.** Published patterns stay in `src/content/patterns/` throughout. Git diff is the audit trail for changes.
+- **Selective annotation.** Unlike `/draft` (everything annotated), `/update` only annotates model-generated substantive content. Operator-directed edits are not annotated — the operator is the author. When in doubt, the model annotates. The exit gate runs `check-draft.js` so annotations cannot slip through unreviewed.
+- **No quality review stage.** The pattern already passed quality review at publication.
+- **PR/CI remains the real gate.** `/update` provides convenience and prevents supporting data from silently drifting.
+
+**Done when:** `/update` loads a published pattern by path or ID, supports interactive editing with selective annotation, exit gate enforces annotation review, syncs index and cross-references on change.
+
+---
+
 ## Updating This Plan
 
 When a phase is complete:

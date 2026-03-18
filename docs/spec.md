@@ -218,7 +218,7 @@ Triggered on push to `master` (i.e. after PR merge). Builds the Astro site and d
 
 ## 7. Claude Commands
 
-Three slash commands implement the authoring pipeline:
+Four slash commands implement the authoring pipeline:
 
 ### `/extract` — Proto-Pattern Mining
 
@@ -242,11 +242,35 @@ Stages: classify source → template-aware extraction → guided elaboration →
 
 **Related pattern proposals:** During Stage 3 (guided elaboration), the `/draft` command reads the published pattern index (`drafts/pattern-index.md`) and proposes related patterns for the Related Patterns section (section 9 of the template). The index contains agent-written summaries alongside structured metadata (ID, type, keywords, domains), enabling semantic matching. Proposed relationships are presented to the operator for confirmation before inclusion.
 
-When drafting from a proto-pattern, offers to clean up the proto-pattern entry on success.
+When drafting from a proto-pattern, the proto-pattern entry is removed from the index and the file deleted after successful drafting.
 
 ### `/publish` — Publication Gate
 
 Validates a draft in `drafts/patterns/` and moves it to `src/content/patterns/`. Checks: schema validation, annotation removal, section completeness, URL verification, quality review. On successful publication, appends an entry to `drafts/pattern-index.md` with the pattern's metadata and a one-line agent-written summary.
+
+### `/update` — Published Pattern Editing
+
+Interactive editing of published patterns in `src/content/patterns/`. Accepts a file path or pattern ID (resolved via `drafts/pattern-index.md`). The pattern remains published throughout — no return to draft status.
+
+Flow:
+
+1. **Load** — Read the pattern, schema, and pattern index entry into context.
+2. **Interactive editing** — Operator describes changes. Edits applied in-place in `src/content/patterns/`. Two modes of change:
+   - **Operator-directed edits** (fix this typo, update this URL, change this date, reword this sentence to say X) — no annotations. The operator is the author of the change.
+   - **New substantive content** (add a Known Use, expand Context to cover a new topic, write a new Implementation Example) — the model annotates generated content with `[ELABORATED | basis: "..."]`, same syntax as `/draft`. The rule is: if the model is generating narrative content that wasn't explicitly dictated by the operator, it must annotate. **When in doubt, annotate.** A false positive (unnecessary annotation) costs the operator one line deletion. A false negative (unverified AI content in production) defeats the purpose of the annotation system.
+3. **Exit gate** — On operator signal, run validation checks:
+   - Schema validation
+   - Section completeness
+   - Annotation check via `scripts/check-draft.js` — if annotations remain, the operator must review and remove them before finishing, same as the `/publish` workflow
+   - URL verification on new or changed URLs only (diff-aware)
+4. **Index sync** — If title, keywords, domains, type, or the pattern's essence changed, update the corresponding row in `drafts/pattern-index.md` (including summary rewrite if warranted).
+5. **Cross-reference maintenance** — If Related Patterns changed, update back-references in affected published patterns.
+6. **Commit offer** — Feature branch and commit for PR review.
+
+Key design decisions:
+- **Annotations for generated content only.** Unlike `/draft` (where everything is annotated), `/update` only annotates model-generated substantive content. Operator-directed edits are not annotated — the operator is the author. This keeps the annotation overhead proportional to the AI contribution.
+- **No quality review stage.** The pattern already passed quality review at publication. The operator is making targeted changes.
+- **PR/CI remains the real gate.** `/update` provides convenience and prevents supporting data (index, cross-references) from silently drifting.
 
 ## 8. Source Document Management
 
