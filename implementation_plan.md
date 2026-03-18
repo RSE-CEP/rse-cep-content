@@ -346,7 +346,7 @@ Add an `/update` command for interactive editing of published patterns, with val
   - `docs/ai-authorship-workflow.md` — add update workflow section
   - `CLAUDE.md` — add `/update` to AI Authorship Commands
   - `implementation_plan.md` — this phase
-- [ ] 13f — Manual testing:
+- [x] 13f — Manual testing:
   - Edit a published pattern via `/update`, verify exit gate catches a deliberately broken field
   - Change keywords, verify index row updates
   - Add a Related Pattern entry, verify back-reference created in the target pattern
