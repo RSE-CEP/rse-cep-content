@@ -322,3 +322,4 @@ The prototype should demonstrate the full cycle with minimal but real content. S
 - [ ] Evaluate Pagefind or similar for client-side search over the built site (may be out of scope for the prototype, but good to test early)
 - [ ] Determine which Astro features to use for filtering/faceting content by metadata fields
 - [ ] Determine if prototype repo becomes the production repo or if it's throwaway
+- [ ] Batch link-rot checker — a script to scan all published patterns for broken URLs. The per-pattern URL check during `/publish` is agent-driven (and benefits from agent judgement, e.g. DOIs that resolve to unexpected destinations), but a periodic batch check across all published content would catch links that break after publication.
