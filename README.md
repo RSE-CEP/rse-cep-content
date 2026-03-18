@@ -4,7 +4,7 @@ AI-assisted content pipeline prototype for the CDL Research Software Engineering
 
 **Live site:** https://ANU-HDRH.github.io/rse-cep-proto/
 
-See [docs/spec.md](./docs/spec.md) for the full specification and [implementation_plan.md](./implementation_plan.md) for the phased build plan.
+See [docs/spec.md](./docs/spec.md) for the full specification and [docs/implementation_plan.md](./docs/implementation_plan.md) for the phased build plan.
 
 ## Prerequisites
 

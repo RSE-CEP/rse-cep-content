@@ -1,6 +1,6 @@
 # RSE-CEP Prototype — Implementation Plan
 
-**Reference:** [docs/spec.md](./docs/spec.md)
+**Reference:** [spec.md](./spec.md)
 **Status key:** `[ ]` not started · `[~]` in progress · `[x]` complete
 
 ---
@@ -169,7 +169,7 @@ Convert the Claude skill into user-invocable slash commands and establish the co
 - [x] Retire `tools/claude-skill.md` as a skill — keep as reference documentation, add archival notice
 - [x] Update `docs/ai-authorship-workflow.md` — reference `/extract` and `/publish` commands
 - [x] Update `CLAUDE.md` — add AI Authorship Commands section
-- [x] Update `implementation_plan.md` — add phases 7-9
+- [x] Update `docs/implementation_plan.md` — add phases 7-9
 
 ### Deviations
 
@@ -232,7 +232,7 @@ Add incremental pattern discovery via proto-patterns: lightweight freeform evide
   - [x] `docs/spec.md` — sections 1 (purpose), 3 (repo structure), 7 (commands), 10 (workflow)
   - [x] `CLAUDE.md` — AI Authorship Commands section
   - [x] `docs/ai-authorship-workflow.md` — proto-pattern lifecycle, renamed commands, troubleshooting
-  - [x] `implementation_plan.md` — this phase
+  - [x] `docs/implementation_plan.md` — this phase
 - [x] 10e — Verification: commands register correctly, documentation is consistent
 
 ### Deviations
@@ -270,7 +270,7 @@ Introduce a three-type classification (Implementation, Architectural, Design) as
   - [x] `docs/patterns/1 - Pattern_Definition_Guide.md` — updated Types section, reference to typology doc
   - [x] `docs/patterns/2 - Pattern_Template.md` — added Pattern Type to metadata table, updated example ID
   - [x] `CLAUDE.md` — typology in Architecture section, added typology doc to Documentation
-  - [x] `implementation_plan.md` — this phase
+  - [x] `docs/implementation_plan.md` — this phase
 
 ### Deviations
 
@@ -304,7 +304,7 @@ Introduce an agent-maintained index of published patterns (`drafts/pattern-index
   - [x] `docs/spec.md` — repo structure, `/draft` and `/publish` command descriptions
   - [x] `CLAUDE.md` — note index in Architecture section, updated `/draft` and `/publish` descriptions
   - [x] `docs/ai-authorship-workflow.md` — document related pattern proposal step in draft workflow, index update on publish
-  - [x] `implementation_plan.md` — this phase
+  - [x] `docs/implementation_plan.md` — this phase
 - [x] 12e — Manual testing:
   - Publish a pattern via `/publish`, verify row appended to `drafts/pattern-index.md` with good summary
   - Run `/draft` with published patterns present, verify related pattern proposals appear
@@ -345,7 +345,7 @@ Add an `/update` command for interactive editing of published patterns, with val
 - [x] 13e — Update documentation:
   - `docs/ai-authorship-workflow.md` — add update workflow section
   - `CLAUDE.md` — add `/update` to AI Authorship Commands
-  - `implementation_plan.md` — this phase
+  - `docs/implementation_plan.md` — this phase
 - [x] 13f — Manual testing:
   - Edit a published pattern via `/update`, verify exit gate catches a deliberately broken field
   - Change keywords, verify index row updates

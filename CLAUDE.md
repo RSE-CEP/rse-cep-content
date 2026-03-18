@@ -5,7 +5,7 @@ AI-assisted content pipeline prototype: source document extraction → structure
 ## Documentation
 
 - **[docs/spec.md](docs/spec.md)** — Project specification (authoritative reference)
-- **[implementation_plan.md](implementation_plan.md)** — Phased build plan. Update when phases complete: mark `[x]`, add completion date, note deviations.
+- **[docs/implementation_plan.md](docs/implementation_plan.md)** — Phased build plan. Update when phases complete: mark `[x]`, add completion date, note deviations.
 - **[docs/patterns/](docs/patterns/)** — Pattern content type documentation:
   - `1 - Pattern_Definition_Guide.md` — What patterns are, quality criteria, maturity levels
   - `2 - Pattern_Template.md` — **Canonical template** for pattern content. The Zod schema and site templates must reflect this structure.
