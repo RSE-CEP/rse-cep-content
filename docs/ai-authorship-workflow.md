@@ -120,7 +120,7 @@ For gaps identified in Stage 2, Claude proposes content that is clearly marked a
 
 Claude writes the draft file to `drafts/patterns/{slug}.md` with structured inline annotations, then runs schema validation.
 
-When drafting from a proto-pattern, Claude offers to remove the proto-pattern entry from the index and delete the file after successful drafting.
+When drafting from a proto-pattern, Claude automatically removes the proto-pattern entry from the index and deletes the file after successful drafting. A drafted proto-pattern must not remain in the index — "published" is a state, not a copy.
 
 ### 5. Review the draft
 

@@ -75,7 +75,7 @@ Wait for operator confirmation before proceeding.
 For each candidate, based on operator-confirmed actions:
 
 **Creating a new proto-pattern:**
-1. Assign the next available typed ID (`{I|A|D|P}-NNN`, per-type sequence from index). This is the pattern's permanent ID — it follows the pattern through draft and publication.
+1. Assign the next available typed ID by running: `node scripts/next-pattern-id.js {type}` (where `{type}` is I, A, D, or P). This script scans both the proto-pattern index and published pattern index to avoid collisions. The ID is permanent — it follows the pattern through draft and publication.
 2. Generate a kebab-case filename from the working name
 3. Create the proto-pattern file with the structure below (includes **Type** field)
 4. Add an entry to `index.md` (includes Type column)

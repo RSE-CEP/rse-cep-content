@@ -23,10 +23,10 @@ When given a path in `drafts/protopatterns/`, use the accumulated material in th
 2. **Treat accumulated notes as the source material.** The Notes section contains evidence from multiple sources — use all of it.
 3. **Optionally read original source documents** if they are referenced and available in `_sources/`.
 4. **Proceed through the 4-stage flow** as normal, using the proto-pattern's accumulated material.
-5. **After successful draft creation,** offer to clean up the proto-pattern:
+5. **After successful draft creation,** clean up the proto-pattern:
    - Remove the entry from `drafts/protopatterns/index.md`
    - Delete the proto-pattern file
-   - The operator decides — do not auto-delete without confirmation.
+   - This is mandatory — a drafted proto-pattern must not remain in the index. Report the cleanup to the operator.
 
 ## Authoritative References
 
@@ -137,7 +137,7 @@ The operator confirms, rejects, or edits each proposal before inclusion in the R
 
 ### Stage 4 — Output and Validation
 
-1. **Compose the final markdown file.** Combine frontmatter and body sections. Frontmatter must include `pattern_type` (implementation/architectural/design) and a correctly-formatted typed `pattern_id` (e.g., `I-001`, `A-003`, `D-002`). The ID prefix must match the type.
+1. **Compose the final markdown file.** Combine frontmatter and body sections. Frontmatter must include `pattern_type` (implementation/architectural/design/process) and a correctly-formatted typed `pattern_id`. When drafting from a proto-pattern, use the proto-pattern's existing ID. When drafting from a source document (direct mode), assign a new ID by running: `node scripts/next-pattern-id.js {type}`. The ID prefix must match the type.
 
 2. **Use structured annotations.** All content must use the annotation syntax:
    - Extracted content: `[EXTRACTED | source: "description" | ref: location | "key quote"]`
