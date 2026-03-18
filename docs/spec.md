@@ -330,24 +330,10 @@ REVIEW & DEPLOY:
 8.  Merge to master → deploy workflow triggers → site published to GitHub Pages
 ```
 
-## 11. Prototype Scope
+## 11. Open Questions / Future Considerations
 
-The prototype should demonstrate the full cycle with minimal but real content. Specifically:
-
-- [ ] Astro project initialised with content collections and Zod schemas (patterns only is fine for prototype)
-- [ ] At least one pattern authored via the extraction tool from a real source document
-- [ ] Validation script working locally and in CI
-- [ ] GitHub Actions: PR validation workflow (schema check + build)
-- [ ] GitHub Actions: deploy workflow to GitHub Pages on merge to master
-- [ ] Branch protection configured on master
-- [ ] Minimal site template that renders pattern content (doesn't need to be pretty, needs to work)
-- [ ] End-to-end run: author pattern → PR → CI passes → merge → site updates
-
-## 12. Open Questions / TODO
-
-- [ ] Finalise Zod schemas for all three content types (patterns, roadmap items, principles) — do collaboratively with Peter, Junran, and James
-- [ ] Define body section conventions for roadmap items and architectural principles
-- [ ] Evaluate Pagefind or similar for client-side search over the built site (may be out of scope for the prototype, but good to test early)
-- [ ] Determine which Astro features to use for filtering/faceting content by metadata fields
-- [ ] Determine if prototype repo becomes the production repo or if it's throwaway
-- [ ] Batch link-rot checker — a script to scan all published patterns for broken URLs. The per-pattern URL check during `/publish` is agent-driven (and benefits from agent judgement, e.g. DOIs that resolve to unexpected destinations), but a periodic batch check across all published content would catch links that break after publication.
+- **Roadmap and principles content types** — Zod schemas and body section conventions for roadmap items and architectural principles are deferred (out of scope for the prototype). To be finalised collaboratively with Peter, Junran, and James when that content type is needed.
+- **Client-side search** — Evaluate Pagefind or similar for full-text search over the built site.
+- **Filtering and faceting** — Determine which Astro features to use for filtering/faceting patterns by metadata fields at scale.
+- **Prototype → production** — Decide whether this repo becomes the production repo or is throwaway.
+- **Batch link-rot checker** — A script to scan all published patterns for broken URLs. The per-pattern URL check during `/publish` is agent-driven (and benefits from agent judgement, e.g. DOIs that resolve to unexpected destinations), but a periodic batch check across all published content would catch links that break after publication.
