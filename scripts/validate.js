@@ -2,60 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { glob } from 'node:fs/promises';
 import matter from 'gray-matter';
-import { z } from 'zod';
+import { z } from 'zod/v4';
+import { createPatternSchema, EXPECTED_SECTIONS } from '../src/schemas/pattern.js';
 
 // ---------------------------------------------------------------------------
-// Schema — mirrors src/content.config.ts (uses zod directly, not astro/zod)
+// Schema — shared single source of truth via src/schemas/pattern.js
 // ---------------------------------------------------------------------------
 
-const patternSchema = z
-  .object({
-    title: z.string(),
-    pattern_id: z.string().regex(/^[IADP]-\d{3}$/, 'Pattern ID must match {I|A|D|P}-NNN format'),
-    pattern_type: z.enum(['implementation', 'architectural', 'design', 'process']),
-    alternative_names: z.array(z.string()).optional(),
-    keywords: z.array(z.string()).min(1),
-    hass_domains: z.array(z.string()).min(1),
-    version: z.string().optional(),
-    author: z.string(),
-    last_updated: z.coerce.date(),
-
-    // Extraction-pipeline provenance (optional)
-    source_type: z
-      .enum([
-        'interview-transcript',
-        'talk-transcript',
-        'manual-notes',
-        'slides',
-        'mixed',
-      ])
-      .optional(),
-    source_ref: z.string().optional(),
-  })
-  .refine(
-    (data) => {
-      const prefix = data.pattern_id.charAt(0);
-      const expected = { I: 'implementation', A: 'architectural', D: 'design', P: 'process' };
-      return expected[prefix] === data.pattern_type;
-    },
-    { message: 'pattern_id prefix must match pattern_type (I=implementation, A=architectural, D=design, P=process)' },
-  );
-
-// ---------------------------------------------------------------------------
-// Expected body sections (soft warnings)
-// ---------------------------------------------------------------------------
-
-const EXPECTED_SECTIONS = [
-  'Intent',
-  'Context',
-  'Issues',
-  'Solution',
-  'Implementation Examples',
-  'Context-Specific Guidance',
-  'Consequences',
-  'Known Uses',
-  'Related Patterns',
-];
+const patternSchema = createPatternSchema(z);
 
 /**
  * Extract H2 headings from markdown body.
