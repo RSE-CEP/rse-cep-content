@@ -4,7 +4,7 @@ This document explains how the RSE-CEP project uses Claude Code for AI-assisted 
 
 ## Overview
 
-The authoring pipeline uses Claude Code (Anthropic's CLI tool for AI-assisted development) with **three slash commands** (`/extract`, `/draft`, and `/publish`) that guide AI-assisted content extraction from source documents through a discover-draft-review-publish lifecycle.
+The authoring pipeline uses Claude Code (Anthropic's CLI tool for AI-assisted development) with **four slash commands** (`/extract`, `/draft`, `/publish`, and `/update`) that guide AI-assisted content extraction from source documents through a discover-draft-review-publish-maintain lifecycle.
 
 The key principle is **extraction before elaboration**: the AI first mines content from real source material (interview transcripts, talk transcripts, notes, slides), then separately proposes content for any gaps — clearly marking what is extracted vs. generated using structured inline annotations.
 
@@ -211,6 +211,50 @@ Team members review the PR. Once CI passes and the content is approved, merge to
 - **Annotations preserve provenance** — git history of the draft shows what was extracted vs. elaborated
 - **Human verification is required** — the publish gate enforces that all annotations are removed
 
+## Updating Published Patterns
+
+Published patterns can be edited in-place using the `/update` command. This supports both operator-directed fixes and AI-assisted content additions, with an annotation system that scales to the level of AI contribution.
+
+### When to use `/update`
+
+- Fix typos, broken URLs, or outdated information
+- Add new Known Uses or Implementation Examples discovered after publication
+- Expand sections with additional context or guidance
+- Update Related Patterns as new patterns are published
+- Adjust keywords, HASS domains, or other metadata
+
+### Running `/update`
+
+```
+# By file path:
+/update src/content/patterns/co-located-metadata-and-data.md
+
+# By pattern ID:
+/update A-004
+```
+
+### Editing modes
+
+The command distinguishes two kinds of changes:
+
+- **Operator-directed edits** — when you tell Claude exactly what to change (fix this typo, update this URL, reword this to say X), no annotations are added. You are the author.
+- **Model-generated content** — when Claude generates new narrative (a new Known Use, expanded guidance, etc.), it annotates with `[ELABORATED | basis: "..."]`. You must review and remove these annotations before finishing, the same as the `/draft` review workflow.
+
+### Exit gate
+
+When you signal you're done, the command runs:
+1. Schema validation
+2. Section completeness check
+3. Annotation check — blocks if any `[ELABORATED | ...]` markers remain
+4. URL verification on new or changed URLs only
+
+### Maintenance tasks
+
+After the exit gate passes, the command automatically:
+- **Syncs the pattern index** (`drafts/pattern-index.md`) if title, keywords, domains, or the pattern's essence changed
+- **Updates cross-references** in other published patterns if Related Patterns was modified (adds or removes back-references)
+- **Offers to commit** all changed files on a feature branch
+
 ## What Claude Code Sees
 
 When Claude Code starts in this project, it reads:
@@ -219,8 +263,9 @@ When Claude Code starts in this project, it reads:
 2. **`.claude/commands/extract.md`** — the proto-pattern mining command
 3. **`.claude/commands/draft.md`** — the full pattern drafting command
 4. **`.claude/commands/publish.md`** — the publish command definition
-5. **`tools/prompt-templates/*.md`** — per-content-type templates specifying expected fields and sections
-6. **`src/content.config.ts`** — the Zod schemas (the authoritative field definitions)
+5. **`.claude/commands/update.md`** — the published pattern editing command
+6. **`tools/prompt-templates/*.md`** — per-content-type templates specifying expected fields and sections
+7. **`src/content.config.ts`** — the Zod schemas (the authoritative field definitions)
 
 The commands use `scripts/validate.js` and `scripts/check-draft.js` to verify output quality.
 
@@ -235,6 +280,8 @@ The commands use `scripts/validate.js` and `scripts/check-draft.js` to verify ou
 | Proto-pattern has too little evidence for `/draft` | Run `/extract` on more source documents to accumulate additional evidence before drafting. |
 | `/publish` fails on annotations | Run `node scripts/check-draft.js drafts/patterns/{slug}.md` to see remaining annotations. Review and delete them. |
 | `/publish` fails on missing sections | Add the missing H2 sections to the draft before re-running. |
+| `/update` exit gate blocks on annotations | Run `node scripts/check-draft.js src/content/patterns/{slug}.md` to see remaining annotations. Review each one and delete the annotation marker once verified. |
+| `/update` pattern ID not found | Check `drafts/pattern-index.md` — the pattern must have an entry in the index. If not, use the file path instead. |
 
 ## Security and Sensitivity
 

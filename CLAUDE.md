@@ -43,6 +43,7 @@ Feature branches → PR to `master` → CI (validate + build) → merge → auto
 - **`/extract`** — Mine proto-patterns from source documents. Identifies candidate patterns, matches against existing proto-patterns, creates or updates lightweight evidence files in `drafts/protopatterns/`.
 - **`/draft`** — Create a full pattern draft. Four stages: classify → extract → elaborate → validate. Accepts either a source document (from `_sources/`) or a proto-pattern (from `drafts/protopatterns/`). Reads `drafts/pattern-index.md` during elaboration to propose related patterns. Outputs to `drafts/patterns/`.
 - **`/publish`** — Validate a draft and move it from `drafts/patterns/` to `src/content/patterns/`. Checks: schema validation, annotation removal, section completeness, URL verification, quality review. On success, appends the pattern to the published pattern index (`drafts/pattern-index.md`).
+- **`/update`** — Edit a published pattern in-place. Accepts file path or pattern ID. Operator-directed edits are unannotated; model-generated substantive content uses `[ELABORATED | basis: "..."]` annotations. Exit gate enforces schema validation, section completeness, and annotation review. Syncs `drafts/pattern-index.md` and cross-references on change.
 
 ### Workflow
 
@@ -50,6 +51,8 @@ Feature branches → PR to `master` → CI (validate + build) → merge → auto
 
 **Direct drafting:** source doc in `_sources/` → `/draft` → draft with annotations → human review → `/publish` → production.
 
-Draft annotations use structured syntax: `[EXTRACTED | source: "..." | ref: ... | "quote"]` and `[ELABORATED | basis: "..."]`. All must be removed before publishing.
+**Post-publication:** `/update` for in-place editing of published patterns with selective annotation and index/cross-reference maintenance.
+
+Draft annotations use structured syntax: `[EXTRACTED | source: "..." | ref: ... | "quote"]` and `[ELABORATED | basis: "..."]`. All must be removed before publishing or finishing an update.
 
 The original skill definition (`tools/claude-skill.md`) is archived as reference.

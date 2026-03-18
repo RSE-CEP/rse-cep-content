@@ -319,6 +319,10 @@ DIRECT DRAFTING (single source, still supported):
 3.  Operator: review draft, delete annotations as verified
 4.  /publish — validate and move to production
 
+POST-PUBLICATION MAINTENANCE:
+      /update {path-or-ID} — interactive editing of published patterns
+      Agent: loads pattern → applies edits (selective annotation) → exit gate → index sync → cross-ref maintenance
+
 REVIEW & DEPLOY:
 5.  Operator: git checkout -b feature/pattern-slug → commit → push → open PR
 6.  CI: schema validation (fast) → trial Astro build (thorough)
