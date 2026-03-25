@@ -24,8 +24,8 @@ The prototype serves to:
 - **Single repo.** The AI extraction tooling, content, Astro site, and CI/CD configuration all live in one repository. No cross-project path dependencies.
 - **Schema as single source of truth.** Zod schemas defined in the Astro content collection config are the sole specification for valid content. The AI tooling does not maintain its own copy.
 - **Extraction before elaboration.** The extraction tool clearly distinguishes content mined from source material versus content proposed by the model to fill gaps.
-- **Git as the review surface.** Tool output is written directly to the content collection directory. The operator reviews via `git diff`, edits in place, and commits.
-- **PR-based quality gate.** All content enters via pull request. CI runs schema validation and a trial site build before merge is permitted.
+- **Git as the review surface.** Tool output is written to the content collection directory on a feature branch. The operator reviews via `git diff`, edits in place, and commits. Content commands (`/draft`, `/publish`) enforce a branch gate — they will not proceed on `master`.
+- **PR-based quality gate.** All content enters via pull request. CI runs schema validation and a trial site build before merge is permitted. Direct commits to `master` are not part of the workflow.
 - **Source document sensitivity.** Raw source documents (especially interview transcripts) are research participant data with consent obligations. They are stored in institutional Sharepoint, with ephemeral local copies used during extraction only.
 
 ## 3. Repo Structure
@@ -310,21 +310,23 @@ PATTERN DISCOVERY (incremental, recommended):
 3.  Repeat steps 1-2 with additional sources to accumulate evidence
 4.  When a proto-pattern has sufficient evidence:
       /draft drafts/protopatterns/slug.md — create full pattern draft from accumulated material
+      Agent: branch gate creates feature/pattern-{slug} before drafting begins
 5.  Operator: review draft, delete annotations as verified
-6.  /publish — validate and move to production
+6.  /publish — validate and move to production (branch gate enforced)
 
 DIRECT DRAFTING (single source, still supported):
 1.  Pull source document from Sharepoint → _sources/
 2.  /draft _sources/document.docx — 4-stage extraction directly to full draft
+      Agent: branch gate creates feature/pattern-{slug} before drafting begins
 3.  Operator: review draft, delete annotations as verified
-4.  /publish — validate and move to production
+4.  /publish — validate and move to production (branch gate enforced)
 
 POST-PUBLICATION MAINTENANCE:
       /update {path-or-ID} — interactive editing of published patterns
       Agent: loads pattern → applies edits (selective annotation) → exit gate → index sync → cross-ref maintenance
 
-REVIEW & DEPLOY:
-5.  Operator: git checkout -b feature/pattern-slug → commit → push → open PR
+REVIEW & DEPLOY (feature branch already exists from /draft):
+5.  Operator: commit → push → open PR
 6.  CI: schema validation (fast) → trial Astro build (thorough)
 7.  Team: review PR → approve
 8.  Merge to master → deploy workflow triggers → site published to GitHub Pages

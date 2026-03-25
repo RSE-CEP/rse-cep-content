@@ -6,6 +6,22 @@ Validate a draft pattern and move it from `drafts/patterns/` to `src/content/pat
 
 Optionally specify a draft file path. If not provided, list files in `drafts/patterns/` and ask the operator which to publish.
 
+## Pre-flight: Branch Gate
+
+**This gate is mandatory. Do not skip it. Do not proceed to publish checks until it passes.**
+
+Check the current branch:
+
+```bash
+git branch --show-current
+```
+
+**If on `master`:** Do not proceed. Warn the operator: "You are on `master`. Publishing must happen on a feature branch so changes go through PR review. Create or switch to a feature branch first (e.g., `feature/publish-{slug}`)." Do not continue until the operator is on a non-master branch.
+
+**If on a feature branch:** Proceed silently.
+
+---
+
 ## Publish Checks
 
 All checks must pass before the file can be moved to production.

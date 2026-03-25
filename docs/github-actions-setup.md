@@ -218,6 +218,58 @@ jobs:
         uses: actions/deploy-pages@v4
 ```
 
+## Migrating to a New Organisation
+
+If the repository is transferred to a different GitHub organisation (via Settings → Transfer), the workflow files and code move with the repo, but several GitHub-side settings and one code change need to be redone. Follow these steps in order.
+
+### 1. Update `astro.config.mjs`
+
+The `site` and `base` fields in `astro.config.mjs` control the URL prefix for all generated links. GitHub Pages for organisation repos serves at `https://{org}.github.io/{repo-name}/`, so these values must match the new location:
+
+```javascript
+export default defineConfig({
+  site: 'https://{new-org}.github.io',
+  base: '/{repo-name}/',
+});
+```
+
+- **`site`** — the root domain for the GitHub Pages site, derived from the org name.
+- **`base`** — the path prefix, derived from the repository name. Every generated link and asset path includes this prefix. If the repo name stays the same after transfer, `base` stays the same. If the repo is renamed, update `base` to match.
+
+Commit this change before proceeding — the deploy workflow will use it on first run.
+
+### 2. Re-enable GitHub Pages
+
+GitHub Pages settings do not transfer. On the new org's copy of the repo:
+
+1. Go to **Settings** → **Pages**
+2. Under **Source**, select **GitHub Actions**
+3. Save
+
+### 3. Set Workflow Permissions
+
+1. Go to **Settings** → **Actions** → **General**
+2. Under **Workflow permissions**, select **Read and write permissions**
+3. Save
+
+### 4. Bootstrap CI and Reconfigure Branch Protection
+
+Branch protection rules / rulesets do not transfer, and GitHub requires CI to have run at least once before its check names become searchable. Follow the same bootstrapping sequence as initial setup:
+
+1. Open a test PR targeting `master` with a trivial change
+2. Wait for CI to run — verify `Schema Validation` and `Trial Build` both appear and pass in the Actions tab
+3. Then configure branch protection (see "Configure Branch Protection" above) — the check names will now appear in the search
+
+### 5. Repoint Local Clones
+
+Anyone with a local clone needs to update their remote:
+
+```bash
+git remote set-url origin https://github.com/{new-org}/{repo-name}.git
+```
+
+GitHub provides automatic redirects from the old URL for a period after transfer, but it's best to update promptly.
+
 ## Troubleshooting
 
 | Problem | Solution |

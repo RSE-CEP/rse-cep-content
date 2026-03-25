@@ -48,6 +48,41 @@ For a worked example, see: `src/content/patterns/version-control-for-research.md
 - **Source sensitivity.** Never include file paths, Sharepoint URLs, or identifying details about research participants in the output. Use `source_ref` for human-readable provenance only.
 - **Schema is law.** The Zod schema in `src/content.config.ts` determines what passes validation. Your output must conform to it.
 
+## Pre-flight: Branch Gate
+
+**This gate is mandatory. Do not skip it. Do not proceed to Stage 1 until it passes.**
+
+Check the current branch:
+
+```bash
+git branch --show-current
+```
+
+**If on `master`:** Do not proceed. Create a feature branch before continuing:
+
+1. Check the state of local master against origin:
+   ```bash
+   git fetch origin master && git rev-list --left-right --count origin/master...HEAD
+   ```
+   - **Right > 0** (unpushed local commits): Warn the operator — "Local master has N unpushed commit(s). Push them before branching to avoid a divergent master." Do not proceed until resolved.
+   - **Left > 0** (behind origin): Warn and offer to run `git pull --rebase origin master`.
+   - **Both 0**: Proceed.
+
+2. Determine the branch name. If the pattern slug is already known (e.g., from a proto-pattern), use `feature/pattern-{slug}`. Otherwise use a temporary name like `feature/draft-wip` and rename later.
+
+3. Create and switch to the feature branch:
+   ```bash
+   git checkout -b feature/pattern-{slug}
+   ```
+
+4. Report to the operator: "Created feature branch `feature/pattern-{slug}`. Proceeding with drafting."
+
+**If already on a feature branch:** Proceed silently.
+
+**If on any other non-master branch:** Proceed, but note the branch name to the operator.
+
+---
+
 ## Extraction Flow
 
 Operate in four stages. Report your progress to the operator at each stage.
@@ -171,21 +206,7 @@ The operator confirms, rejects, or edits each proposal before inclusion in the R
 
 ### Git Integration
 
-Before creating the feature branch, check the state of local master:
-
-```bash
-git fetch origin master && git rev-list --left-right --count origin/master...HEAD
-```
-
-Interpret the output (`<left>\t<right>`):
-- **Right > 0** (local master has unpushed commits): Warn the operator — "Local master has N unpushed commit(s). Push them before creating the feature branch to avoid a divergent master." Do not proceed until the operator confirms they have pushed or explicitly accepts the risk.
-- **Left > 0** (local master is behind origin): Warn the operator — "Local master is N commit(s) behind origin/master. Consider pulling before branching." Offer to run `git pull --rebase origin master`.
-- **Both 0**: Proceed silently.
-
-After the check (or operator confirmation), offer to:
-1. Create a feature branch (`feature/pattern-{slug}`)
-2. Commit the draft file
-3. The operator decides — do not auto-commit without confirmation.
+After validation passes, commit the draft on the current feature branch (created during Pre-flight). The operator decides whether to commit — do not auto-commit without confirmation.
 
 ## Multiple Patterns
 

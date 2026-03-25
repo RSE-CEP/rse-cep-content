@@ -25,6 +25,7 @@ Astro + content collections. Zod schemas in `src/content.config.ts` are the sing
 - **Schema is code-level truth.** `src/content.config.ts` Zod schemas are what validation actually checks. They must faithfully implement the pattern template.
 - **Extraction before elaboration.** AI must distinguish extracted content from generated content.
 - **Source sensitivity.** Source documents stay in `_sources/` (gitignored) or Sharepoint. Never commit them. Use `source_ref` for human-readable provenance only.
+- **Never commit to master.** All pattern content changes (drafts, proto-patterns, published patterns) must be committed on a feature branch, never directly to `master`. The `/draft` and `/publish` commands enforce this with a branch gate — do not bypass it.
 
 ## Commands
 
