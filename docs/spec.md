@@ -258,7 +258,7 @@ Analyses a source document to identify candidate patterns and accumulate evidenc
 3. **Create or Update** — For matches: add projects and evidence to existing proto-pattern. For new: create file and index entry.
 4. **Write and Report** — Write all files, report summary (created N, updated N, total in index).
 
-Proto-patterns are freeform markdown with projects, sources table, and dated notes sections. They are not structured pattern drafts.
+Proto-patterns are freeform markdown with metadata (ID, type, description, source files, dates), projects, sources table, and dated notes sections. They are not structured pattern drafts. The `Source files:` metadata field lists the `_sources/` paths that were mined, giving `/draft` machine-readable pointers for `ptr:` annotations. Since proto-patterns are gitignored, they may include paraphrased source text, quotes, and file paths — the only restriction is no identifying details about research participants.
 
 ### `/draft` — Full Pattern Drafting
 

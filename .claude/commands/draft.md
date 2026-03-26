@@ -20,9 +20,10 @@ When given a path in `_sources/`, operate exactly as described in the Extraction
 When given a path in `_local/protopatterns/`, use the accumulated material in the proto-pattern file as the primary source for the 4-stage flow:
 
 1. **Read the proto-pattern file.** It contains projects, sources, and freeform notes accumulated across multiple `/extract` runs.
-2. **Treat accumulated notes as the source material.** The Notes section contains evidence from multiple sources — use all of it.
-3. **Optionally read original source documents** if they are referenced and available in `_sources/`.
-4. **Proceed through the 4-stage flow** as normal, using the proto-pattern's accumulated material.
+2. **Resolve source files.** Read the `**Source files:**` field from the proto-pattern metadata. This lists the `_sources/` paths needed for `ptr:` annotations. **Error early if any listed file does not exist in `_sources/`** — report the missing file(s) and stop.
+3. **Treat accumulated notes as the source material.** The Notes section contains evidence from multiple sources — use all of it.
+4. **Read the original source documents** listed in the `Source files:` field. These are needed to create accurate `ptr:` annotations with line numbers during Stage 4.
+5. **Proceed through the 4-stage flow** as normal, using the proto-pattern's accumulated material and the resolved source files for `ptr:` references.
 5. **After successful draft creation,** clean up the proto-pattern:
    - Remove the entry from `_local/protopatterns/index.md`
    - Delete the proto-pattern file

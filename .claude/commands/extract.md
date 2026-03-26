@@ -14,7 +14,7 @@ The operator should specify:
 - **Discovery, not drafting.** This command identifies and accumulates evidence for patterns. It does not produce full pattern drafts — use `/draft` for that.
 - **Freeform notes.** Proto-patterns are lightweight sketches, not structured templates. Capture evidence and observations without forcing them into the pattern template.
 - **Incremental accumulation.** Each `/extract` run may add new projects and evidence to existing proto-patterns. The value grows over multiple sources.
-- **No source content in output.** Never include quoted or paraphrased source text, file paths, Sharepoint URLs, or identifying details about research participants in proto-pattern files. Use `source_ref` for human-readable provenance only. Describe what the source contributes in your own words.
+- **Proto-patterns are local-only.** Since proto-patterns live in `_local/` (gitignored), they may include paraphrased source text, quotes, `_sources/` file paths, and other source-derived content. This makes them richer working notes for `/draft`. The only restriction: never include identifying details about research participants (names, roles that identify individuals).
 
 ## Extraction Flow
 
@@ -79,7 +79,7 @@ For each candidate, based on operator-confirmed actions:
 **Creating a new proto-pattern:**
 1. Assign the next available typed ID by running: `node scripts/next-pattern-id.js {type}` (where `{type}` is I, A, D, or P). This script scans both the proto-pattern index and published pattern index to avoid collisions. The ID is permanent — it follows the pattern through draft and publication.
 2. Generate a kebab-case filename from the working name
-3. Create the proto-pattern file with the structure below (includes **Type** field)
+3. Create the proto-pattern file with the structure below (includes **Type** and **Source files** fields). Populate **Source files:** with the `_sources/` path of the document being mined.
 4. Add an entry to `index.md` (includes Type column)
 
 **Updating an existing proto-pattern:**
@@ -87,7 +87,8 @@ For each candidate, based on operator-confirmed actions:
 2. Add new projects to the Projects section
 3. Add a new source entry to the Sources table
 4. Add new notes under a dated heading in the Notes section
-5. Update `last_updated` and `project_count` in both the file and `index.md`
+5. Update the **Source files:** field — append the new `_sources/` path if not already listed (comma-separated)
+6. Update `last_updated` and `project_count` in both the file and `index.md`
 
 Present the proposed changes to the operator before writing.
 
@@ -144,6 +145,7 @@ This is advisory only — the operator decides when to draft.
 **ID:** {I|A|D|P}-NNN
 **Type:** Implementation | Architectural | Design | Process
 **Description:** One or two sentences.
+**Source files:** _sources/filename.txt
 **Created:** YYYY-MM-DD
 **Last updated:** YYYY-MM-DD
 
@@ -178,7 +180,6 @@ When creating or updating proto-patterns, add or modify rows in this table. Keep
 
 - Do not produce full pattern drafts — that is `/draft`'s job.
 - Do not force proto-pattern notes into the formal pattern template structure.
-- Do not commit source documents or include source file paths in output.
-- Do not include identifying details about research participants.
+- Do not include identifying details about research participants (names, roles that identify individuals) — even in gitignored proto-patterns.
 - Do not auto-merge candidates with existing entries without operator confirmation.
 - Do not skip the matching step — always check the index for existing entries.
