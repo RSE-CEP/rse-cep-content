@@ -386,6 +386,12 @@ Migrate EXTRACTED annotations from embedded quotes to pointer-based references. 
   - §8: add Text Renditions subsection, Anonymised Source Filenames subsection
 - [ ] 14e — Update `CLAUDE.md`:
   - Update annotation syntax in Key Constraints and AI Authorship Commands sections
+- [ ] 14f — Manual testing:
+  - Run `check-draft.js` against a draft containing new-format EXTRACTED annotations — verify detected and counted
+  - Run `check-draft.js` against a draft containing old-format EXTRACTED annotations (embedded quote) — verify still detected or flagged
+  - Run `check-draft.js` against a clean file (no annotations) — verify passes
+  - Run `/draft` against a source document in `_sources/` — verify EXTRACTED annotations use pointer syntax, no embedded quotes, `.txt` rendition created
+  - Run `/publish` against a draft with new-format annotations remaining — verify it blocks
 
 ### Design Decisions
 
@@ -419,6 +425,17 @@ A local Node.js web interface for reviewing draft annotations. Resolves source p
   - Add review tool to Development section
 - [ ] 15e — Update `docs/spec.md`:
   - §10: update operator workflow to reference `npm run review` as annotation review step
+
+- [ ] 15f — Manual testing:
+  - `npm run review` starts server on port 4323
+  - Browser UI lists draft files from `drafts/patterns/`
+  - Selecting a draft shows annotations with progress indicator
+  - EXTRACTED annotation: source panel resolves pointer and displays source context with buffer lines
+  - EXTRACTED annotation with missing/invalid pointer: source panel shows clear error
+  - *Accept & clear*: annotation marker removed from file, content preserved
+  - *Edit content*: inline editor works, edited content + annotation removal written to file
+  - *Skip*: moves to next annotation, skipped annotation remains in file
+  - Reopening a partially reviewed draft resumes from first remaining annotation
 
 ### Implementation Notes
 
