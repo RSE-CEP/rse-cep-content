@@ -1,6 +1,8 @@
 # /extract — Mine Proto-Patterns from Source Material
 
-Analyse a source document in `_sources/` to identify candidate patterns, then create or update proto-pattern files in `drafts/protopatterns/`.
+Analyse a source document in `_sources/` to identify candidate patterns, then create or update proto-pattern files in `_local/protopatterns/`.
+
+**Local-only output.** Proto-patterns are stored in `_local/protopatterns/` (gitignored). They are your working notes, not shared artefacts. The person who extracts should be the person who drafts.
 
 ## Arguments
 
@@ -10,9 +12,9 @@ The operator should specify:
 ## Key Principles
 
 - **Discovery, not drafting.** This command identifies and accumulates evidence for patterns. It does not produce full pattern drafts — use `/draft` for that.
-- **Freeform notes.** Proto-patterns are lightweight sketches, not structured templates. Capture evidence, quotes, and observations without forcing them into the pattern template.
+- **Freeform notes.** Proto-patterns are lightweight sketches, not structured templates. Capture evidence and observations without forcing them into the pattern template.
 - **Incremental accumulation.** Each `/extract` run may add new projects and evidence to existing proto-patterns. The value grows over multiple sources.
-- **Source sensitivity.** Never include file paths, Sharepoint URLs, or identifying details about research participants. Use `source_ref` for human-readable provenance only.
+- **No source content in output.** Never include quoted or paraphrased source text, file paths, Sharepoint URLs, or identifying details about research participants in proto-pattern files. Use `source_ref` for human-readable provenance only. Describe what the source contributes in your own words.
 
 ## Extraction Flow
 
@@ -47,7 +49,7 @@ Wait for operator confirmation before proceeding.
 
 ### Stage 2 — Index Matching
 
-Load `drafts/protopatterns/index.md`. For each confirmed candidate, perform semantic matching against existing proto-pattern entries:
+Load `_local/protopatterns/index.md`. For each confirmed candidate, perform semantic matching against existing proto-pattern entries:
 
 - Compare names, descriptions, and subject matter
 - A match means the candidate is describing the same pattern as an existing entry (even if the name differs)
@@ -103,7 +105,7 @@ Report summary:
 - **Total in index:** N proto-patterns
 
 ### New
-- {I|A|D|P}-NNN: "Name" (type) → drafts/protopatterns/slug.md
+- {I|A|D|P}-NNN: "Name" (type) → _local/protopatterns/slug.md
 
 ### Updated
 - {I|A|D|P}-NNN: "Name" (type) — added N projects, N notes

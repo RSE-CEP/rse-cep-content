@@ -12,8 +12,10 @@ All patterns are classified by type — **Implementation (I)**, **Architectural 
 
 ### Two Paths to a Pattern
 
-- **Incremental (recommended):** Run `/extract` on multiple source documents to build up proto-patterns — lightweight evidence sketches in `drafts/protopatterns/`. When a proto-pattern has enough evidence, run `/draft` to create a full pattern draft.
+- **Incremental (recommended):** Run `/extract` on multiple source documents to build up proto-patterns — lightweight evidence sketches in `_local/protopatterns/` (gitignored). When a proto-pattern has enough evidence, run `/draft` to create a full pattern draft.
 - **Direct:** Run `/draft` directly on a single source document to create a full draft in one step. Best when a single source is rich enough for a complete pattern.
+
+**Local-first model (v1):** Proto-patterns and annotated drafts are user-local (gitignored). The person who extracts is the person who drafts. Clean drafts are exported to `drafts/patterns/` for commit and PR review. Nothing with `ptr:` annotations or source-derived content is ever committed.
 
 ## Prerequisites
 
@@ -59,7 +61,7 @@ Claude reads the source and identifies candidate patterns — recurring practice
 
 #### Stage 2 — Index Matching
 
-Claude compares candidates against existing proto-patterns in `drafts/protopatterns/index.md` and presents a match table for your confirmation.
+Claude compares candidates against existing proto-patterns in `_local/protopatterns/index.md` and presents a match table for your confirmation.
 
 #### Stage 3 — Create or Update
 
@@ -79,7 +81,7 @@ When a proto-pattern has sufficient evidence, or when working directly from a si
 
 ```
 # From a proto-pattern (incremental path):
-/draft drafts/protopatterns/ner-newspapers.md
+/draft _local/protopatterns/ner-newspapers.md
 
 # From a source document (direct path):
 /draft _sources/interview-j-example-2026-02-15.docx
@@ -118,13 +120,26 @@ For gaps identified in Stage 2, Claude proposes content that is clearly marked a
 
 #### Stage 4 — Output and Validation
 
-Claude writes the draft file to `drafts/patterns/{slug}.md` with structured inline annotations, then runs schema validation.
+Claude writes the annotated draft to `_local/drafts/{slug}.md` (gitignored) with structured inline annotations and `ptr:` references to source files, then runs schema validation.
 
-When drafting from a proto-pattern, Claude automatically removes the proto-pattern entry from the index and deletes the file after successful drafting. A drafted proto-pattern must not remain in the index — "published" is a state, not a copy.
+When drafting from a proto-pattern, Claude automatically removes the proto-pattern entry from the index and deletes the file after successful drafting.
+
+#### Stage 5 — Export Gate
+
+The annotated draft in `_local/drafts/` contains annotations referencing your local `_sources/`. Before committing:
+
+1. **Verify annotations** — check `ptr:` ranges against source files
+2. **Strip annotations** — remove all `[EXTRACTED | ...]` and `[ELABORATED | ...]` markers
+3. **Copy to repo** — move the clean draft to `drafts/patterns/{slug}.md`
+4. **Commit** on the feature branch
+
+You can ask Claude to perform the export, or do it manually. Run `node scripts/check-draft.js drafts/patterns/{slug}.md` to confirm no annotations remain.
+
+A review tool to automate annotation verification and stripping is planned but not yet implemented. The manual process is sufficient for v1.
 
 ### 5. Review the draft
 
-The draft file in `drafts/patterns/` contains **inline annotations** marking the provenance of every piece of content:
+The annotated draft in `_local/drafts/` contains **inline annotations** marking the provenance of every piece of content:
 
 ```markdown
 [EXTRACTED | source: "Interview with J. Example" | ref: Q3 response | "exact quote from source"]
@@ -144,7 +159,7 @@ Note: It is *crucial* to disable Copilot or any other generative tools that make
 You can check your progress at any time:
 
 ```bash
-node scripts/check-draft.js drafts/patterns/{slug}.md
+node scripts/check-draft.js _local/drafts/{slug}.md
 ```
 
 This reports how many annotations remain and where they are.
@@ -182,19 +197,19 @@ Team members review the PR. Once CI passes and the content is approved, merge to
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│ Proto-Pattern Accumulation                                          │
+│ Proto-Pattern Accumulation (LOCAL — gitignored)                      │
 │                                                                     │
-│  _sources/doc1.docx ──→ /extract ──→ protopatterns/slug.md  ◄──┐    │
-│  _sources/doc2.docx ──→ /extract ──→ (updates existing)        │    │
-│  _sources/doc3.docx ──→ /extract ──────────────────────────────┘    │
+│  _sources/doc1.docx ──→ /extract ──→ _local/protopatterns/slug.md ◄─┐│
+│  _sources/doc2.docx ──→ /extract ──→ (updates existing)             ││
+│  _sources/doc3.docx ──→ /extract ─────────────────────────────────┘│
 │                                                                     │
 └──────────────────────────────┬──────────────────────────────────────┘
                                │
                      /draft (from proto-pattern)
                                │
                                ▼
-                  drafts/patterns/slug.md ──→ review ──→ /publish ──→ src/content/patterns/slug.md
-                  (with annotations)          (verify)                 (production)
+                  _local/drafts/slug.md ──→ verify & strip ──→ drafts/patterns/slug.md ──→ /publish ──→ src/content/patterns/
+                  (annotated, local)         (export gate)       (clean, committed)                      (production)
 ```
 
 ## Direct Draft Lifecycle
@@ -202,13 +217,15 @@ Team members review the PR. Once CI passes and the content is approved, merge to
 | Step | Output | Notes |
 |------|--------|-------|
 | `_sources/doc.docx` | — | Source document |
-| `/draft` | `drafts/patterns/slug.md` | With inline annotations |
-| Human review | (same file, edited) | Verify and delete annotations |
+| `/draft` | `_local/drafts/slug.md` | Annotated draft (gitignored) |
+| Human review | (same file, edited) | Verify annotations against sources |
+| Export gate | `drafts/patterns/slug.md` | Strip annotations, copy to repo |
 | `/publish` | `src/content/patterns/slug.md` | Production |
 
 - **Proto-patterns** are freeform evidence sketches — they accumulate material from multiple sources before a full draft is created
-- **Drafts are committed to git** — they are tracked work-in-progress, not ephemeral
-- **Annotations preserve provenance** — git history of the draft shows what was extracted vs. elaborated
+- **Proto-patterns and annotated drafts are local** — they live in `_local/` (gitignored), never committed
+- **Clean drafts are committed** — annotations are stripped before export to `drafts/patterns/`
+- **Annotations preserve provenance** — the annotated copy in `_local/drafts/` shows what was extracted vs. elaborated
 - **Human verification is required** — the publish gate enforces that all annotations are removed
 
 ## Updating Published Patterns

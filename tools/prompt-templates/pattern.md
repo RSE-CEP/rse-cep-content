@@ -10,7 +10,7 @@ All pattern files must include YAML frontmatter with these fields:
 ---
 # Required fields
 title: "Human-readable pattern title"
-pattern_id: RSE-HASS-NNN        # Unique identifier
+pattern_id: I-001                # Typed ID: {I|A|D|P}-NNN
 keywords:                        # At least one discovery tag
   - keyword-one
   - keyword-two
@@ -83,14 +83,42 @@ The markdown body must follow the pattern template structure. Essential sections
 
 ## Extraction Provenance Conventions
 
-When extracting content, track provenance at the section level:
+When extracting content, track provenance at the section level using structured annotations:
 
-- **[EXTRACTED]** — Content directly sourced from the input document. Include a brief citation of where in the source it came from.
-- **[ELABORATED]** — Content proposed by the AI to fill gaps. Clearly marked for operator review.
-- **[ABSENT]** — Section where the source document provides no relevant content. Left minimal or empty for operator to fill.
+### EXTRACTED — Pointer-based source reference
+
+```
+[EXTRACTED | source: "identifier" | ptr: "_sources/filename.txt:startline:endline" | basis: "short description"]
+```
+
+| Field | Description |
+|-------|-------------|
+| `source` | Human-readable source identifier (safe to commit — no participant names, no identifying file paths) |
+| `ptr` | Pointer to text rendition: repo-relative `.txt` file path, colon-separated start and end line numbers (1-indexed, inclusive) |
+| `basis` | Short description of extracted content (~100 chars max, no quotation marks around source text). This is a summary, not a quote. |
+
+**Rules:**
+- Do not embed quoted or paraphrased source text in EXTRACTED annotations
+- Record line ranges at the time of reading the source document
+- Prefer generous line ranges (more context rather than less)
+- A `.txt` rendition of the source must exist in `_sources/` before writing pointers
+
+### ELABORATED — AI-generated content
+
+```
+[ELABORATED | basis: "reason for elaboration"]
+```
+
+Content proposed by the AI to fill gaps. Clearly marked for operator review.
+
+### ABSENT
+
+Section where the source document provides no relevant content. Left minimal or empty for operator to fill.
 
 ## Output Path
 
-Pattern files are written to: `src/content/patterns/{slug}.md`
+Draft pattern files are written to: `drafts/patterns/{slug}.md`
+
+Published patterns live in: `src/content/patterns/{slug}.md`
 
 Where `{slug}` is a kebab-case version of the pattern name (e.g., `named-entity-recognition-historical-newspapers.md`).

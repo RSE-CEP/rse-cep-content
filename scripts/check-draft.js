@@ -11,6 +11,10 @@ import path from 'node:path';
 
 const ANNOTATION_RE = /\[(EXTRACTED|ELABORATED)\s*\|/g;
 
+// Lint: flag EXTRACTED annotations where basis looks like it contains a quote
+// (longer than ~100 chars or contains quotation marks)
+const EXTRACTED_BASIS_RE = /\[EXTRACTED\s*\|[\s\S]*?basis:\s*"([^"]*?)"\s*\]/g;
+
 function checkFile(filePath) {
   const resolved = path.resolve(filePath);
   if (!fs.existsSync(resolved)) {
@@ -21,6 +25,7 @@ function checkFile(filePath) {
   const content = fs.readFileSync(resolved, 'utf-8');
   const lines = content.split('\n');
   const annotations = [];
+  const warnings = [];
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -33,12 +38,41 @@ function checkFile(filePath) {
         text: line.trim(),
       });
     }
+
+    // Lint EXTRACTED basis fields for potential embedded quotes
+    EXTRACTED_BASIS_RE.lastIndex = 0;
+    let basisMatch;
+    while ((basisMatch = EXTRACTED_BASIS_RE.exec(line)) !== null) {
+      const basis = basisMatch[1];
+      if (basis.length > 100) {
+        warnings.push({
+          line: i + 1,
+          msg: `basis field is ${basis.length} chars (>100) — may contain embedded source text`,
+        });
+      }
+      if (/['\u2018\u2019\u201C\u201D]/.test(basis)) {
+        warnings.push({
+          line: i + 1,
+          msg: `basis field contains quotation marks — should be a summary, not a quote`,
+        });
+      }
+    }
   }
 
   const relativePath = path.relative(process.cwd(), resolved);
 
-  if (annotations.length === 0) {
+  if (annotations.length === 0 && warnings.length === 0) {
     console.log(`✓ ${relativePath} — no annotations found (ready to publish)`);
+    return 0;
+  }
+
+  if (annotations.length === 0 && warnings.length > 0) {
+    console.log(`✓ ${relativePath} — no annotations found (ready to publish)`);
+    // Still show warnings even if no annotations remain
+    console.log(`  ⚠ ${warnings.length} lint warning(s):\n`);
+    for (const w of warnings) {
+      console.log(`  line ${w.line}: ${w.msg}`);
+    }
     return 0;
   }
 
@@ -52,6 +86,13 @@ function checkFile(filePath) {
 
   for (const ann of annotations) {
     console.log(`  line ${ann.line} [${ann.type}]: ${ann.text}`);
+  }
+
+  if (warnings.length > 0) {
+    console.log(`\n  ⚠ ${warnings.length} lint warning(s):\n`);
+    for (const w of warnings) {
+      console.log(`  line ${w.line}: ${w.msg}`);
+    }
   }
 
   return 1;

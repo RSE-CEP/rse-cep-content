@@ -17,15 +17,16 @@ AI-assisted content pipeline prototype: source document extraction → structure
 
 ## Architecture
 
-Astro + content collections. Zod schemas in `src/content.config.ts` are the single source of truth. Validation via `scripts/validate.js` (used by CI and AI skill). GitHub Actions for PR gating and deployment. Patterns are classified by type — Implementation (I), Architectural (A), Design (D), Process (P) — see `docs/pattern_typology.md`. Type is encoded in the pattern ID (`{I|A|D|P}-NNN`) and cross-validated with `pattern_type` in the schema. A published pattern index (`drafts/pattern-index.md`) is maintained by the `/publish` command and consumed by `/draft` to propose related patterns.
+Astro + content collections. Zod schemas in `src/content.config.ts` are the single source of truth. Validation via `scripts/validate.js` (used by CI and AI skill). GitHub Actions for PR gating and deployment. Patterns are classified by type — Implementation (I), Architectural (A), Design (D), Process (P) — see `docs/pattern_typology.md`. Type is encoded in the pattern ID (`{I|A|D|P}-NNN`) and cross-validated with `pattern_type` in the schema. A published pattern index (`drafts/pattern-index.md`) is maintained by the `/publish` command and consumed by `/draft` to propose related patterns. **Local-first workflow:** proto-patterns and annotated drafts live in `_local/` (gitignored); clean drafts are exported to `drafts/patterns/` for commit.
 
 ## Key Constraints
 
 - **Pattern template is authoritative.** `docs/patterns/2 - Pattern_Template.md` defines the pattern structure. The Zod schema, validation, and site templates derive from it.
 - **Schema is code-level truth.** `src/content.config.ts` Zod schemas are what validation actually checks. They must faithfully implement the pattern template.
 - **Extraction before elaboration.** AI must distinguish extracted content from generated content.
-- **Source sensitivity.** Source documents stay in `_sources/` (gitignored) or Sharepoint. Never commit them. Use `source_ref` for human-readable provenance only.
-- **Never commit to master.** All pattern content changes (drafts, proto-patterns, published patterns) must be committed on a feature branch, never directly to `master`. The `/draft` and `/publish` commands enforce this with a branch gate — do not bypass it.
+- **Source sensitivity.** Source documents stay in `_sources/` (gitignored) or Sharepoint. Never commit them. Use `source_ref` for human-readable provenance only. EXTRACTED annotations use pointers to text renditions — never embed quoted source text in draft files. Interview transcript filenames must be anonymised (date-based, no participant names).
+- **Local-first extraction.** Proto-patterns (`_local/protopatterns/`) and annotated drafts (`_local/drafts/`) are gitignored. Nothing with `ptr:` annotations or source-derived content is ever committed. Clean drafts are exported to `drafts/patterns/` after annotation stripping.
+- **Never commit to master.** All pattern content changes (drafts, published patterns) must be committed on a feature branch, never directly to `master`. The `/draft` and `/publish` commands enforce this with a branch gate — do not bypass it.
 
 ## Commands
 
@@ -41,19 +42,19 @@ Feature branches → PR to `master` → CI (validate + build) → merge → auto
 
 ## AI Authorship Commands
 
-- **`/extract`** — Mine proto-patterns from source documents. Identifies candidate patterns, matches against existing proto-patterns, creates or updates lightweight evidence files in `drafts/protopatterns/`.
-- **`/draft`** — Create a full pattern draft. Four stages: classify → extract → elaborate → validate. Accepts either a source document (from `_sources/`) or a proto-pattern (from `drafts/protopatterns/`). Reads `drafts/pattern-index.md` during elaboration to propose related patterns. Outputs to `drafts/patterns/`.
-- **`/publish`** — Validate a draft and move it from `drafts/patterns/` to `src/content/patterns/`. Checks: schema validation, annotation removal, section completeness, URL verification, quality review. On success, appends the pattern to the published pattern index (`drafts/pattern-index.md`).
+- **`/extract`** — Mine proto-patterns from source documents. Identifies candidate patterns, matches against existing proto-patterns, creates or updates lightweight evidence files in `_local/protopatterns/` (gitignored).
+- **`/draft`** — Create a full pattern draft. Five stages: classify → extract → elaborate → validate → export gate. Accepts either a source document (from `_sources/`) or a proto-pattern (from `_local/protopatterns/`). Reads `drafts/pattern-index.md` during elaboration to propose related patterns. Annotated draft to `_local/drafts/` (gitignored); clean export to `drafts/patterns/`.
+- **`/publish`** — Validate a draft and move it from `drafts/patterns/` to `src/content/patterns/`. Pre-flight annotation check blocks if annotations remain. Checks: schema validation, annotation removal, section completeness, URL verification, quality review. On success, appends the pattern to the published pattern index (`drafts/pattern-index.md`).
 - **`/update`** — Edit a published pattern in-place. Accepts file path or pattern ID. Operator-directed edits are unannotated; model-generated substantive content uses `[ELABORATED | basis: "..."]` annotations. Exit gate enforces schema validation, section completeness, and annotation review. Syncs `drafts/pattern-index.md` and cross-references on change.
 
 ### Workflow
 
-**Via proto-patterns (incremental):** source docs → `/extract` → proto-pattern(s) accumulate evidence → `/draft` from proto-pattern → draft with annotations → human review → `/publish` → production.
+**Via proto-patterns (incremental):** source docs → `/extract` → proto-patterns in `_local/protopatterns/` → `/draft` → annotated draft in `_local/drafts/` → verify & strip annotations → export to `drafts/patterns/` → `/publish` → production.
 
-**Direct drafting:** source doc in `_sources/` → `/draft` → draft with annotations → human review → `/publish` → production.
+**Direct drafting:** source doc in `_sources/` → `/draft` → annotated draft in `_local/drafts/` → verify & strip annotations → export to `drafts/patterns/` → `/publish` → production.
 
 **Post-publication:** `/update` for in-place editing of published patterns with selective annotation and index/cross-reference maintenance.
 
-Draft annotations use structured syntax: `[EXTRACTED | source: "..." | ref: ... | "quote"]` and `[ELABORATED | basis: "..."]`. All must be removed before publishing or finishing an update.
+Draft annotations use structured syntax: `[EXTRACTED | source: "..." | ptr: "_sources/file.txt:start:end" | basis: "short description"]` and `[ELABORATED | basis: "..."]`. EXTRACTED annotations use pointers to text renditions in `_sources/` — no quoted source text is embedded in drafts. All annotations must be removed before publishing or finishing an update.
 
 The original skill definition (`tools/claude-skill.md`) is archived as reference.

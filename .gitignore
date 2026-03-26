@@ -24,3 +24,6 @@ pnpm-debug.log*
 
 # Source documents — sensitive research data, never commit
 _sources/
+
+# Local working files — proto-patterns, annotated drafts (user-local, never commit)
+_local/

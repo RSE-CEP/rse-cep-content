@@ -367,31 +367,38 @@ Add an `/update` command for interactive editing of published patterns, with val
 
 ## Phase 14 — Source Pointer Annotation Format
 
+**Completed:** 2026-03-26
+
 Migrate EXTRACTED annotations from embedded quotes to pointer-based references. Sensitive source content stays in `_sources/` (gitignored), never in draft files. See `docs/change-spec-source-pointer-review-tool.md` for full rationale.
 
-- [ ] 14a — Update `/draft` command (`.claude/commands/draft.md`):
+- [x] 14a — Update `/draft` command (`.claude/commands/draft.md`):
   - Stage 4: new EXTRACTED annotation syntax with `ptr` field (file + line range) replacing embedded quotes
   - Instruction: ensure `.txt` rendition exists in `_sources/` before writing pointers
   - Instruction: record line ranges at time of reading, never embed quoted/paraphrased source text
   - `basis` field is a short description only (not a quote)
-- [ ] 14b — Update `tools/prompt-templates/pattern.md`:
+- [x] 14b — Update `tools/prompt-templates/pattern.md`:
   - Update Extraction Provenance Conventions section with new pointer syntax
-- [ ] 14c — Update `scripts/check-draft.js`:
+- [x] 14c — Update `scripts/check-draft.js`:
   - Update annotation detection regex to match new EXTRACTED format (pointer-based)
   - Add optional lint: flag `basis` fields longer than ~100 chars or containing quotation marks
-- [ ] 14d — Update `docs/spec.md`:
-  - §3: add `check-draft.js` and `review-server.js` to repo structure
+- [x] 14d — Update `docs/spec.md`:
+  - §3: add `check-draft.js` to repo structure
   - §4: add Draft Annotation Syntax section with pointer-based EXTRACTED format
   - §7: update `/draft` Stage 4 description with text rendition and pointer workflow
   - §8: add Text Renditions subsection, Anonymised Source Filenames subsection
-- [ ] 14e — Update `CLAUDE.md`:
+- [x] 14e — Update `CLAUDE.md`:
   - Update annotation syntax in Key Constraints and AI Authorship Commands sections
 - [ ] 14f — Manual testing:
   - Run `check-draft.js` against a draft containing new-format EXTRACTED annotations — verify detected and counted
-  - Run `check-draft.js` against a draft containing old-format EXTRACTED annotations (embedded quote) — verify still detected or flagged
   - Run `check-draft.js` against a clean file (no annotations) — verify passes
   - Run `/draft` against a source document in `_sources/` — verify EXTRACTED annotations use pointer syntax, no embedded quotes, `.txt` rendition created
   - Run `/publish` against a draft with new-format annotations remaining — verify it blocks
+
+### Deviations
+
+- **`review-server.js` not added to §3 repo structure.** The change spec listed it for 14d, but the review server is a Phase 15 deliverable. Added `check-draft.js` only — `review-server.js` will be added in Phase 15.
+- **Prompt template output path corrected.** `tools/prompt-templates/pattern.md` still pointed to `src/content/patterns/` as the output path. Updated to reflect the draft/publish split (`drafts/patterns/` for drafts, `src/content/patterns/` for published).
+- **Prompt template `pattern_id` format updated.** The frontmatter example still used the old `RSE-HASS-NNN` format. Updated to `I-001` typed format.
 
 ### Design Decisions
 
@@ -403,14 +410,92 @@ Migrate EXTRACTED annotations from embedded quotes to pointer-based references. 
 
 ---
 
-## Phase 15 — Draft Review Tool
+## Phase 15 — Local-First Extraction & Drafting Workflow
 
-A local Node.js web interface for reviewing draft annotations. Resolves source pointers to display context on demand, writes annotation removals back to the markdown file.
+**Completed:** 2026-03-26
 
-- [ ] 15a — Create `scripts/review-server.js`:
+Restructure the extraction and drafting pipeline so that proto-patterns and annotated drafts are user-local (gitignored), not committed to the repo. Solves source locality, protopattern leakage, and multi-user complexity problems identified during Phase 14 testing. See `docs/change-local-first_extraction.md` for full rationale.
+
+- [x] 15a — Create `_local/` directory structure:
+  - Create `_local/protopatterns/` with empty `index.md`
+  - Create `_local/drafts/`
+  - Add `_local/` to `.gitignore`
+  - Delete `drafts/protopatterns/` directory (move any existing content to `_local/protopatterns/` first)
+
+- [x] 15b — Update `/extract` command (`.claude/commands/extract.md`):
+  - Change all output paths from `drafts/protopatterns/` to `_local/protopatterns/`
+  - Change index path from `drafts/protopatterns/index.md` to `_local/protopatterns/index.md`
+  - Add local-only note to preamble: proto-patterns are user-local working notes, not shared artefacts
+  - Reinforce instruction: no source content (quotes, paraphrases) in proto-pattern files
+
+- [x] 15c — Update `/draft` command (`.claude/commands/draft.md`):
+  - Change output path from `drafts/patterns/{slug}.md` to `_local/drafts/{slug}.md`
+  - Change proto-pattern input path from `drafts/protopatterns/` to `_local/protopatterns/`
+  - Update proto-pattern cleanup paths (`_local/protopatterns/index.md`, `_local/protopatterns/{file}.md`)
+  - Add Stage 5 — Export Gate:
+    1. Verify annotations: operator checks `ptr:` ranges against source files
+    2. Strip annotations: remove all `[EXTRACTED | ...]` and `[ELABORATED | ...]` markers
+    3. Copy to repo: move clean draft to `drafts/patterns/{slug}.md`
+    4. Commit on feature branch
+    5. Report export checklist to operator (including `check-draft.js` verification command)
+  - Update Pre-flight Branch Gate: commits happen to `drafts/patterns/`, not `_local/drafts/`
+
+- [x] 15d — Update `/publish` command (`.claude/commands/publish.md`):
+  - Add pre-flight annotation check guard: run `check-draft.js` on target file before proceeding
+  - If annotations detected, halt and instruct operator to complete export gate first
+
+- [x] 15e — Update `scripts/check-draft.js`:
+  - Ensure it works on both `_local/drafts/` and `drafts/patterns/` paths (no path restrictions)
+
+- [x] 15f — Update documentation:
+  - `docs/spec.md` — §3 repo structure (remove `drafts/protopatterns/`, add `_local/`), §7 command descriptions (updated paths, export gate), §10 workflow (local-first model, single-user v1 note)
+  - `docs/ai-authorship-workflow.md` — update all `drafts/protopatterns/` references, update draft output paths, add Export Gate section, add note about deferred review tool
+  - `CLAUDE.md` — update Architecture section (local-first structure), update command descriptions with new paths
+
+- [x] 15g — Automated verification:
+  - `_local/` is in `.gitignore`
+  - `drafts/protopatterns/` directory does not exist
+  - `/extract` command file contains `_local/protopatterns` (not `drafts/protopatterns`)
+  - `/draft` command file contains `_local/drafts` and `_local/protopatterns` (not old paths)
+  - `/draft` command file contains "Export Gate" or "export gate"
+  - `/publish` command file contains annotation check guard language
+  - `check-draft.js` accepts paths outside `drafts/patterns/`
+
+- [ ] 15h — Manual acceptance testing:
+  - Run `/extract` against a source document — verify proto-pattern output goes to `_local/protopatterns/`, index updated at `_local/protopatterns/index.md`
+  - Run `/draft` from proto-pattern — verify annotated draft output goes to `_local/drafts/` with pointer-based annotations
+  - Verify `_local/` contents do not appear in `git status`
+  - Manually strip annotations from draft, copy to `drafts/patterns/`, run `node scripts/check-draft.js drafts/patterns/{slug}.md` — verify passes (no annotations detected)
+  - Copy annotated draft (without stripping) to `drafts/patterns/`, run `/publish` — verify it blocks with annotation check failure
+  - Run `node scripts/check-draft.js _local/drafts/{slug}.md` — verify annotations detected and counted
+
+### Deviations
+
+- **`check-draft.js` unchanged.** The script already accepts arbitrary file paths with no path restrictions, so no code changes were needed for 15e.
+- **`/draft` export gate includes agent-assisted option.** The implementation plan specified a manual export gate only, but the `/draft` command now offers the operator a choice: ask Claude to strip annotations and copy to `drafts/patterns/`, or do it manually. This reduces friction without removing operator control.
+- **Existing proto-patterns migrated.** 7 proto-patterns and an index file were moved from `drafts/protopatterns/` to `_local/protopatterns/`.
+
+### Design Decisions
+
+- **Single-user for v1.** The person who extracts is the person who drafts. Multi-user source sharing (SharePoint sync, encrypted bundles) is explicitly deferred.
+- **Collaboration at PR stage.** Teams review clean drafts via pull requests — the substance and quality, not the AI provenance annotations.
+- **Manual export gate for now.** The review tool (Phase 16) will automate annotation verification and stripping. The manual process is sufficient for v1.
+- **No migration burden.** The repo had minimal content in `drafts/protopatterns/` — move-and-delete was straightforward.
+
+**Done when:** Proto-patterns and annotated drafts are written to `_local/` (gitignored). Clean drafts are exported to `drafts/patterns/` for commit. No source-derived content is ever committed. Commands and documentation reflect local-first workflow.
+
+---
+
+## Phase 16 — Draft Review Tool (DEFERRED)
+
+> **Deferred** pending validation of the local-first workflow (Phase 15). The manual export gate provides equivalent functionality without tooling. This phase can be revived when the manual workflow proves cumbersome.
+
+A local Node.js web interface for reviewing draft annotations. Resolves source pointers to display context on demand, writes annotation removals back to the markdown file. Operates on `_local/drafts/` (updated from `drafts/patterns/` per Phase 15).
+
+- [ ] 16a — Create `scripts/review-server.js`:
   - Plain Node.js HTTP server (no framework), serves single-page wizard UI
   - Port 4323 (avoids clash with Astro dev on 4321)
-  - Draft selection: list files in `drafts/patterns/`
+  - Draft selection: list files in `_local/drafts/`
   - Annotation stepping: parse all annotations in selected draft, navigate prev/next/jump
   - Source panel (EXTRACTED only): resolve `ptr` field, read `.txt` file, slice line range + configurable buffer (default 3 lines either side). Clear error if pointer unresolvable.
   - Actions per annotation:
@@ -418,17 +503,19 @@ A local Node.js web interface for reviewing draft annotations. Resolves source p
     - *Edit content* — inline editor pre-populated with annotated content, edit then accept, write to file
     - *Skip* — move to next without changes
   - Resume from first remaining annotation if operator returns mid-review
-- [ ] 15b — Add `review` script to `package.json`: `"review": "node scripts/review-server.js"`
-- [ ] 15c — Update `docs/ai-authorship-workflow.md`:
+- [ ] 16b — Add `review` script to `package.json`: `"review": "node scripts/review-server.js"`
+- [ ] 16c — Export integration:
+  - After all annotations cleared, offer to copy clean file to `drafts/patterns/{slug}.md`
+  - Run `check-draft.js` to confirm no annotations remain
+- [ ] 16d — Update `docs/ai-authorship-workflow.md`:
   - Add draft review tool section (usage, what it does, when to use it)
-- [ ] 15d — Update `docs/pattern-pipeline.md`:
-  - Add review tool to Development section
-- [ ] 15e — Update `docs/spec.md`:
+- [ ] 16e — Update `docs/spec.md`:
+  - §3: add `review-server.js` to repo structure
   - §10: update operator workflow to reference `npm run review` as annotation review step
 
-- [ ] 15f — Manual testing:
+- [ ] 16f — Manual testing:
   - `npm run review` starts server on port 4323
-  - Browser UI lists draft files from `drafts/patterns/`
+  - Browser UI lists draft files from `_local/drafts/`
   - Selecting a draft shows annotations with progress indicator
   - EXTRACTED annotation: source panel resolves pointer and displays source context with buffer lines
   - EXTRACTED annotation with missing/invalid pointer: source panel shows clear error
@@ -436,6 +523,7 @@ A local Node.js web interface for reviewing draft annotations. Resolves source p
   - *Edit content*: inline editor works, edited content + annotation removal written to file
   - *Skip*: moves to next annotation, skipped annotation remains in file
   - Reopening a partially reviewed draft resumes from first remaining annotation
+  - After clearing all annotations, export to `drafts/patterns/` works and `check-draft.js` confirms clean
 
 ### Implementation Notes
 
@@ -444,7 +532,7 @@ A local Node.js web interface for reviewing draft annotations. Resolves source p
 - Read-only on source files — the tool never touches `_sources/`
 - Annotation state encoded in the file itself — cleared annotation = reviewed
 
-**Done when:** `npm run review` launches a browser UI that lists drafts, steps through annotations with source context display, and writes annotation removals back to the markdown file.
+**Done when:** `npm run review` launches a browser UI that lists drafts from `_local/drafts/`, steps through annotations with source context display, writes annotation removals back to the markdown file, and offers export to `drafts/patterns/` when complete.
 
 ---
 

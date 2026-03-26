@@ -1,12 +1,12 @@
 # /draft — AI-Assisted Pattern Drafting
 
-Create a full structured pattern draft from either a source document in `_sources/` or a proto-pattern in `drafts/protopatterns/`.
+Create a full structured pattern draft from either a source document in `_sources/` or a proto-pattern in `_local/protopatterns/`. The annotated draft is written to `_local/drafts/` (gitignored). A clean version is exported to `drafts/patterns/` for commit after the operator verifies and strips annotations.
 
 ## Arguments
 
 The operator should specify one of:
 - **Source document mode:** A source document path in `_sources/`, plus optional focus guidance and target pattern type (I/A/D/P)
-- **Proto-pattern mode:** A proto-pattern file path in `drafts/protopatterns/` (type and ID are inherited from the proto-pattern)
+- **Proto-pattern mode:** A proto-pattern file path in `_local/protopatterns/` (type and ID are inherited from the proto-pattern)
 - Optional `pattern_id` and `author` (will be prompted if not provided)
 
 ## Input Modes
@@ -17,14 +17,14 @@ When given a path in `_sources/`, operate exactly as described in the Extraction
 
 ### From Proto-Pattern
 
-When given a path in `drafts/protopatterns/`, use the accumulated material in the proto-pattern file as the primary source for the 4-stage flow:
+When given a path in `_local/protopatterns/`, use the accumulated material in the proto-pattern file as the primary source for the 4-stage flow:
 
 1. **Read the proto-pattern file.** It contains projects, sources, and freeform notes accumulated across multiple `/extract` runs.
 2. **Treat accumulated notes as the source material.** The Notes section contains evidence from multiple sources — use all of it.
 3. **Optionally read original source documents** if they are referenced and available in `_sources/`.
 4. **Proceed through the 4-stage flow** as normal, using the proto-pattern's accumulated material.
 5. **After successful draft creation,** clean up the proto-pattern:
-   - Remove the entry from `drafts/protopatterns/index.md`
+   - Remove the entry from `_local/protopatterns/index.md`
    - Delete the proto-pattern file
    - This is mandatory — a drafted proto-pattern must not remain in the index. Report the cleanup to the operator.
 
@@ -81,11 +81,13 @@ git branch --show-current
 
 **If on any other non-master branch:** Proceed, but note the branch name to the operator.
 
+**Note:** The branch gate exists for the Export Gate (Stage 5), which commits the clean draft to `drafts/patterns/`. The annotated draft in `_local/drafts/` is gitignored and never committed.
+
 ---
 
 ## Extraction Flow
 
-Operate in four stages. Report your progress to the operator at each stage.
+Operate in five stages. Report your progress to the operator at each stage.
 
 ### Stage 1 — Source Classification and Type Confirmation
 
@@ -174,39 +176,71 @@ The operator confirms, rejects, or edits each proposal before inclusion in the R
 
 1. **Compose the final markdown file.** Combine frontmatter and body sections. Frontmatter must include `pattern_type` (implementation/architectural/design/process) and a correctly-formatted typed `pattern_id`. When drafting from a proto-pattern, use the proto-pattern's existing ID. When drafting from a source document (direct mode), assign a new ID by running: `node scripts/next-pattern-id.js {type}`. The ID prefix must match the type.
 
-2. **Use structured annotations.** All content must use the annotation syntax:
-   - Extracted content: `[EXTRACTED | source: "description" | ref: location | "key quote"]`
+2. **Ensure a text rendition exists.** Before writing any EXTRACTED annotations, confirm a `.txt` rendition of the source document exists in `_sources/`. If the source is already `.txt`, use it directly. Otherwise, generate a plain-text rendition (same filename stem, `.txt` extension — e.g. `some-talk.pdf` → `some-talk.txt`) using available tools. If a `.txt` rendition already exists, use it as-is.
+
+3. **Use structured annotations.** All content must use the annotation syntax:
+   - Extracted content: `[EXTRACTED | source: "identifier" | ptr: "_sources/filename.txt:startline:endline" | basis: "short description"]`
    - Elaborated content: `[ELABORATED | basis: "reason for elaboration"]`
+
+   **EXTRACTED annotation rules:**
+   - The `source` field is a human-readable identifier (safe to commit — no participant names, no identifying file paths).
+   - The `ptr` field is a pointer to the text rendition: repo-relative path to the `.txt` file, colon-separated start and end line numbers (1-indexed, inclusive). Record line ranges at the time of reading the source — do not reconstruct them after the fact. Prefer generous ranges (more context rather than less).
+   - The `basis` field is a short description of the extracted content (e.g. "participant describes multi-step validation workflow"). It is **not** a quote from the source. Keep it under ~100 characters and do not use quotation marks around source text within it.
+   - **Do not embed quoted or paraphrased source text in EXTRACTED annotations.** The source content is accessible via the pointer. The `basis` field is a summary only.
 
    These annotations are visible inline for reviewer verification and machine-parseable for the publish workflow.
 
-3. **Determine the output path.** Use kebab-case slug: `drafts/patterns/{slug}.md`
+4. **Determine the output path.** Use kebab-case slug: `_local/drafts/{slug}.md`
 
-4. **Write the file** to the drafts directory.
+5. **Write the file** to the local drafts directory.
 
-5. **Run validation:**
+6. **Run validation:**
    ```bash
-   node --import tsx scripts/validate.js drafts/patterns/{slug}.md
+   node --import tsx scripts/validate.js _local/drafts/{slug}.md
    ```
 
-6. **If validation fails:** Read the error output, fix the issues, re-validate. Repeat until validation passes.
+7. **If validation fails:** Read the error output, fix the issues, re-validate. Repeat until validation passes.
 
-7. **Report final status:**
+8. **Report status and proceed to Stage 5:**
    ```
    ## Draft Complete
 
-   - **File:** drafts/patterns/{slug}.md
+   - **File:** _local/drafts/{slug}.md
    - **Source:** [source document path or proto-pattern ID]
    - **Validation:** PASS
    - **Sections extracted:** N of 9 essential sections
    - **Sections elaborated:** N sections
    - **Annotations:** N [EXTRACTED], N [ELABORATED] markers for reviewer verification
-   - **Operator review needed:** [list any areas needing attention]
    ```
 
-### Git Integration
+### Stage 5 — Export Gate
 
-After validation passes, commit the draft on the current feature branch (created during Pre-flight). The operator decides whether to commit — do not auto-commit without confirmation.
+The draft in `_local/drafts/` contains annotations that reference the operator's local `_sources/`. Before committing, the annotations must be verified and stripped.
+
+Present the export checklist to the operator:
+
+```
+## Export Checklist
+
+Your annotated draft is at: _local/drafts/{slug}.md
+
+Before committing:
+[ ] Verify ptr: annotations against source files
+[ ] Strip all [EXTRACTED | ...] and [ELABORATED | ...] markers
+[ ] Copy clean file to drafts/patterns/{slug}.md
+[ ] Commit on feature branch
+
+Run `node scripts/check-draft.js drafts/patterns/{slug}.md` to confirm no annotations remain.
+```
+
+**If the operator asks you to perform the export:**
+
+1. **Strip annotations.** Remove all `[EXTRACTED | ...]` and `[ELABORATED | ...]` markers from the draft content, leaving the surrounding text in place.
+2. **Copy to repo.** Write the clean draft to `drafts/patterns/{slug}.md`.
+3. **Verify.** Run `node scripts/check-draft.js drafts/patterns/{slug}.md` to confirm no annotations remain.
+4. **Commit.** Offer to commit the clean draft on the current feature branch. Do not auto-commit without confirmation.
+
+**If the operator wants to do it manually:** Acknowledge and end. The annotated draft remains in `_local/drafts/` for their review.
 
 ## Multiple Patterns
 
