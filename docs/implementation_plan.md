@@ -365,6 +365,72 @@ Add an `/update` command for interactive editing of published patterns, with val
 
 ---
 
+## Phase 14 — Source Pointer Annotation Format
+
+Migrate EXTRACTED annotations from embedded quotes to pointer-based references. Sensitive source content stays in `_sources/` (gitignored), never in draft files. See `docs/change-spec-source-pointer-review-tool.md` for full rationale.
+
+- [ ] 14a — Update `/draft` command (`.claude/commands/draft.md`):
+  - Stage 4: new EXTRACTED annotation syntax with `ptr` field (file + line range) replacing embedded quotes
+  - Instruction: ensure `.txt` rendition exists in `_sources/` before writing pointers
+  - Instruction: record line ranges at time of reading, never embed quoted/paraphrased source text
+  - `basis` field is a short description only (not a quote)
+- [ ] 14b — Update `tools/prompt-templates/pattern.md`:
+  - Update Extraction Provenance Conventions section with new pointer syntax
+- [ ] 14c — Update `scripts/check-draft.js`:
+  - Update annotation detection regex to match new EXTRACTED format (pointer-based)
+  - Add optional lint: flag `basis` fields longer than ~100 chars or containing quotation marks
+- [ ] 14d — Update `docs/spec.md`:
+  - §3: add `check-draft.js` and `review-server.js` to repo structure
+  - §4: add Draft Annotation Syntax section with pointer-based EXTRACTED format
+  - §7: update `/draft` Stage 4 description with text rendition and pointer workflow
+  - §8: add Text Renditions subsection, Anonymised Source Filenames subsection
+- [ ] 14e — Update `CLAUDE.md`:
+  - Update annotation syntax in Key Constraints and AI Authorship Commands sections
+
+### Design Decisions
+
+- **No migration burden.** The repo has only two published patterns and an empty drafts directory. No existing annotations to convert.
+- **ELABORATED unchanged.** Only EXTRACTED annotations change — ELABORATED annotations contain no source material and are unaffected.
+- **`/extract`, `/publish`, `/update` unchanged.** These commands do not produce EXTRACTED annotations with quotes. `/update` uses ELABORATED only.
+
+**Done when:** `/draft` writes pointer-based EXTRACTED annotations. `check-draft.js` detects the new format. Documentation reflects new syntax throughout.
+
+---
+
+## Phase 15 — Draft Review Tool
+
+A local Node.js web interface for reviewing draft annotations. Resolves source pointers to display context on demand, writes annotation removals back to the markdown file.
+
+- [ ] 15a — Create `scripts/review-server.js`:
+  - Plain Node.js HTTP server (no framework), serves single-page wizard UI
+  - Port 4323 (avoids clash with Astro dev on 4321)
+  - Draft selection: list files in `drafts/patterns/`
+  - Annotation stepping: parse all annotations in selected draft, navigate prev/next/jump
+  - Source panel (EXTRACTED only): resolve `ptr` field, read `.txt` file, slice line range + configurable buffer (default 3 lines either side). Clear error if pointer unresolvable.
+  - Actions per annotation:
+    - *Accept & clear* — remove annotation marker, leave content, write to file immediately
+    - *Edit content* — inline editor pre-populated with annotated content, edit then accept, write to file
+    - *Skip* — move to next without changes
+  - Resume from first remaining annotation if operator returns mid-review
+- [ ] 15b — Add `review` script to `package.json`: `"review": "node scripts/review-server.js"`
+- [ ] 15c — Update `docs/ai-authorship-workflow.md`:
+  - Add draft review tool section (usage, what it does, when to use it)
+- [ ] 15d — Update `docs/pattern-pipeline.md`:
+  - Add review tool to Development section
+- [ ] 15e — Update `docs/spec.md`:
+  - §10: update operator workflow to reference `npm run review` as annotation review step
+
+### Implementation Notes
+
+- Single HTML page served inline from the script — JS in the page handles annotation stepping and inline editing
+- File writes are synchronous and immediate on each accept action (no undo)
+- Read-only on source files — the tool never touches `_sources/`
+- Annotation state encoded in the file itself — cleared annotation = reviewed
+
+**Done when:** `npm run review` launches a browser UI that lists drafts, steps through annotations with source context display, and writes annotation removals back to the markdown file.
+
+---
+
 ## Updating This Plan
 
 When a phase is complete:
