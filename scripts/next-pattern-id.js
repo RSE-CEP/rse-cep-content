@@ -19,7 +19,7 @@ import path from 'node:path';
 const VALID_TYPES = ['I', 'A', 'D', 'P'];
 
 const INDEX_FILES = [
-  'drafts/protopatterns/index.md',
+  '_local/protopatterns/index.md',
   'drafts/pattern-index.md',
 ];
 
