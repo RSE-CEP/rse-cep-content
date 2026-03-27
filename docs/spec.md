@@ -312,11 +312,17 @@ Key design decisions:
 
 ### Text Renditions
 
-Source documents that are not already plain text (`.docx`, `.pdf`, etc.) must be rendered to a `.txt` file before EXTRACTED annotation pointers can be written. Convention:
+Source documents that are not already plain text must be rendered to a `.txt` file before EXTRACTED annotation pointers can be written. Rules by source type:
+
+- `.txt` or `.md` — already plain text and line-addressable; use directly as the rendition (no conversion needed).
+- `.json` or `.yaml` / `.yml` (interview transcripts) — run `node scripts/interview-to-text.js <source>` to produce a deterministic, turn-delimited `.txt` rendition. The script detects interview files by the presence of a top-level `turns` array. Going forward, operators convert chatbot JSON exports directly to `.txt` — the YAML intermediate is no longer needed.
+- `.pdf`, `.docx`, etc. — generate a plain-text rendition using available tools.
+
+Convention:
 
 - Rendition lives in `_sources/` alongside the original (both gitignored)
 - Same filename stem, `.txt` extension: `some-talk.pdf` → `some-talk.txt`
-- The `/draft` command generates the rendition using available tools as part of the drafting run, before writing annotations
+- The `/draft` command generates the rendition as part of the drafting run, before writing annotations
 - If a `.txt` rendition already exists, it is used as-is
 
 ### Anonymised Source Filenames

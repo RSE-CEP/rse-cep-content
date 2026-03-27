@@ -60,11 +60,17 @@ ELABORATED annotations are unchanged — they contain no source material:
 
 ### Text renditions
 
-Source documents that are not already plain text (`.docx`, `.pdf`, etc.) must be rendered to a `.txt` file before the pointer can be written. Convention:
+Source documents that are not already plain text must be rendered to a `.txt` file before the pointer can be written. Rules by source type:
+
+- `.txt` or `.md` — already plain text and line-addressable; use directly (no conversion needed).
+- `.json` or `.yaml` / `.yml` (interview transcripts) — run `node scripts/interview-to-text.js <source>` to produce a deterministic, turn-delimited `.txt` rendition. Going forward, operators convert chatbot JSON directly to `.txt`; the YAML intermediate is no longer needed.
+- `.pdf`, `.docx`, etc. — CC generates the rendition using available tools (pymupdf for PDF, python-docx or similar for docx).
+
+Convention:
 
 - Rendition lives in `_sources/` alongside the original (both gitignored)
 - Same filename stem, `.txt` extension: `some-talk.pdf` → `some-talk.txt`
-- CC generates the rendition using available tools (pymupdf for PDF, python-docx or similar for docx) as part of the `/draft` or `/extract` run, before writing annotations
+- CC generates the rendition as part of the `/draft` or `/extract` run, before writing annotations
 - If a `.txt` rendition already exists, it is used as-is
 
 CC writes the pointer while reading the source — it is not reconstructing line numbers after the fact. The range should be generous (erring toward more context rather than less). The review tool displays several lines of buffer either side of the stated range.

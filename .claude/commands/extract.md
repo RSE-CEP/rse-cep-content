@@ -22,7 +22,7 @@ Operate in four stages. Report your progress to the operator at each stage.
 
 ### Stage 1 — Source Analysis
 
-Read the source document from `_sources/`. Identify candidate patterns — recurring practices, solutions to common problems, named approaches, or implicit methodologies.
+Read the source document from `_sources/`. For `.txt` and `.md` files, read directly. For interview transcripts (`.json` or `.yaml`), read the `.txt` rendition instead — if it doesn't exist, run `node scripts/interview-to-text.js <source>` first. Identify candidate patterns — recurring practices, solutions to common problems, named approaches, or implicit methodologies.
 
 For each candidate, note:
 - **Working name** — a descriptive label for the pattern

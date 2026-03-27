@@ -177,7 +177,11 @@ The operator confirms, rejects, or edits each proposal before inclusion in the R
 
 1. **Compose the final markdown file.** Combine frontmatter and body sections. Frontmatter must include `pattern_type` (implementation/architectural/design/process) and a correctly-formatted typed `pattern_id`. When drafting from a proto-pattern, use the proto-pattern's existing ID. When drafting from a source document (direct mode), assign a new ID by running: `node scripts/next-pattern-id.js {type}`. The ID prefix must match the type.
 
-2. **Ensure a text rendition exists.** Before writing any EXTRACTED annotations, confirm a `.txt` rendition of the source document exists in `_sources/`. If the source is already `.txt`, use it directly. Otherwise, generate a plain-text rendition (same filename stem, `.txt` extension — e.g. `some-talk.pdf` → `some-talk.txt`) using available tools. If a `.txt` rendition already exists, use it as-is.
+2. **Ensure a text rendition exists.** Before writing any EXTRACTED annotations, confirm a `.txt` rendition of the source document exists in `_sources/`. Rules by source type:
+   - `.txt` or `.md` — use the source file directly as the rendition (already plain text and line-addressable).
+   - `.json` or `.yaml` / `.yml` (interview transcripts) — the operator should have already run `node scripts/interview-to-text.js <source>` to produce a `.txt` rendition. If the `.txt` is missing, run the script. The `.txt` is the source you read — not the JSON/YAML.
+   - `.pdf`, `.docx`, etc. — generate a plain-text rendition (same filename stem, `.txt` extension) using available tools.
+   - If a `.txt` rendition already exists, use it as-is.
 
 3. **Use structured annotations.** All content must use the annotation syntax:
    - Extracted content: `[EXTRACTED | source: "identifier" | ptr: "_sources/filename.txt:startline:endline" | basis: "short description"]`
