@@ -486,13 +486,58 @@ Restructure the extraction and drafting pipeline so that proto-patterns and anno
 
 ---
 
-## Phase 16 — Draft Review Tool (DEFERRED)
+## Phase 16 — Decouple Branch/Commit from Draft & Introduce `/export` Command
 
-> **Deferred** pending validation of the local-first workflow (Phase 15). The manual export gate provides equivalent functionality without tooling. This phase can be revived when the manual workflow proves cumbersome.
+Extract the branch gate and export step from `/draft` into a standalone `/export` command. The `/draft` command becomes purely local (no git operations), and `/export` handles the transition from local annotated draft to committed clean artefact. This prepares the workflow for the review tool (Phase 17) which will sit between `/draft` and `/export`. See `docs/change-draft-export.md` for full rationale.
 
-A local Node.js web interface for reviewing draft annotations. Resolves source pointers to display context on demand, writes annotation removals back to the markdown file. Operates on `_local/drafts/` (updated from `drafts/patterns/` per Phase 15).
+- [ ] 16a — Update `/draft` command (`.claude/commands/draft.md`):
+  - Remove Pre-flight Branch Gate section entirely (no git operations during drafting)
+  - Remove Stage 5 (Export Gate) — no annotation stripping, no copy to `drafts/patterns/`, no commit
+  - Replace with a handoff message reporting: file location (`_local/drafts/{slug}.md`), annotation counts, validation status, and next steps (review annotations, then run `/export`)
+  - Renumber stages: Classify → Extract → Elaborate → Validate (4 stages, not 5)
 
-- [ ] 16a — Create `scripts/review-server.js`:
+- [ ] 16b — Create `/export` command (`.claude/commands/export.md`):
+  - **Branch gate:** If on `master`, create `feature/pattern-{slug}` (with safety checks for unpushed commits, behind-origin state). If already on a feature branch, proceed.
+  - **Annotation check:** Run `check-draft.js` against `_local/drafts/{slug}.md`. If annotations remain, halt and direct operator to complete review.
+  - **Strip and copy:** Remove any residual annotation markers, write clean file to `drafts/patterns/{slug}.md`.
+  - **Verify:** Run `check-draft.js` against exported file to confirm clean.
+  - **Commit:** Offer to commit on the feature branch.
+
+- [ ] 16c — Update `/publish` command (`.claude/commands/publish.md`):
+  - Update annotation check pre-flight to note that `/export` should have been run first
+  - No structural changes (its own branch gate remains)
+
+- [ ] 16d — Update documentation:
+  - [ ] `CLAUDE.md` — add `/export` to AI Authorship Commands and workflow description
+  - [ ] `docs/ai-authorship-workflow.md` — update workflow to show `/draft` → review → `/export` → `/publish` sequence
+  - [ ] `docs/spec.md` — update command descriptions and workflow (§7, §10)
+  - [ ] `docs/implementation_plan.md` — this phase
+
+- [ ] 16e — Manual testing:
+  - Run `/draft` — verify it produces `_local/drafts/{slug}.md` with no git operations, no branch creation, no export
+  - Verify `/draft` output includes handoff message with annotation counts and next-step instructions
+  - Run `/export` on a draft with annotations remaining — verify it halts with clear message
+  - Strip annotations from draft, run `/export` — verify branch creation, clean copy to `drafts/patterns/{slug}.md`, `check-draft.js` passes, commit offered
+  - Run `/export` while already on a feature branch — verify it proceeds without creating a new branch
+  - Run `/publish` after `/export` — verify normal publish flow works
+
+### Design Decisions
+
+- **`/export` name chosen over `/commit-draft` or `/stage`.** Concise, matches existing "export gate" terminology.
+- **`/publish` does not subsume `/export`.** Keeping them separate preserves the PR review step between export and publication. The `drafts/patterns/` intermediate directory has value as the PR-reviewable artefact.
+- **No migration needed.** Existing clean drafts in `drafts/patterns/` continue to work with `/publish` as-is. Change is workflow-only, going forward.
+
+**Done when:** `/draft` is purely local with no git operations. `/export` handles branch creation, annotation verification, clean copy, and commit. `/publish` flow unchanged. Documentation reflects the four-command workflow: `/extract` → `/draft` → `/export` → `/publish`.
+
+---
+
+## Phase 17 — Draft Review Tool (DEFERRED)
+
+> **Deferred** pending validation of the `/draft` → `/export` workflow (Phase 16). The manual annotation review process provides equivalent functionality without tooling. This phase can be revived when the manual workflow proves cumbersome.
+
+A local Node.js web interface for reviewing draft annotations. Resolves source pointers to display context on demand, writes annotation removals back to the markdown file. Operates on `_local/drafts/` — sits between `/draft` (which produces the annotated file) and `/export` (which requires annotations to be cleared).
+
+- [ ] 17a — Create `scripts/review-server.js`:
   - Plain Node.js HTTP server (no framework), serves single-page wizard UI
   - Port 4323 (avoids clash with Astro dev on 4321)
   - Draft selection: list files in `_local/drafts/`
@@ -503,17 +548,17 @@ A local Node.js web interface for reviewing draft annotations. Resolves source p
     - *Edit content* — inline editor pre-populated with annotated content, edit then accept, write to file
     - *Skip* — move to next without changes
   - Resume from first remaining annotation if operator returns mid-review
-- [ ] 16b — Add `review` script to `package.json`: `"review": "node scripts/review-server.js"`
-- [ ] 16c — Export integration:
-  - After all annotations cleared, offer to copy clean file to `drafts/patterns/{slug}.md`
-  - Run `check-draft.js` to confirm no annotations remain
-- [ ] 16d — Update `docs/ai-authorship-workflow.md`:
+- [ ] 17b — Add `review` script to `package.json`: `"review": "node scripts/review-server.js"`
+- [ ] 17c — Export integration:
+  - After all annotations cleared, offer to invoke `/export` or prompt the operator to run it
+  - Run `check-draft.js` to confirm no annotations remain before handoff
+- [ ] 17d — Update `docs/ai-authorship-workflow.md`:
   - Add draft review tool section (usage, what it does, when to use it)
-- [ ] 16e — Update `docs/spec.md`:
+- [ ] 17e — Update `docs/spec.md`:
   - §3: add `review-server.js` to repo structure
   - §10: update operator workflow to reference `npm run review` as annotation review step
 
-- [ ] 16f — Manual testing:
+- [ ] 17f — Manual testing:
   - `npm run review` starts server on port 4323
   - Browser UI lists draft files from `_local/drafts/`
   - Selecting a draft shows annotations with progress indicator
@@ -523,7 +568,7 @@ A local Node.js web interface for reviewing draft annotations. Resolves source p
   - *Edit content*: inline editor works, edited content + annotation removal written to file
   - *Skip*: moves to next annotation, skipped annotation remains in file
   - Reopening a partially reviewed draft resumes from first remaining annotation
-  - After clearing all annotations, export to `drafts/patterns/` works and `check-draft.js` confirms clean
+  - After clearing all annotations, `/export` integration works and `check-draft.js` confirms clean
 
 ### Implementation Notes
 
@@ -532,7 +577,7 @@ A local Node.js web interface for reviewing draft annotations. Resolves source p
 - Read-only on source files — the tool never touches `_sources/`
 - Annotation state encoded in the file itself — cleared annotation = reviewed
 
-**Done when:** `npm run review` launches a browser UI that lists drafts from `_local/drafts/`, steps through annotations with source context display, writes annotation removals back to the markdown file, and offers export to `drafts/patterns/` when complete.
+**Done when:** `npm run review` launches a browser UI that lists drafts from `_local/drafts/`, steps through annotations with source context display, writes annotation removals back to the markdown file, and hands off to `/export` when complete.
 
 ---
 
