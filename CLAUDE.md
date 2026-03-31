@@ -26,7 +26,7 @@ Astro + content collections. Zod schemas in `src/content.config.ts` are the sing
 - **Extraction before elaboration.** AI must distinguish extracted content from generated content.
 - **Source sensitivity.** Source documents stay in `_sources/` (gitignored) or Sharepoint. Never commit them. Use `source_ref` for human-readable provenance only. EXTRACTED annotations use pointers to text renditions — never embed quoted source text in draft files. Interview transcript filenames must be anonymised (date-based, no participant names).
 - **Local-first extraction.** Proto-patterns (`_local/protopatterns/`) and annotated drafts (`_local/drafts/`) are gitignored. Nothing with `ptr:` annotations or source-derived content is ever committed. Clean drafts are exported to `drafts/patterns/` after annotation stripping.
-- **Never commit to master.** All pattern content changes (drafts, published patterns) must be committed on a feature branch, never directly to `master`. The `/draft` and `/publish` commands enforce this with a branch gate — do not bypass it.
+- **Never commit to master.** All pattern content changes (drafts, published patterns) must be committed on a feature branch, never directly to `master`. The `/export` and `/publish` commands enforce this with a branch gate — do not bypass it.
 
 ## Commands
 
@@ -43,15 +43,16 @@ Feature branches → PR to `master` → CI (validate + build) → merge → auto
 ## AI Authorship Commands
 
 - **`/extract`** — Mine proto-patterns from source documents. Identifies candidate patterns, matches against existing proto-patterns, creates or updates lightweight evidence files in `_local/protopatterns/` (gitignored).
-- **`/draft`** — Create a full pattern draft. Five stages: classify → extract → elaborate → validate → export gate. Accepts either a source document (from `_sources/`) or a proto-pattern (from `_local/protopatterns/`). Reads `drafts/pattern-index.md` during elaboration to propose related patterns. Annotated draft to `_local/drafts/` (gitignored); clean export to `drafts/patterns/`.
-- **`/publish`** — Validate a draft and move it from `drafts/patterns/` to `src/content/patterns/`. Pre-flight annotation check blocks if annotations remain. Checks: schema validation, annotation removal, section completeness, URL verification, quality review. On success, appends the pattern to the published pattern index (`drafts/pattern-index.md`).
+- **`/draft`** — Create a full pattern draft. Four stages: classify → extract → elaborate → validate. Accepts either a source document (from `_sources/`) or a proto-pattern (from `_local/protopatterns/`). Reads `drafts/pattern-index.md` during elaboration to propose related patterns. Purely local — annotated draft to `_local/drafts/` (gitignored), no git operations.
+- **`/export`** — Export a verified draft for commit. Branch gate (creates feature branch if on master), annotation check (halts if annotations remain), strip residual markers, copy clean file to `drafts/patterns/`, verify, offer to commit.
+- **`/publish`** — Validate a draft and move it from `drafts/patterns/` to `src/content/patterns/`. Pre-flight annotation check blocks if annotations remain (directs operator to `/export`). Checks: schema validation, annotation removal, section completeness, URL verification, quality review. On success, appends the pattern to the published pattern index (`drafts/pattern-index.md`).
 - **`/update`** — Edit a published pattern in-place. Accepts file path or pattern ID. Operator-directed edits are unannotated; model-generated substantive content uses `[ELABORATED | basis: "..."]` annotations. Exit gate enforces schema validation, section completeness, and annotation review. Syncs `drafts/pattern-index.md` and cross-references on change.
 
 ### Workflow
 
-**Via proto-patterns (incremental):** source docs → `/extract` → proto-patterns in `_local/protopatterns/` → `/draft` → annotated draft in `_local/drafts/` → verify & strip annotations → export to `drafts/patterns/` → `/publish` → production.
+**Via proto-patterns (incremental):** source docs → `/extract` → proto-patterns in `_local/protopatterns/` → `/draft` → annotated draft in `_local/drafts/` → review & strip annotations → `/export` → clean draft in `drafts/patterns/` → `/publish` → production.
 
-**Direct drafting:** source doc in `_sources/` → `/draft` → annotated draft in `_local/drafts/` → verify & strip annotations → export to `drafts/patterns/` → `/publish` → production.
+**Direct drafting:** source doc in `_sources/` → `/draft` → annotated draft in `_local/drafts/` → review & strip annotations → `/export` → clean draft in `drafts/patterns/` → `/publish` → production.
 
 **Post-publication:** `/update` for in-place editing of published patterns with selective annotation and index/cross-reference maintenance.
 

@@ -4,7 +4,7 @@ This document explains how the RSE-CEP project uses Claude Code for AI-assisted 
 
 ## Overview
 
-The authoring pipeline uses Claude Code (Anthropic's CLI tool for AI-assisted development) with **four slash commands** (`/extract`, `/draft`, `/publish`, and `/update`) that guide AI-assisted content extraction from source documents through a discover-draft-review-publish-maintain lifecycle.
+The authoring pipeline uses Claude Code (Anthropic's CLI tool for AI-assisted development) with **five slash commands** (`/extract`, `/draft`, `/export`, `/publish`, and `/update`) that guide AI-assisted content extraction from source documents through a discover-draft-review-export-publish-maintain lifecycle.
 
 The key principle is **extraction before elaboration**: the AI first mines content from real source material (interview transcripts, talk transcripts, notes, slides), then separately proposes content for any gaps — clearly marking what is extracted vs. generated using structured inline annotations.
 
@@ -88,6 +88,8 @@ When a proto-pattern has sufficient evidence, or when working directly from a si
 Focus on NER and text processing patterns for historical newspapers.
 ```
 
+The `/draft` command is purely local — it writes to `_local/drafts/` and performs no git operations. Branching and committing are handled later by `/export`.
+
 The command operates in four stages:
 
 #### Stage 1 — Source Classification and Type Confirmation
@@ -124,18 +126,21 @@ Claude writes the annotated draft to `_local/drafts/{slug}.md` (gitignored) with
 
 When drafting from a proto-pattern, Claude automatically removes the proto-pattern entry from the index and deletes the file after successful drafting.
 
-#### Stage 5 — Export Gate
+### 4a. Export with `/export`
 
-The annotated draft in `_local/drafts/` contains annotations referencing your local `_sources/`. Before committing:
+After reviewing and stripping annotations from the draft, run `/export` to transition the local draft into a committed artefact:
 
-1. **Verify annotations** — check `ptr:` ranges against source files
-2. **Strip annotations** — remove all `[EXTRACTED | ...]` and `[ELABORATED | ...]` markers
-3. **Copy to repo** — move the clean draft to `drafts/patterns/{slug}.md`
-4. **Commit** on the feature branch
+```
+/export {slug}
+```
 
-You can ask Claude to perform the export, or do it manually. Run `node scripts/check-draft.js drafts/patterns/{slug}.md` to confirm no annotations remain.
+The `/export` command:
 
-A review tool to automate annotation verification and stripping is planned but not yet implemented. The manual process is sufficient for v1.
+1. **Branch gate** — creates a feature branch if on `master` (with safety checks for unpushed commits and behind-origin state)
+2. **Annotation check** — runs `check-draft.js` against the local draft; halts if annotations remain
+3. **Strip and copy** — removes any residual annotation markers, writes clean file to `drafts/patterns/{slug}.md`
+4. **Verify** — runs `check-draft.js` against the exported file to confirm it is clean
+5. **Commit** — offers to commit on the feature branch
 
 ### 5. Review the draft
 
@@ -178,12 +183,11 @@ If all checks pass, the file is moved from `drafts/patterns/` to `src/content/pa
 
 If any check fails, the command reports what needs fixing and does not move the file.
 
-### 7. Commit and open a PR
+### 7. Push and open a PR
+
+The `/export` command already created the feature branch and committed the draft. Push and open a PR:
 
 ```bash
-git checkout -b feature/pattern-ner-newspapers
-git add src/content/patterns/ner-newspapers.md
-git commit -m "Add NER for historical newspapers pattern"
 git push -u origin feature/pattern-ner-newspapers
 ```
 
@@ -208,8 +212,8 @@ Team members review the PR. Once CI passes and the content is approved, merge to
                      /draft (from proto-pattern)
                                │
                                ▼
-                  _local/drafts/slug.md ──→ verify & strip ──→ drafts/patterns/slug.md ──→ /publish ──→ src/content/patterns/
-                  (annotated, local)         (export gate)       (clean, committed)                      (production)
+                  _local/drafts/slug.md ──→ review & strip ──→ /export ──→ drafts/patterns/slug.md ──→ /publish ──→ src/content/patterns/
+                  (annotated, local)         (manual review)                (clean, committed)                        (production)
 ```
 
 ## Direct Draft Lifecycle
@@ -217,16 +221,16 @@ Team members review the PR. Once CI passes and the content is approved, merge to
 | Step | Output | Notes |
 |------|--------|-------|
 | `_sources/doc.docx` | — | Source document |
-| `/draft` | `_local/drafts/slug.md` | Annotated draft (gitignored) |
+| `/draft` | `_local/drafts/slug.md` | Annotated draft (gitignored, no git ops) |
 | Human review | (same file, edited) | Verify annotations against sources |
-| Export gate | `drafts/patterns/slug.md` | Strip annotations, copy to repo |
+| `/export` | `drafts/patterns/slug.md` | Branch gate, annotation check, clean copy, commit |
 | `/publish` | `src/content/patterns/slug.md` | Production |
 
 - **Proto-patterns** are freeform evidence sketches — they accumulate material from multiple sources before a full draft is created
 - **Proto-patterns and annotated drafts are local** — they live in `_local/` (gitignored), never committed
-- **Clean drafts are committed** — annotations are stripped before export to `drafts/patterns/`
+- **Clean drafts are committed via `/export`** — annotations must be stripped before `/export` copies to `drafts/patterns/`
 - **Annotations preserve provenance** — the annotated copy in `_local/drafts/` shows what was extracted vs. elaborated
-- **Human verification is required** — the publish gate enforces that all annotations are removed
+- **Human verification is required** — both `/export` and `/publish` enforce that all annotations are removed
 
 ## Updating Published Patterns
 
@@ -278,9 +282,10 @@ When Claude Code starts in this project, it reads:
 
 1. **`CLAUDE.md`** — project context, architecture, conventions, and constraints
 2. **`.claude/commands/extract.md`** — the proto-pattern mining command
-3. **`.claude/commands/draft.md`** — the full pattern drafting command
-4. **`.claude/commands/publish.md`** — the publish command definition
-5. **`.claude/commands/update.md`** — the published pattern editing command
+3. **`.claude/commands/draft.md`** — the full pattern drafting command (local only, no git)
+4. **`.claude/commands/export.md`** — the export command (branch gate, annotation check, clean copy, commit)
+5. **`.claude/commands/publish.md`** — the publish command definition
+6. **`.claude/commands/update.md`** — the published pattern editing command
 6. **`tools/prompt-templates/*.md`** — per-content-type templates specifying expected fields and sections
 7. **`src/content.config.ts`** — the Zod schemas (the authoritative field definitions)
 

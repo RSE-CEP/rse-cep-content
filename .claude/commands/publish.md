@@ -32,10 +32,11 @@ node scripts/check-draft.js drafts/patterns/{slug}.md
 
 **If annotations are detected:** Halt immediately. Report the annotation count and instruct the operator:
 
-> This draft still contains annotations. Complete the export gate first:
+> This draft still contains annotations. Run `/export` to produce a clean draft first:
 > 1. Review annotations in the annotated draft (`_local/drafts/{slug}.md` if available)
 > 2. Strip all `[EXTRACTED | ...]` and `[ELABORATED | ...]` markers
-> 3. Ensure `drafts/patterns/{slug}.md` is clean before re-running `/publish`
+> 3. Run `/export {slug}` to verify annotations are cleared and copy the clean file to `drafts/patterns/`
+> 4. Re-run `/publish` after `/export` completes
 
 Do not proceed to publish checks until annotations are cleared.
 

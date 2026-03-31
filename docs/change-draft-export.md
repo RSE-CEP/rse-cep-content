@@ -1,6 +1,6 @@
 # Change Proposal: Decouple Branch/Commit from Draft, Move to Export Step
 
-**Status:** Proposed
+**Status:** Implemented (2026-03-30)
 **Date:** 2026-03-27
 **Affects:** `/draft` command, `/publish` command, Phase 16 (review tool)
 

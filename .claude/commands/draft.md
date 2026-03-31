@@ -1,6 +1,6 @@
 # /draft — AI-Assisted Pattern Drafting
 
-Create a full structured pattern draft from either a source document in `_sources/` or a proto-pattern in `_local/protopatterns/`. The annotated draft is written to `_local/drafts/` (gitignored). A clean version is exported to `drafts/patterns/` for commit after the operator verifies and strips annotations.
+Create a full structured pattern draft from either a source document in `_sources/` or a proto-pattern in `_local/protopatterns/`. The annotated draft is written to `_local/drafts/` (gitignored). No git operations are performed — use `/export` when ready to commit a clean version.
 
 ## Arguments
 
@@ -49,46 +49,9 @@ For a worked example, see: `src/content/patterns/version-control-for-research.md
 - **Source sensitivity.** Never include file paths, Sharepoint URLs, or identifying details about research participants in the output. Use `source_ref` for human-readable provenance only.
 - **Schema is law.** The Zod schema in `src/content.config.ts` determines what passes validation. Your output must conform to it.
 
-## Pre-flight: Branch Gate
-
-**This gate is mandatory. Do not skip it. Do not proceed to Stage 1 until it passes.**
-
-Check the current branch:
-
-```bash
-git branch --show-current
-```
-
-**If on `master`:** Do not proceed. Create a feature branch before continuing:
-
-1. Check the state of local master against origin:
-   ```bash
-   git fetch origin master && git rev-list --left-right --count origin/master...HEAD
-   ```
-   - **Right > 0** (unpushed local commits): Warn the operator — "Local master has N unpushed commit(s). Push them before branching to avoid a divergent master." Do not proceed until resolved.
-   - **Left > 0** (behind origin): Warn and offer to run `git pull --rebase origin master`.
-   - **Both 0**: Proceed.
-
-2. Determine the branch name. If the pattern slug is already known (e.g., from a proto-pattern), use `feature/pattern-{slug}`. Otherwise use a temporary name like `feature/draft-wip` and rename later.
-
-3. Create and switch to the feature branch:
-   ```bash
-   git checkout -b feature/pattern-{slug}
-   ```
-
-4. Report to the operator: "Created feature branch `feature/pattern-{slug}`. Proceeding with drafting."
-
-**If already on a feature branch:** Proceed silently.
-
-**If on any other non-master branch:** Proceed, but note the branch name to the operator.
-
-**Note:** The branch gate exists for the Export Gate (Stage 5), which commits the clean draft to `drafts/patterns/`. The annotated draft in `_local/drafts/` is gitignored and never committed.
-
----
-
 ## Extraction Flow
 
-Operate in five stages. Report your progress to the operator at each stage.
+Operate in four stages. Report your progress to the operator at each stage. This command performs no git operations — branching and committing are handled by `/export`.
 
 ### Stage 1 — Source Classification and Type Confirmation
 
@@ -206,7 +169,7 @@ The operator confirms, rejects, or edits each proposal before inclusion in the R
 
 7. **If validation fails:** Read the error output, fix the issues, re-validate. Repeat until validation passes.
 
-8. **Report status and proceed to Stage 5:**
+8. **Report status:**
    ```
    ## Draft Complete
 
@@ -216,36 +179,12 @@ The operator confirms, rejects, or edits each proposal before inclusion in the R
    - **Sections extracted:** N of 9 essential sections
    - **Sections elaborated:** N sections
    - **Annotations:** N [EXTRACTED], N [ELABORATED] markers for reviewer verification
+
+   Next steps:
+   1. Review annotations in _local/drafts/{slug}.md (verify ptr: ranges against source files)
+   2. Strip all [EXTRACTED | ...] and [ELABORATED | ...] markers as you verify each one
+   3. When ready to commit, run /export {slug}
    ```
-
-### Stage 5 — Export Gate
-
-The draft in `_local/drafts/` contains annotations that reference the operator's local `_sources/`. Before committing, the annotations must be verified and stripped.
-
-Present the export checklist to the operator:
-
-```
-## Export Checklist
-
-Your annotated draft is at: _local/drafts/{slug}.md
-
-Before committing:
-[ ] Verify ptr: annotations against source files
-[ ] Strip all [EXTRACTED | ...] and [ELABORATED | ...] markers
-[ ] Copy clean file to drafts/patterns/{slug}.md
-[ ] Commit on feature branch
-
-Run `node scripts/check-draft.js drafts/patterns/{slug}.md` to confirm no annotations remain.
-```
-
-**If the operator asks you to perform the export:**
-
-1. **Strip annotations.** Remove all `[EXTRACTED | ...]` and `[ELABORATED | ...]` markers from the draft content, leaving the surrounding text in place.
-2. **Copy to repo.** Write the clean draft to `drafts/patterns/{slug}.md`.
-3. **Verify.** Run `node scripts/check-draft.js drafts/patterns/{slug}.md` to confirm no annotations remain.
-4. **Commit.** Offer to commit the clean draft on the current feature branch. Do not auto-commit without confirmation.
-
-**If the operator wants to do it manually:** Acknowledge and end. The annotated draft remains in `_local/drafts/` for their review.
 
 ## Multiple Patterns
 

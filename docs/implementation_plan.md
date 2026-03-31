@@ -479,7 +479,7 @@ Restructure the extraction and drafting pipeline so that proto-patterns and anno
 
 - **Single-user for v1.** The person who extracts is the person who drafts. Multi-user source sharing (SharePoint sync, encrypted bundles) is explicitly deferred.
 - **Collaboration at PR stage.** Teams review clean drafts via pull requests — the substance and quality, not the AI provenance annotations.
-- **Manual export gate for now.** The review tool (Phase 16) will automate annotation verification and stripping. The manual process is sufficient for v1.
+- **Export via `/export` command.** Phase 16 introduced a standalone `/export` command that handles branch creation, annotation verification, clean copy, and commit. The `/draft` command is now purely local.
 - **No migration burden.** The repo had minimal content in `drafts/protopatterns/` — move-and-delete was straightforward.
 
 **Done when:** Proto-patterns and annotated drafts are written to `_local/` (gitignored). Clean drafts are exported to `drafts/patterns/` for commit. No source-derived content is ever committed. Commands and documentation reflect local-first workflow.
@@ -490,36 +490,36 @@ Restructure the extraction and drafting pipeline so that proto-patterns and anno
 
 Extract the branch gate and export step from `/draft` into a standalone `/export` command. The `/draft` command becomes purely local (no git operations), and `/export` handles the transition from local annotated draft to committed clean artefact. This prepares the workflow for the review tool (Phase 17) which will sit between `/draft` and `/export`. See `docs/change-draft-export.md` for full rationale.
 
-- [ ] 16a — Update `/draft` command (`.claude/commands/draft.md`):
+- [x] 16a — Update `/draft` command (`.claude/commands/draft.md`):
   - Remove Pre-flight Branch Gate section entirely (no git operations during drafting)
   - Remove Stage 5 (Export Gate) — no annotation stripping, no copy to `drafts/patterns/`, no commit
   - Replace with a handoff message reporting: file location (`_local/drafts/{slug}.md`), annotation counts, validation status, and next steps (review annotations, then run `/export`)
   - Renumber stages: Classify → Extract → Elaborate → Validate (4 stages, not 5)
 
-- [ ] 16b — Create `/export` command (`.claude/commands/export.md`):
+- [x] 16b — Create `/export` command (`.claude/commands/export.md`):
   - **Branch gate:** If on `master`, create `feature/pattern-{slug}` (with safety checks for unpushed commits, behind-origin state). If already on a feature branch, proceed.
   - **Annotation check:** Run `check-draft.js` against `_local/drafts/{slug}.md`. If annotations remain, halt and direct operator to complete review.
   - **Strip and copy:** Remove any residual annotation markers, write clean file to `drafts/patterns/{slug}.md`.
   - **Verify:** Run `check-draft.js` against exported file to confirm clean.
   - **Commit:** Offer to commit on the feature branch.
 
-- [ ] 16c — Update `/publish` command (`.claude/commands/publish.md`):
+- [x] 16c — Update `/publish` command (`.claude/commands/publish.md`):
   - Update annotation check pre-flight to note that `/export` should have been run first
   - No structural changes (its own branch gate remains)
 
-- [ ] 16d — Update documentation:
-  - [ ] `CLAUDE.md` — add `/export` to AI Authorship Commands and workflow description
-  - [ ] `docs/ai-authorship-workflow.md` — update workflow to show `/draft` → review → `/export` → `/publish` sequence
-  - [ ] `docs/spec.md` — update command descriptions and workflow (§7, §10)
-  - [ ] `docs/implementation_plan.md` — this phase
+- [x] 16d — Update documentation:
+  - [x] `CLAUDE.md` — add `/export` to AI Authorship Commands and workflow description
+  - [x] `docs/ai-authorship-workflow.md` — update workflow to show `/draft` → review → `/export` → `/publish` sequence
+  - [x] `docs/spec.md` — update command descriptions and workflow (§7, §10)
+  - [x] `docs/implementation_plan.md` — this phase
 
-- [ ] 16e — Manual testing:
-  - Run `/draft` — verify it produces `_local/drafts/{slug}.md` with no git operations, no branch creation, no export
-  - Verify `/draft` output includes handoff message with annotation counts and next-step instructions
-  - Run `/export` on a draft with annotations remaining — verify it halts with clear message
-  - Strip annotations from draft, run `/export` — verify branch creation, clean copy to `drafts/patterns/{slug}.md`, `check-draft.js` passes, commit offered
-  - Run `/export` while already on a feature branch — verify it proceeds without creating a new branch
-  - Run `/publish` after `/export` — verify normal publish flow works
+- [x] 16e — Manual testing:
+  - ✔ Run `/draft` — verify it produces `_local/drafts/{slug}.md` with no git operations, no branch creation, no export
+  - ✔ Verify `/draft` output includes handoff message with annotation counts and next-step instructions
+  - ✔ Run `/export` on a draft with annotations remaining — verify it halts with clear message
+  - ✔ Strip annotations from draft, run `/export` — verify branch creation, clean copy to `drafts/patterns/{slug}.md`, `check-draft.js` passes, commit offered
+  - ✔ Run `/export` while already on a feature branch — verify it proceeds without creating a new branch
+  - ✔ Run `/publish` after `/export` — verify normal publish flow works
 
 ### Design Decisions
 
@@ -527,7 +527,7 @@ Extract the branch gate and export step from `/draft` into a standalone `/export
 - **`/publish` does not subsume `/export`.** Keeping them separate preserves the PR review step between export and publication. The `drafts/patterns/` intermediate directory has value as the PR-reviewable artefact.
 - **No migration needed.** Existing clean drafts in `drafts/patterns/` continue to work with `/publish` as-is. Change is workflow-only, going forward.
 
-**Done when:** `/draft` is purely local with no git operations. `/export` handles branch creation, annotation verification, clean copy, and commit. `/publish` flow unchanged. Documentation reflects the four-command workflow: `/extract` → `/draft` → `/export` → `/publish`.
+**Done when:** `/draft` is purely local with no git operations. `/export` handles branch creation, annotation verification, clean copy, and commit. `/publish` flow unchanged. Documentation reflects the five-command workflow: `/extract` → `/draft` → `/export` → `/publish` → `/update`.
 
 ---
 

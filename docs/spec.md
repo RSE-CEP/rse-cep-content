@@ -24,7 +24,7 @@ The prototype serves to:
 - **Single repo.** The AI extraction tooling, content, Astro site, and CI/CD configuration all live in one repository. No cross-project path dependencies.
 - **Schema as single source of truth.** Zod schemas defined in the Astro content collection config are the sole specification for valid content. The AI tooling does not maintain its own copy.
 - **Extraction before elaboration.** The extraction tool clearly distinguishes content mined from source material versus content proposed by the model to fill gaps.
-- **Git as the review surface.** Tool output is written to the content collection directory on a feature branch. The operator reviews via `git diff`, edits in place, and commits. Content commands (`/draft`, `/publish`) enforce a branch gate — they will not proceed on `master`.
+- **Git as the review surface.** Tool output is written to the content collection directory on a feature branch. The operator reviews via `git diff`, edits in place, and commits. Content commands (`/export`, `/publish`) enforce a branch gate — they will not proceed on `master`.
 - **PR-based quality gate.** All content enters via pull request. CI runs schema validation and a trial site build before merge is permitted. Direct commits to `master` are not part of the workflow.
 - **Source document sensitivity.** Raw source documents (especially interview transcripts) are research participant data with consent obligations. They are stored in institutional Sharepoint, with ephemeral local copies used during extraction only.
 
@@ -247,7 +247,7 @@ Triggered on push to `master` (i.e. after PR merge). Builds the Astro site and d
 
 ## 7. Claude Commands
 
-Four slash commands implement the authoring pipeline:
+Five slash commands implement the authoring pipeline:
 
 ### `/extract` — Proto-Pattern Mining
 
@@ -262,16 +262,26 @@ Proto-patterns are freeform markdown with metadata (ID, type, description, sourc
 
 ### `/draft` — Full Pattern Drafting
 
-The 5-stage extraction flow that produces a full structured pattern draft. Accepts two input modes:
+The 4-stage extraction flow that produces a full structured pattern draft. Accepts two input modes:
 
 - **Source document** (from `_sources/`) — direct single-source drafting (original workflow)
 - **Proto-pattern** (from `_local/protopatterns/`) — uses accumulated multi-source evidence as input
 
-Stages: classify source → template-aware extraction → guided elaboration → output with annotations and validation → export gate. Annotated drafts are written to `_local/drafts/` (gitignored) with inline `[EXTRACTED]` and `[ELABORATED]` annotations. EXTRACTED annotations use pointer-based references to text renditions in `_sources/` (see §4 Draft Annotation Syntax) — no source text is embedded in draft files. The export gate strips annotations and copies the clean draft to `drafts/patterns/` for commit.
+Stages: classify source → template-aware extraction → guided elaboration → output with annotations and validation. The `/draft` command is purely local — no git operations. Annotated drafts are written to `_local/drafts/` (gitignored) with inline `[EXTRACTED]` and `[ELABORATED]` annotations. EXTRACTED annotations use pointer-based references to text renditions in `_sources/` (see §4 Draft Annotation Syntax) — no source text is embedded in draft files.
 
 **Related pattern proposals:** During Stage 3 (guided elaboration), the `/draft` command reads the published pattern index (`drafts/pattern-index.md`) and proposes related patterns for the Related Patterns section (section 9 of the template). The index contains agent-written summaries alongside structured metadata (ID, type, keywords, domains), enabling semantic matching. Proposed relationships are presented to the operator for confirmation before inclusion.
 
 When drafting from a proto-pattern, the proto-pattern entry is removed from the index and the file deleted after successful drafting.
+
+### `/export` — Draft Export
+
+Handles the transition from local annotated draft to committed clean artefact. Steps:
+
+1. **Branch gate** — if on `master`, create `feature/pattern-{slug}` (with safety checks for unpushed commits and behind-origin state). If already on a feature branch, proceed.
+2. **Annotation check** — run `check-draft.js` against `_local/drafts/{slug}.md`. If annotations remain, halt and direct operator to complete review.
+3. **Strip and copy** — remove any residual annotation markers, write clean file to `drafts/patterns/{slug}.md`.
+4. **Verify** — run `check-draft.js` against exported file to confirm clean.
+5. **Commit** — offer to commit on the feature branch.
 
 ### `/publish` — Publication Gate
 
@@ -364,23 +374,25 @@ PATTERN DISCOVERY (incremental, recommended):
 3.  Repeat steps 1-2 with additional sources to accumulate evidence
 4.  When a proto-pattern has sufficient evidence:
       /draft _local/protopatterns/slug.md — create full pattern draft
-      Agent: branch gate → 4-stage extraction → annotated draft in _local/drafts/
-5.  Export: verify annotations → strip markers → copy to drafts/patterns/
-6.  /publish — validate and move to production (branch gate enforced)
+      Agent: 4-stage extraction → annotated draft in _local/drafts/ (no git ops)
+5.  Review: verify annotations against sources → strip markers
+6.  /export — branch gate → annotation check → clean copy to drafts/patterns/ → commit
+7.  /publish — validate and move to production (branch gate enforced)
 
 DIRECT DRAFTING (single source, still supported):
 1.  Pull source document from Sharepoint → _sources/
-2.  /draft _sources/document.docx — 5-stage extraction to full draft
-      Agent: branch gate → 4-stage extraction → annotated draft in _local/drafts/
-3.  Export: verify annotations → strip markers → copy to drafts/patterns/
-4.  /publish — validate and move to production (branch gate enforced)
+2.  /draft _sources/document.docx — 4-stage extraction to full draft
+      Agent: 4-stage extraction → annotated draft in _local/drafts/ (no git ops)
+3.  Review: verify annotations against sources → strip markers
+4.  /export — branch gate → annotation check → clean copy to drafts/patterns/ → commit
+5.  /publish — validate and move to production (branch gate enforced)
 
 POST-PUBLICATION MAINTENANCE:
       /update {path-or-ID} — interactive editing of published patterns
       Agent: loads pattern → applies edits (selective annotation) → exit gate → index sync → cross-ref maintenance
 
-REVIEW & DEPLOY (feature branch already exists from /draft):
-5.  Operator: commit → push → open PR
+REVIEW & DEPLOY (feature branch already exists from /export):
+5.  Operator: push → open PR
 6.  CI: schema validation (fast) → trial Astro build (thorough)
 7.  Team: review PR → approve
 8.  Merge to master → deploy workflow triggers → site published to GitHub Pages
