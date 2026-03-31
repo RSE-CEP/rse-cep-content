@@ -12,6 +12,7 @@ AI-assisted content pipeline prototype: source document extraction → structure
   - `3 - *.md` — Worked examples (Version Control, Configuration Management)
 - **[docs/pattern_typology.md](docs/pattern_typology.md)** — Pattern type definitions (I/A/D/P), classification guide, section emphasis per type
 - **[docs/ai-authorship-workflow.md](docs/ai-authorship-workflow.md)** — AI extraction process and operator workflow
+- **[docs/git-workflow.md](docs/git-workflow.md)** — Git workflow for pattern content (branch, commit, PR, merge, return to master)
 - **[docs/github-actions-setup.md](docs/github-actions-setup.md)** — CI/CD setup and deployment
 - **[docs/validation-script.md](docs/validation-script.md)** — Schema validation script
 
@@ -24,7 +25,7 @@ Astro + content collections. Zod schemas in `src/content.config.ts` are the sing
 - **Pattern template is authoritative.** `docs/patterns/2 - Pattern_Template.md` defines the pattern structure. The Zod schema, validation, and site templates derive from it.
 - **Schema is code-level truth.** `src/content.config.ts` Zod schemas are what validation actually checks. They must faithfully implement the pattern template.
 - **Extraction before elaboration.** AI must distinguish extracted content from generated content.
-- **Source sensitivity.** Source documents stay in `_sources/` (gitignored) or Sharepoint. Never commit them. Use `source_ref` for human-readable provenance only. EXTRACTED annotations use pointers to text renditions — never embed quoted source text in draft files. Interview transcript filenames must be anonymised (date-based, no participant names).
+- **Source sensitivity.** Source documents stay in `_sources/` (gitignored) or Sharepoint. Never commit them. Use `source_ref` for human-readable provenance only. EXTRACTED annotations use pointers to text renditions — never embed quoted source text in draft files. Interview transcript filenames must be anonymised (date-based, no participant names). `source_ref` must not name interview participants or other non-public individuals — use role-based descriptions with dates (e.g. "RSE practitioner interview, 2026-03-23"). Public authors, speakers at recorded events, and published document authors may be named.
 - **Local-first extraction.** Proto-patterns (`_local/protopatterns/`) and annotated drafts (`_local/drafts/`) are gitignored. Nothing with `ptr:` annotations or source-derived content is ever committed. Clean drafts are exported to `drafts/patterns/` after annotation stripping.
 - **Never commit to master.** All pattern content changes (drafts, published patterns) must be committed on a feature branch, never directly to `master`. The `/export` and `/publish` commands enforce this with a branch gate — do not bypass it.
 

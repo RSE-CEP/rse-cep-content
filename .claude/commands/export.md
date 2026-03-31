@@ -68,7 +68,31 @@ Do not proceed.
 
 ---
 
-## Step 3 — Strip and Copy
+## Step 3 — Source Sensitivity Check
+
+Scan the draft for potential source sensitivity issues before the content leaves the local (gitignored) environment.
+
+1. **Parse `source_ref` from frontmatter.** Check whether it contains what appears to be a personal name (capitalised multi-word phrases that are not common nouns, place names, or organisation names) in combination with interview or transcript context (e.g. "interview", "transcript", "practitioner interview").
+
+2. **Scan body text.** Look for personal names appearing near words like "interview", "participant", "informant", "interviewee", or "practitioner" — particularly in Known Uses, Context, or Implementation Examples sections.
+
+3. **Scan EXTRACTED annotation `source` fields** (if any survive to this point). Apply the same name-detection heuristic.
+
+4. **Report findings.** If potential names are found, present them to the operator:
+
+   > **Source sensitivity warning:** The following may contain personal names of non-public individuals:
+   > - `source_ref`: "Mat Bettinson, RSE-CEP practitioner interview (2026-03-23)"
+   >   → Suggested: "RSE-CEP practitioner interview (2026-03-23)"
+   >
+   > Public authors, speakers at recorded events, and published document authors may be named. Confirm each item or provide a replacement.
+
+   Wait for the operator to confirm or provide replacements before proceeding. Apply any replacements to the local draft file (`_local/drafts/{slug}.md`) so the corrected values flow through to the exported copy.
+
+5. **If no issues detected:** Proceed silently to Step 4.
+
+---
+
+## Step 4 — Strip and Copy
 
 Even after manual review, residual annotation markers may remain (partial deletions, invisible characters, etc.). As a safety net:
 
@@ -78,7 +102,7 @@ Even after manual review, residual annotation markers may remain (partial deleti
 
 ---
 
-## Step 4 — Verify
+## Step 5 — Verify
 
 Run the annotation scanner against the exported file to confirm it is clean:
 
@@ -88,11 +112,11 @@ node scripts/check-draft.js drafts/patterns/{slug}.md
 
 **If annotations are detected:** This indicates a bug in the stripping logic. Report the issue and halt — do not commit a file with annotations.
 
-**If clean:** Proceed to Step 5.
+**If clean:** Proceed to Step 6.
 
 ---
 
-## Step 5 — Commit
+## Step 6 — Commit
 
 Offer to commit the clean draft on the feature branch:
 
@@ -110,7 +134,10 @@ Ready to commit `drafts/patterns/{slug}.md` on this branch. Proceed?
 If the operator confirms:
 1. Stage the file: `git add drafts/patterns/{slug}.md`
 2. Commit with a message like: `feat: add draft pattern {slug}`
-3. Report success and suggest next steps: "Run `/publish` when ready to move to production."
+3. Report success and suggest next steps, referencing the Git workflow:
+   > Next steps — see [docs/git-workflow.md](../docs/git-workflow.md):
+   > - Run `/publish` when ready to move to production (Step 3)
+   > - Or push the branch and open a PR (Step 4), then return to master (Step 6)
 
 If the operator declines: Acknowledge and end. The exported file remains in `drafts/patterns/` uncommitted.
 

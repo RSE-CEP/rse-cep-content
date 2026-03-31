@@ -46,7 +46,7 @@ For a worked example, see: `src/content/patterns/version-control-for-research.md
 - **Extraction before elaboration.** Always distinguish what comes from the source document versus what you generate to fill gaps.
 - **Patterns are not prescriptive recipes.** They describe issues and solutions, providing guidance and principles rather than step-by-step instructions.
 - **"Issues" not "Problems".** Use the project's inclusive terminology — issues may be requirements, principles, goals, challenges, or technical problems.
-- **Source sensitivity.** Never include file paths, Sharepoint URLs, or identifying details about research participants in the output. Use `source_ref` for human-readable provenance only.
+- **Source sensitivity.** Never include file paths, Sharepoint URLs, or identifying details about research participants in the output. Use `source_ref` for human-readable provenance only. The `source_ref` value must not name interview participants or other non-public individuals — use role-based descriptions with dates (e.g. "RSE practitioner interview, 2026-03-23"). Public authors, speakers at recorded events, and published document authors may be named.
 - **Schema is law.** The Zod schema in `src/content.config.ts` determines what passes validation. Your output must conform to it.
 
 ## Extraction Flow
@@ -151,7 +151,7 @@ The operator confirms, rejects, or edits each proposal before inclusion in the R
    - Elaborated content: `[ELABORATED | basis: "reason for elaboration"]`
 
    **EXTRACTED annotation rules:**
-   - The `source` field is a human-readable identifier (safe to commit — no participant names, no identifying file paths).
+   - The `source` field is a human-readable identifier (safe to commit — no participant names or other non-public individuals, no identifying file paths). For interviews, use role-based descriptions with dates (e.g. "RSE practitioner interview, 2026-03-23"). Public authors, speakers, and document authors may be named.
    - The `ptr` field is a pointer to the text rendition: repo-relative path to the `.txt` file, colon-separated start and end line numbers (1-indexed, inclusive). Record line ranges at the time of reading the source — do not reconstruct them after the fact. Prefer generous ranges (more context rather than less).
    - The `basis` field is a short description of the extracted content (e.g. "participant describes multi-step validation workflow"). It is **not** a quote from the source. Keep it under ~100 characters and do not use quotation marks around source text within it.
    - **Do not embed quoted or paraphrased source text in EXTRACTED annotations.** The source content is accessible via the pointer. The `basis` field is a summary only.

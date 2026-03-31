@@ -116,6 +116,8 @@ Review the draft against the pattern quality criteria from `docs/patterns/1 - Pa
 - **Design (D) pattern** describing system components rather than methodology or decision frameworks → flag: "D patterns should describe analytical approaches. Consider whether this is better typed as Architectural."
 - **Process (P) pattern** describing artefact structure rather than human workflow → flag: "P patterns should describe how people and agents work together, not what artefacts they produce. Consider whether this is better typed as Design or Architectural. A strong P pattern, such as AI spec-driven development, centres on the iterative workflow between practitioners and agents, not on the spec itself."
 
+**Source sensitivity check:** Verify that `source_ref` and body text do not name non-public individuals (especially interview participants). Interview sources should use role-based descriptions with dates (e.g. "RSE practitioner interview, 2026-03-23"). Public authors, speakers at recorded events, and published document authors may be named. Flag any potential personal names for operator confirmation.
+
 Report quality concerns but do not block publication for them — the operator decides.
 
 ## On All Checks Passing
@@ -152,3 +154,11 @@ Report quality concerns but do not block publication for them — the operator d
 - If URLs are broken: list them with line numbers and HTTP status
 - **Do NOT move the file**
 - Suggest next steps (e.g., "remove remaining annotations", "add the missing sections")
+
+## After Commit
+
+After the commit, remind the operator of the next steps by referencing the Git workflow:
+
+> Next steps — see [docs/git-workflow.md](../docs/git-workflow.md):
+> - **Step 4:** Push the branch and open a PR
+> - **Step 6:** Return to master after the PR is merged
