@@ -63,12 +63,25 @@ const base = import.meta.env.BASE_URL;
         background: #fef3c7;
         color: #92400e;
       }
+      .experimental-banner {
+        background: #fef3c7;
+        border: 2px solid #d97706;
+        color: #92400e;
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
     </style>
   </head>
   <body>
     <nav>
       <a href={`${base}`}>RSE-CEP Patterns</a>
     </nav>
+    <div class="experimental-banner">
+      Experimental — This site and all pattern content are prototypes under active development. Content may be incomplete, inaccurate, or change without notice.
+    </div>
     <slot />
   </body>
 </html>

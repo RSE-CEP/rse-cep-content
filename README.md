@@ -1,5 +1,7 @@
 # RSE-CEP Content
 
+> **Experimental — Not for production use.** This project and all pattern outputs are prototypes under active development. Content may be incomplete, inaccurate, or change without notice. Do not rely on these patterns for operational decisions.
+
 Content and publishing infrastructure for the [CDL Research Software Engineering Capacity Enhancement Project (RSE-CEP)](https://rse-cep.github.io/rse-cep-content/).
 
 RSE-CEP develops practical guidance for research software engineers working in the humanities, arts, and social sciences (HASS) and Indigenous research contexts — areas where the technical challenges of building research software are inseparable from cultural, ethical, and disciplinary considerations.
