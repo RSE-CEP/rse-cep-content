@@ -605,6 +605,167 @@ This phase must be implemented **before** the externalised relationships proposa
 
 ---
 
+## Phase 18 — Externalised Pattern Relationships and Principle Alignments
+
+Move relationship and principle alignment data out of pattern markdown bodies into shared JSON/YAML data files. Introduce a `/relate` skill for LLM-assisted relationship computation and principle alignment. Astro renders both sections from data at build time, keeping all pattern pages current. See `docs/change-proposal-externalised-relationships.md` for full rationale.
+
+### 18a — Create data files and validation tool
+
+- [ ] Create `src/data/` directory
+- [ ] Create `src/data/principles.yml` — FAIR + sustainability scaffold (5 principles as specified in change proposal)
+- [ ] Create `src/data/related-patterns.json` — empty object `{}`
+- [ ] Create `src/data/principle-alignments.json` — empty object `{}`
+- [ ] Create `scripts/update-relationships.js`:
+  - Two modes: `relate` (merge related patterns) and `align` (merge principle alignments)
+  - Accepts `--input` JSON payload via CLI argument
+  - Validates payload with Zod schemas:
+    - `relate`: correct shape, valid relationship types (`works-well-with`, `alternative-approach`, `typical-sequence-before`, `typical-sequence-after`), referenced pattern IDs exist in `src/content/patterns/`
+    - `align`: valid principle IDs from `principles.yml`, non-empty relevance text
+  - Loads existing JSON, merges (append, no duplicates by `related_id` for relate; replace by `principle_id` per pattern for align), writes back
+  - Both modes idempotent and safe to re-run
+  - Returns structured success/failure output
+
+### 18b — Automated testing: validation tool
+
+- [ ] Test `relate` mode: valid payload merges correctly, duplicate `related_id` not duplicated on re-run
+- [ ] Test `relate` mode: invalid relationship type rejected
+- [ ] Test `relate` mode: non-existent pattern ID rejected
+- [ ] Test `align` mode: valid payload merges correctly, re-run replaces by `principle_id`
+- [ ] Test `align` mode: invalid principle ID rejected
+- [ ] Test `align` mode: empty relevance text rejected
+- [ ] Test both modes: output files are valid JSON after merge
+
+### 18c — Update pattern template and schema
+
+- [ ] Update `docs/patterns/2 - Pattern_Template.md`:
+  - Remove the "Related Patterns" section entirely (if still present after Phase 17)
+  - Add note: related patterns and principle alignments are managed externally and rendered automatically
+- [ ] Update `EXPECTED_SECTIONS` in `src/schemas/pattern.js`:
+  - Remove "Related Patterns" if present (should already be gone after Phase 17; verify and confirm)
+  - Final list (8 sections): Intent, Context, Issues, Motivating Example, Solution, Implementation Examples, Consequences, Known Uses
+  - Note: "References" was in Phase 17's 9-section list — confirm current state and adjust accordingly
+- [ ] Remove "Related Patterns" H2 section from any existing published patterns (currently only `co-located-data-and-metadata.md` in `src/content/patterns/`)
+
+### 18d — Update Astro pattern detail page
+
+- [ ] Update `src/pages/patterns/[...slug].astro`:
+  - Import `src/data/related-patterns.json`
+  - Import `src/data/principle-alignments.json`
+  - Import and parse `src/data/principles.yml` (add `js-yaml` dependency if needed, or use Vite YAML plugin)
+  - **Related Patterns section** (below `<Content />`):
+    - Filter `related-patterns.json` for current pattern's ID
+    - Group by relationship type (using human-readable labels: "Works Well With", "Alternative Approach", "Typical Sequence: Before", "Typical Sequence: After")
+    - Render each related pattern as a link to its pattern page with rationale text
+    - Render nothing (no heading, no empty section) if no relationships exist
+  - **Principle Alignments section** (below Related Patterns):
+    - Filter `principle-alignments.json` for current pattern's ID
+    - Look up principle name and group from `principles.yml`
+    - Render each aligned principle with group tag, name, and relevance text
+    - Render nothing if no alignments exist
+
+### 18e — Automated testing: rendering
+
+- [ ] `npm run build` succeeds with empty relationship/alignment data (no sections rendered)
+- [ ] Create a minimal test pattern, seed `related-patterns.json` and `principle-alignments.json` with test data for it, verify `npm run build` succeeds
+- [ ] `npm run dev` — verify Related Patterns section renders with correct grouping, links, and rationale text
+- [ ] `npm run dev` — verify Principle Alignments section renders with principle name, group, and relevance
+- [ ] Clean up test data after verification
+
+### 18f — Create `/relate` skill
+
+- [ ] Create `.claude/commands/relate.md`:
+  - **Arguments:** pattern ID (required). Pattern must exist in `src/content/patterns/`
+  - **Phase 1 — Typological pairing:**
+    - Use target pattern's `pattern_type` to ask a focused question
+    - If type A: present all published I-patterns from index, ask which are concrete implementations
+    - If type I: present all published A-patterns, ask which architectural principles this implements
+    - D and P types: skip this phase (picked up in phase 2)
+    - Output: `(related_id, relationship_type, rationale_both_directions)` tuples
+  - **Phase 2 — General relatedness:**
+    - Present target pattern against full published pattern index
+    - Exclude patterns already identified in phase 1
+    - Model identifies related patterns, classifies relationship types, writes bidirectional rationales
+    - Output: additional `(related_id, relationship_type, rationale_both_directions)` tuples
+  - **Phase 3 — Principle alignment:**
+    - Read `src/data/principles.yml` for all principle definitions
+    - Read target pattern content
+    - Single LLM call: select most relevant principles (2–4), write concise relevance statement for each
+    - Output: `(principle_id, relevance)` tuples
+  - **Phase 4 — Combine and persist:**
+    - Merge phases 1+2 (phase 1 takes precedence on overlap)
+    - Format as JSON payloads
+    - Call `scripts/update-relationships.js relate --input '{...}'`
+    - Call `scripts/update-relationships.js align --input '{...}'`
+    - Report all changes to operator
+  - **`--all` mode:** iterate over all published pattern IDs, run full pipeline for each
+
+### 18g — Update `/publish` skill
+
+- [ ] Update `.claude/commands/publish.md`:
+  - Step 3 (section completeness): remove "Related Patterns" from required sections if still present; confirm list is 8 sections
+  - Replace step 4 (cross-reference backfill) with: invoke `/relate` skill with the newly published pattern's ID
+  - Step 5 (commit offer): include `src/data/related-patterns.json` and `src/data/principle-alignments.json` in the commit alongside pattern file and index
+
+### 18h — Update `/update` skill
+
+- [ ] Update `.claude/commands/update.md`:
+  - Remove cross-reference maintenance step (13c) — relationships are now external
+  - If pattern content changes substantively, suggest re-running `/relate` for the pattern
+
+### 18i — Update documentation
+
+- [ ] `CLAUDE.md`:
+  - Add `/relate` to AI Authorship Commands
+  - Update Architecture section: note externalised relationships, data files, principle alignments
+  - Update `/publish` description to mention `/relate` invocation
+- [ ] `docs/spec.md`:
+  - §3 repo structure: add `src/data/` directory with data files
+  - §4: update pattern structure (8 required sections, externalised relationships)
+  - §7: add `/relate` command description, update `/publish` description
+- [ ] `docs/ai-authorship-workflow.md`:
+  - Add `/relate` to workflow documentation
+  - Update `/publish` workflow to show `/relate` invocation
+  - Document principle alignment process
+- [ ] `docs/implementation_plan.md` — mark this phase complete
+
+### 18j — Wipe existing published patterns and republish from drafts
+
+- [ ] Delete all files in `src/content/patterns/` (currently only `co-located-data-and-metadata.md`)
+- [ ] Clear `drafts/pattern-index.md` (reset to header row only)
+- [ ] Clear `src/data/related-patterns.json` and `src/data/principle-alignments.json` (reset to `{}`)
+- [ ] Run `/export` for `_local/drafts/co-located-data-and-metadata.md` → `drafts/patterns/`
+- [ ] Run `/export` for `_local/drafts/ro-crate-research-data-packaging.md` → `drafts/patterns/`
+- [ ] Run `/publish` for `drafts/patterns/co-located-data-and-metadata.md` — verify publication with new 8-section requirements and `/relate` invocation
+- [ ] Run `/publish` for `drafts/patterns/ro-crate-research-data-packaging.md` — verify same
+- [ ] Verify `drafts/pattern-index.md` has entries for both patterns
+- [ ] Verify `src/data/related-patterns.json` has bidirectional relationships populated
+- [ ] Verify `src/data/principle-alignments.json` has alignments for both patterns
+
+### 18k — Manual acceptance testing
+
+- [ ] `npm run validate` passes for all published patterns
+- [ ] `npm run build` succeeds
+- [ ] `npm run dev` — verify both pattern detail pages render:
+  - Related Patterns section with correct links and rationales
+  - Principle Alignments section with principle names, groups, and relevance text
+- [ ] Run `/relate A-004` (or whichever ID) standalone — verify it updates data files without error
+- [ ] Run `/relate --all` — verify it recomputes relationships and alignments for all patterns
+- [ ] Run `/publish` on a new test pattern — verify `/relate` is invoked as part of the publish pipeline
+- [ ] Verify pattern pages with no relationships/alignments render cleanly (no empty sections)
+
+### Design Decisions
+
+- **Phase 17 prerequisite.** Phase 17 (template simplification) removed most of the Related Patterns section infrastructure. This phase completes the transition by externalising the data entirely.
+- **Single JSON per data type.** Atomic updates, simple Astro imports, easy PR diffs.
+- **Bidirectional storage.** LLM writes both directions with tailored rationale — explicit over implicit.
+- **Skill does LLM work, script does validation/merge.** No additional API credentials; scripts stay deterministic and testable.
+- **Decomposed LLM calls.** Typological → general → principles: each call has a narrow, focused question.
+- **Republish from local drafts.** Wipe existing published patterns and republish through the updated pipeline to validate the full workflow end-to-end.
+
+**Done when:** Relationships and principle alignments are stored in `src/data/` JSON files, not in pattern markdown. Astro renders both sections from data at build time. `/relate` skill computes relationships and alignments via focused LLM calls. `/publish` invokes `/relate` after publication. Both draft patterns republished through the updated pipeline with relationships and alignments populated.
+
+---
+
 ## Updating This Plan
 
 When a phase is complete:
