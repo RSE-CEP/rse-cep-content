@@ -585,11 +585,11 @@ This phase must be implemented **before** the externalised relationships proposa
   - Create a minimal test pattern file matching the new template structure, validate it passes `npm run validate -- --publish`
   - Delete test pattern after verification
 
-- [ ] 17i — Visual verification:
+- [x] 17i — Visual verification:
   - `npm run dev` — verify pattern detail page renders boilerplate sections (Key References, Citation, License, Acknowledgments) below pattern content
   - Verify boilerplate sections use appropriate styling and are visually distinct from pattern content
 
-- [ ] 17j — Manual acceptance testing:
+- [x] 17j — Manual acceptance testing:
   - Run `/draft` against a source document — verify output matches simplified 9-section structure (no removed sections generated)
   - Run `/publish` against a file missing one of the new required sections — verify it rejects with clear error
   - Run `/publish` against a file with old sections (e.g. Context-Specific Guidance) but missing new ones (e.g. References) — verify it catches the missing section
