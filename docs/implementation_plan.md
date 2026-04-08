@@ -531,15 +531,77 @@ Extract the branch gate and export step from `/draft` into a standalone `/export
 
 ---
 
+## Phase 17 — Pattern Template Simplification
 
-### Implementation Notes
+Simplify the pattern template to retain only sections that are attestable from practitioner experience — interviews, project documentation, or domain knowledge. Remove sections that encourage AI-generated filler, move boilerplate to Astro-rendered site furniture, and consolidate overlapping sections. See `docs/change-proposal-template-simplification.md` for full rationale.
 
-- Single HTML page served inline from the script — JS in the page handles annotation stepping and inline editing
-- File writes are synchronous and immediate on each accept action (no undo)
-- Read-only on source files — the tool never touches `_sources/`
-- Annotation state encoded in the file itself — cleared annotation = reviewed
+This phase must be implemented **before** the externalised relationships proposal (`docs/change-proposal-externalised-relationships.md`), which further modifies the template and detail page.
 
-**Done when:** `npm run review` launches a browser UI that lists drafts from `_local/drafts/`, steps through annotations with source context display, writes annotation removals back to the markdown file, and hands off to `/export` when complete.
+- [ ] 17a — Write new pattern template (`docs/patterns/2 - Pattern_Template.md`):
+  - 9 required H2 sections: Intent, Context, Issues, Motivating Example, Solution, Implementation Examples, Consequences, Known Uses, References
+  - Context sub-headings: When This Pattern Applies, When This Pattern Does NOT Apply, Prerequisites
+  - Issues sub-headings: Issue N: [Name], Key Constraints
+  - Solution sub-headings: Core Idea, Key Principles, Solution Structure, How the Issues Are Balanced
+  - Consequences sub-headings: What You Gain, What You Accept (remove Risks to Manage)
+  - References consolidates former Resources (Learning Materials, Code Examples, Tools, Further Reading) and absorbs pattern-specific citations
+  - Remove: Pattern Metadata (duplicates frontmatter), Related Patterns, Context-Specific Guidance, Common Variations, Pitfalls to Avoid, Values and Considerations, Validation Checklist, How to Contribute, Citation, Metadata (DOI/License/Repository), Acknowledgments, Key References
+
+- [ ] 17b — Update `EXPECTED_SECTIONS` in `src/schemas/pattern.js`:
+  - New list: Intent, Context, Issues, Motivating Example, Solution, Implementation Examples, Consequences, Known Uses, References
+  - Removes: Context-Specific Guidance, Related Patterns
+  - Adds: Motivating Example, References
+
+- [ ] 17c — Update `/publish` command (`.claude/commands/publish.md`):
+  - Update section completeness check (step 3) to match new `EXPECTED_SECTIONS`
+  - Remove Related Patterns cross-reference step (step 4) — handled by externalised relationships proposal
+
+- [ ] 17d — Update `/draft` command (`.claude/commands/draft.md`):
+  - Update output structure to target the simplified 9-section template
+  - Remove instructions for generating Context-Specific Guidance, Common Variations, Pitfalls to Avoid, Related Patterns, Resources (replaced by References)
+  - Fewer sections means more focused extraction passes
+
+- [ ] 17e — Add Astro-rendered boilerplate to pattern detail page (`src/pages/patterns/[...slug].astro`):
+  - **Key References** — static content: Alexander (1977), CARE Principles (2020), Gamma et al. (1994), and other foundational references shared across all patterns
+  - **Citation** — generated from frontmatter fields (pattern_id, title, author, last_updated)
+  - **License and Repository** — static site-level content
+  - **Acknowledgments** — static site-level content (ARDC HASS RDC, etc.)
+  - These render below `<Content />`, outside the pattern markdown body
+
+- [ ] 17f — Remove existing published patterns:
+  - Delete all files in `src/content/patterns/` (A-004, D-002, I-005)
+  - Clear `drafts/pattern-index.md` (reset to header row only)
+  - Rationale: template changes are too significant for incremental migration; these are prototype toy data
+
+- [ ] 17g — Update documentation:
+  - `CLAUDE.md` — update body section list in Phase 1 design note, update Architecture section to reflect simplified template and boilerplate rendering
+  - `docs/spec.md` — update §4 (pattern structure: new section list, boilerplate rendering), §7 (command descriptions where sections are referenced)
+  - `docs/ai-authorship-workflow.md` — update section references throughout, document that boilerplate sections are Astro-rendered not author-written
+  - `docs/patterns/1 - Pattern_Definition_Guide.md` — update any section references to match simplified structure
+  - `docs/implementation_plan.md` — mark this phase complete
+
+- [ ] 17h — Automated testing:
+  - `npm run validate` passes with no patterns present (empty collection)
+  - `npm run build` succeeds — site builds with updated Astro template and boilerplate sections
+  - Create a minimal test pattern file matching the new template structure, validate it passes `npm run validate -- --publish`
+  - Delete test pattern after verification
+
+- [ ] 17i — Visual verification:
+  - `npm run dev` — verify pattern detail page renders boilerplate sections (Key References, Citation, License, Acknowledgments) below pattern content
+  - Verify boilerplate sections use appropriate styling and are visually distinct from pattern content
+
+- [ ] 17j — Manual acceptance testing:
+  - Run `/draft` against a source document — verify output matches simplified 9-section structure (no removed sections generated)
+  - Run `/publish` against a file missing one of the new required sections — verify it rejects with clear error
+  - Run `/publish` against a file with old sections (e.g. Context-Specific Guidance) but missing new ones (e.g. References) — verify it catches the missing section
+
+### Design Decisions
+
+- **Delete rather than migrate published patterns.** The template changes are substantial enough that updating 3 prototype toy patterns is not worth the effort. Clean slate.
+- **Boilerplate in Astro, not markdown.** Key References, Citation, License, and Acknowledgments are site-level content maintained in one place. Patterns should contain only pattern-specific substance.
+- **References consolidates Resources.** A single References section replaces the split across Resources (with sub-headings) and Key References. Foundational references move to Astro boilerplate; pattern-specific references stay in the markdown.
+- **Related Patterns deferred to externalised relationships.** The section is removed here; the next proposal introduces Astro-rendered relationship data.
+
+**Done when:** Pattern template has 9 attestable sections. `EXPECTED_SECTIONS` updated. Published patterns removed. Astro detail page renders boilerplate. `/draft` and `/publish` target simplified structure. All documentation reflects the new template.
 
 ---
 
