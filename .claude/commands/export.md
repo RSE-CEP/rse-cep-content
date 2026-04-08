@@ -135,9 +135,9 @@ If the operator confirms:
 1. Stage the file: `git add drafts/patterns/{slug}.md`
 2. Commit with a message like: `feat: add draft pattern {slug}`
 3. Report success and suggest next steps, referencing the Git workflow:
-   > Next steps — see [docs/git-workflow.md](../docs/git-workflow.md):
-   > - Run `/publish` when ready to move to production (Step 3)
-   > - Or push the branch and open a PR (Step 4), then return to master (Step 6)
+   > Next steps:
+   > - Run `/publish` to move this draft to production (adds a commit to this branch), then push and open a PR
+   > - Or push and open a PR now (Step 4 in docs/git-workflow.md) to run CI against the draft first — publish later before or after merging
 
 If the operator declines: Acknowledge and end. The exported file remains in `drafts/patterns/` uncommitted.
 
