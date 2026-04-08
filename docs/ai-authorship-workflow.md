@@ -4,7 +4,7 @@ This document explains how the RSE-CEP project uses Claude Code for AI-assisted 
 
 ## Overview
 
-The authoring pipeline uses Claude Code (Anthropic's CLI tool for AI-assisted development) with **five slash commands** (`/extract`, `/draft`, `/export`, `/publish`, and `/update`) that guide AI-assisted content extraction from source documents through a discover-draft-review-export-publish-maintain lifecycle.
+The authoring pipeline uses Claude Code (Anthropic's CLI tool for AI-assisted development) with **six slash commands** (`/extract`, `/draft`, `/export`, `/publish`, `/relate`, and `/update`) that guide AI-assisted content extraction from source documents through a discover-draft-review-export-publish-maintain lifecycle.
 
 The key principle is **extraction before elaboration**: the AI first mines content from real source material (interview transcripts, talk transcripts, notes, slides), then separately proposes content for any gaps — clearly marking what is extracted vs. generated using structured inline annotations.
 
@@ -177,7 +177,7 @@ Once all annotations are removed and the content is verified:
 
 The publish command runs checks including schema validation, annotation check, section completeness, URL verification, and quality review.
 
-If all checks pass, the file is moved from `drafts/patterns/` to `src/content/patterns/`, a row is appended to the published pattern index (`drafts/pattern-index.md`) with an agent-written summary for future relationship matching, and you're offered to commit.
+If all checks pass, the file is moved from `drafts/patterns/` to `src/content/patterns/`, a row is appended to the published pattern index (`drafts/pattern-index.md`) with an agent-written summary, `/relate` is invoked to compute related patterns and principle alignments, and you're offered to commit.
 
 If any check fails, the command reports what needs fixing and does not move the file.
 
@@ -270,7 +270,28 @@ When you signal you're done, the command runs:
 
 After the exit gate passes, the command automatically:
 - **Syncs the pattern index** (`drafts/pattern-index.md`) if title, keywords, domains, or the pattern's essence changed
+- **Suggests re-running `/relate`** if pattern content changed substantively (the operator decides)
 - **Offers to commit** all changed files on a feature branch
+
+## Computing Relationships and Principle Alignments
+
+The `/relate` command computes related patterns and principle alignments for a given pattern. It is invoked automatically by `/publish` after publication, and can be run standalone:
+
+```
+# For a single pattern:
+/relate A-004
+
+# For all published patterns (e.g. after updating principles.yml):
+/relate --all
+```
+
+The command runs three focused LLM calls:
+
+1. **Typological pairing** — structural A↔I links (Architectural patterns and their Implementation counterparts)
+2. **General relatedness** — keyword/domain-based relationship discovery across all types
+3. **Principle alignment** — selects the most relevant architectural principles (from `src/data/principles.yml`) and writes concise relevance statements
+
+Results are stored in `src/data/related-patterns.json` (bidirectional relationships) and `src/data/principle-alignments.json`, validated and merged by `scripts/update-relationships.js`. The Astro detail page renders both sections automatically at build time.
 
 ## What Claude Code Sees
 
@@ -281,8 +302,9 @@ When Claude Code starts in this project, it reads:
 3. **`.claude/commands/draft.md`** — the full pattern drafting command (local only, no git)
 4. **`.claude/commands/export.md`** — the export command (branch gate, annotation check, clean copy, commit)
 5. **`.claude/commands/publish.md`** — the publish command definition
-6. **`.claude/commands/update.md`** — the published pattern editing command
-6. **`tools/prompt-templates/*.md`** — per-content-type templates specifying expected fields and sections
+6. **`.claude/commands/relate.md`** — the relationship and principle alignment command
+7. **`.claude/commands/update.md`** — the published pattern editing command
+8. **`tools/prompt-templates/*.md`** — per-content-type templates specifying expected fields and sections
 7. **`src/content.config.ts`** — the Zod schemas (the authoritative field definitions)
 
 The commands use `scripts/validate.js` and `scripts/check-draft.js` to verify output quality.

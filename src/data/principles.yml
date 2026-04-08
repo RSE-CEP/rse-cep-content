@@ -1,0 +1,37 @@
+principles:
+  - id: findable
+    group: FAIR
+    name: Findable
+    description: >
+      Data and metadata should be easy to find for both humans and computers.
+      Machine-readable metadata is essential for automatic discovery.
+
+  - id: accessible
+    group: FAIR
+    name: Accessible
+    description: >
+      Once found, data and metadata should be retrievable via standardised,
+      open protocols with clear authentication and authorisation where needed.
+
+  - id: interoperable
+    group: FAIR
+    name: Interoperable
+    description: >
+      Data should use shared vocabularies and formats so it can be combined
+      with other data and work with applications or workflows for analysis,
+      storage, and processing.
+
+  - id: reusable
+    group: FAIR
+    name: Reusable
+    description: >
+      Data and metadata should be richly described with accurate provenance
+      so they can be replicated and/or combined in different settings.
+
+  - id: sustainability
+    group: Sustainability
+    name: Long-term Sustainability
+    description: >
+      Research outputs should remain usable, interpretable, and accessible
+      beyond the life of the originating project, without ongoing
+      infrastructure dependency.

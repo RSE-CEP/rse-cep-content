@@ -33,15 +33,20 @@ The prototype serves to:
 ```
 rsecep-site/                          # Astro project root
 ├── src/
-│   └── content/
-│       ├── config.ts                 # Zod schemas for all content types
-│       ├── patterns/                 # Pattern markdown files
-│       ├── roadmap/                  # Roadmap item markdown files
-│       └── principles/               # Architectural principle markdown files
+│   ├── content/
+│   │   ├── config.ts                 # Zod schemas for all content types
+│   │   ├── patterns/                 # Pattern markdown files
+│   │   ├── roadmap/                  # Roadmap item markdown files
+│   │   └── principles/               # Architectural principle markdown files
+│   └── data/
+│       ├── related-patterns.json     # Bidirectional pattern relationships (machine-managed)
+│       ├── principle-alignments.json # Pattern-to-principle alignments (machine-managed)
+│       └── principles.yml            # Curated architectural principles (FAIR, sustainability)
 ├── src/pages/                        # Astro page templates
 ├── scripts/
 │   ├── validate.js                   # Frontmatter validation script
-│   └── check-draft.js                # Annotation scanner for draft files
+│   ├── check-draft.js                # Annotation scanner for draft files
+│   └── update-relationships.js       # Relationship/alignment validation and merge tool
 ├── tools/
 │   ├── claude-skill.md               # Claude skill definition
 │   └── prompt-templates/             # Per-output-type prompt templates
@@ -170,7 +175,7 @@ Note: `source_type` and `source_ref` are extraction-pipeline provenance fields, 
 
 ### Body Conventions
 
-Patterns follow the structure defined in the pattern template (`docs/patterns/2 - Pattern_Template.md`). The 9 required H2 sections are: Intent, Context, Issues, Motivating Example, Solution, Implementation Examples, Consequences, Known Uses, References. Every section is fillable from interviews, project documentation, or practitioner knowledge. Site-level boilerplate (Key References, Citation, License, Acknowledgments) is rendered by the Astro detail page template, not included in the pattern markdown.
+Patterns follow the structure defined in the pattern template (`docs/patterns/2 - Pattern_Template.md`). The 8 required H2 sections are: Intent, Context, Issues, Motivating Example, Solution, Implementation Examples, Consequences, Known Uses. Every section is fillable from interviews, project documentation, or practitioner knowledge. Site-level boilerplate (Key References, Citation, License, Acknowledgments) is rendered by the Astro detail page template, not included in the pattern markdown. Related patterns and principle alignments are managed externally in `src/data/` and rendered automatically by the Astro detail page — they are not part of the pattern content body.
 
 Roadmap items and principles will have their own section conventions (TBD when schemas are finalised). Section presence should be validated with a soft warning, not a hard failure.
 
@@ -248,7 +253,7 @@ Triggered on push to `master` (i.e. after PR merge). Builds the Astro site and d
 
 ## 7. Claude Commands
 
-Five slash commands implement the authoring pipeline:
+Six slash commands implement the authoring pipeline:
 
 ### `/extract` — Proto-Pattern Mining
 
@@ -284,7 +289,11 @@ Handles the transition from local annotated draft to committed clean artefact. S
 
 ### `/publish` — Publication Gate
 
-Validates a draft in `drafts/patterns/` and moves it to `src/content/patterns/`. Checks: schema validation, annotation removal, section completeness, URL verification, quality review. On successful publication, appends an entry to `drafts/pattern-index.md` with the pattern's metadata and a one-line agent-written summary.
+Validates a draft in `drafts/patterns/` and moves it to `src/content/patterns/`. Checks: schema validation, annotation removal, section completeness, URL verification, quality review. On successful publication, appends an entry to `drafts/pattern-index.md` with the pattern's metadata and a one-line agent-written summary, then invokes `/relate` to compute relationships and principle alignments.
+
+### `/relate` — Relationship and Principle Alignment Computation
+
+Computes related patterns and principle alignments for a given pattern ID via three focused LLM calls: typological pairing (A↔I structural links), general relatedness (keyword/domain signal), and principle alignment (selecting relevant principles from `src/data/principles.yml`). Results are persisted bidirectionally to `src/data/related-patterns.json` and `src/data/principle-alignments.json` via `scripts/update-relationships.js`. Supports `--all` for batch recomputation (e.g. after updating principle definitions).
 
 ### `/update` — Published Pattern Editing
 

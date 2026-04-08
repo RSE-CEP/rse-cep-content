@@ -81,7 +81,7 @@ The file must pass all frontmatter schema checks.
 
 #### 3b. Section Completeness
 
-Verify all 9 expected body sections are present (H2 headings):
+Verify all 8 expected body sections are present (H2 headings):
 - Intent
 - Context
 - Issues
@@ -90,7 +90,6 @@ Verify all 9 expected body sections are present (H2 headings):
 - Implementation Examples
 - Consequences
 - Known Uses
-- References
 
 #### 3c. Annotation Check
 
@@ -131,6 +130,14 @@ If any of these changed:
 3. Report the index changes to the operator.
 
 If nothing index-relevant changed, report: "No index-relevant changes — pattern index unchanged."
+
+### 4b. Relationship Re-computation
+
+If the pattern's content changed substantively (e.g. new sections, revised solution, changed keywords/domains), suggest to the operator:
+
+> The pattern content has changed substantively. Consider running `/relate {pattern_id}` to recompute related patterns and principle alignments.
+
+Do not run `/relate` automatically — the operator decides. Minor edits (typos, formatting) do not warrant this suggestion.
 
 ### 5. Git Integration
 

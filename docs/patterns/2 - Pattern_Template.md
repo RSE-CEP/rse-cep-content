@@ -198,6 +198,12 @@
 
 ---
 
+> **Note:** Related patterns and principle alignments are managed externally
+> and rendered automatically on the published site. They are not part of
+> the pattern content body.
+
+---
+
 **Template Version 2.0**
 **Developed by:** CDL RSE Capacity Enhancement Project
 **License:** CC BY 4.0

@@ -1,6 +1,23 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import yaml from 'js-yaml';
 import Base from '../../layouts/Base.astro';
+
+import relatedPatternsData from '../../data/related-patterns.json';
+import principleAlignmentsData from '../../data/principle-alignments.json';
+
+const principlesRaw = readFileSync(resolve(process.cwd(), 'src/data/principles.yml'), 'utf-8');
+const principlesDoc = yaml.load(principlesRaw);
+const principlesMap = new Map((principlesDoc.principles || []).map((p) => [p.id, p]));
+
+const RELATIONSHIP_LABELS = {
+  'works-well-with': 'Works Well With',
+  'alternative-approach': 'Alternative Approach',
+  'typical-sequence-before': 'Typical Sequence: Before',
+  'typical-sequence-after': 'Typical Sequence: After',
+};
 
 export async function getStaticPaths() {
   const patterns = await getCollection('patterns');
@@ -13,9 +30,29 @@ export async function getStaticPaths() {
 const { pattern } = Astro.props;
 const { Content } = await render(pattern);
 const d = pattern.data;
+const patternId = d.pattern_id;
 
 const citationDate = d.last_updated.toISOString().slice(0, 10);
 const citationYear = d.last_updated.getFullYear();
+
+// Related patterns for this pattern
+const relationships = relatedPatternsData[patternId] || [];
+const groupedRelationships = {};
+for (const rel of relationships) {
+  const label = RELATIONSHIP_LABELS[rel.relationship] || rel.relationship;
+  if (!groupedRelationships[label]) groupedRelationships[label] = [];
+  groupedRelationships[label].push(rel);
+}
+const hasRelationships = relationships.length > 0;
+
+// Build a map of pattern_id → slug for linking
+const allPatterns = await getCollection('patterns');
+const patternSlugMap = new Map(allPatterns.map((p) => [p.data.pattern_id, p.id]));
+const patternTitleMap = new Map(allPatterns.map((p) => [p.data.pattern_id, p.data.title]));
+
+// Principle alignments for this pattern
+const alignments = principleAlignmentsData[patternId] || [];
+const hasAlignments = alignments.length > 0;
 ---
 
 <Base title={d.title}>
@@ -47,6 +84,55 @@ const citationYear = d.last_updated.getFullYear();
   <article>
     <Content />
   </article>
+
+  {hasRelationships && (
+    <section class="related-patterns">
+      <h2>Related Patterns</h2>
+      {Object.entries(groupedRelationships).map(([label, rels]) => (
+        <div class="relationship-group">
+          <h3>{label}</h3>
+          <ul>
+            {rels.map((rel) => {
+              const slug = patternSlugMap.get(rel.related_id);
+              const title = patternTitleMap.get(rel.related_id) || rel.related_id;
+              return (
+                <li>
+                  {slug ? (
+                    <a href={`${import.meta.env.BASE_URL}/patterns/${slug}/`}>
+                      <strong>{rel.related_id}: {title}</strong>
+                    </a>
+                  ) : (
+                    <strong>{rel.related_id}: {title}</strong>
+                  )}
+                  {rel.rationale && <span class="rationale"> — {rel.rationale}</span>}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </section>
+  )}
+
+  {hasAlignments && (
+    <section class="principle-alignments">
+      <h2>Principle Alignments</h2>
+      <ul>
+        {alignments.map((a) => {
+          const principle = principlesMap.get(a.principle_id);
+          const name = principle ? principle.name : a.principle_id;
+          const group = principle ? principle.group : '';
+          return (
+            <li>
+              {group && <span class="principle-group">{group}</span>}
+              <strong>{name}</strong>
+              <span class="relevance"> — {a.relevance}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  )}
 
   <hr class="boilerplate-divider" />
 
@@ -106,5 +192,49 @@ const citationYear = d.last_updated.getFullYear();
   }
   .site-boilerplate li {
     margin-bottom: 0.5rem;
+  }
+  .related-patterns,
+  .principle-alignments {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #f0f4ff;
+    border-radius: 6px;
+    border-left: 4px solid #4a6fa5;
+  }
+  .related-patterns h2,
+  .principle-alignments h2 {
+    margin-top: 0;
+    color: #2c3e50;
+    font-size: 1.3em;
+  }
+  .relationship-group h3 {
+    font-size: 1em;
+    color: #4a6fa5;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .related-patterns ul,
+  .principle-alignments ul {
+    padding-left: 1.5rem;
+  }
+  .related-patterns li,
+  .principle-alignments li {
+    margin-bottom: 0.75rem;
+  }
+  .rationale,
+  .relevance {
+    color: #555;
+  }
+  .principle-group {
+    display: inline-block;
+    background: #4a6fa5;
+    color: white;
+    font-size: 0.75em;
+    padding: 0.15em 0.5em;
+    border-radius: 3px;
+    margin-right: 0.5em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    vertical-align: middle;
   }
 </style>

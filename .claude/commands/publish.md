@@ -70,7 +70,7 @@ node scripts/check-draft.js drafts/patterns/{slug}.md
 
 ### 3. Section Completeness
 
-Verify all 9 expected body sections are present (H2 headings):
+Verify all 8 expected body sections are present (H2 headings):
 - Intent
 - Context
 - Issues
@@ -79,7 +79,6 @@ Verify all 9 expected body sections are present (H2 headings):
 - Implementation Examples
 - Consequences
 - Known Uses
-- References
 
 **FAIL if any section is missing.** This is a hard requirement for publication (unlike validation, which soft-warns).
 
@@ -138,8 +137,9 @@ Report quality concerns but do not block publication for them — the operator d
    - Append a row for the newly published pattern. The **Summary** column should be a concise one-line description you write capturing the pattern's essence — not mechanically extracted from a field, but written for semantic matching (i.e., another agent reading this summary should be able to judge whether this pattern is related to a different pattern). Keep it under ~150 characters.
    - **Keywords** and **HASS Domains** columns should be comma-separated values from the frontmatter fields.
    - Example row: `| I-001 | Implementation | Version Control for Research | version control, git | digital humanities, archaeology | Using Git-based version control workflows adapted for HASS research outputs and collaborative authoring |`
-4. **Report success** with a summary of what was published
-5. **Offer to commit** — create a commit with the new pattern file and updated index. The operator decides.
+4. **Compute relationships and principle alignments** — invoke the `/relate` skill with the newly published pattern's ID. This computes related patterns (bidirectional) and principle alignments via focused LLM calls, then persists the results to `src/data/related-patterns.json` and `src/data/principle-alignments.json` via the validation tool.
+5. **Report success** with a summary of what was published
+6. **Offer to commit** — create a commit with the new pattern file, updated index, `src/data/related-patterns.json`, and `src/data/principle-alignments.json`. The operator decides.
 
 ## On Check Failure
 

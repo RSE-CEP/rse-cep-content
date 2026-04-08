@@ -55,5 +55,4 @@ export const EXPECTED_SECTIONS = [
   'Implementation Examples',
   'Consequences',
   'Known Uses',
-  'References',
 ];
