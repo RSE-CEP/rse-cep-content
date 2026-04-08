@@ -118,8 +118,6 @@ For each section, Claude indicates whether the content was extracted from source
 
 For gaps identified in Stage 2, Claude proposes content that is clearly marked as model-generated. The operator can accept, reject, or rewrite each proposal.
 
-**Related pattern proposals:** If published patterns exist in `drafts/pattern-index.md`, Claude matches the draft against the index using shared keywords, domains, type relationships, and semantic relevance. It presents a table of proposed related patterns with relationship types (Works Well With, Alternative Approaches, Typical Sequence) and rationale. The operator confirms or rejects each proposal before it is included in the Related Patterns section. If no published patterns exist, this step is skipped gracefully.
-
 #### Stage 4 — Output and Validation
 
 Claude writes the annotated draft to `_local/drafts/{slug}.md` (gitignored) with structured inline annotations and `ptr:` references to source files, then runs schema validation.
@@ -241,7 +239,6 @@ Published patterns can be edited in-place using the `/update` command. This supp
 - Fix typos, broken URLs, or outdated information
 - Add new Known Uses or Implementation Examples discovered after publication
 - Expand sections with additional context or guidance
-- Update Related Patterns as new patterns are published
 - Adjust keywords, HASS domains, or other metadata
 
 ### Running `/update`
@@ -273,7 +270,6 @@ When you signal you're done, the command runs:
 
 After the exit gate passes, the command automatically:
 - **Syncs the pattern index** (`drafts/pattern-index.md`) if title, keywords, domains, or the pattern's essence changed
-- **Updates cross-references** in other published patterns if Related Patterns was modified (adds or removes back-references)
 - **Offers to commit** all changed files on a feature branch
 
 ## What Claude Code Sees

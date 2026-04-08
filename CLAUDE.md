@@ -18,7 +18,7 @@ AI-assisted content pipeline prototype: source document extraction → structure
 
 ## Architecture
 
-Astro + content collections. Zod schemas in `src/content.config.ts` are the single source of truth. Validation via `scripts/validate.js` (used by CI and AI skill). GitHub Actions for PR gating and deployment. Patterns are classified by type — Implementation (I), Architectural (A), Design (D), Process (P) — see `docs/pattern_typology.md`. Type is encoded in the pattern ID (`{I|A|D|P}-NNN`) and cross-validated with `pattern_type` in the schema. A published pattern index (`drafts/pattern-index.md`) is maintained by the `/publish` command and consumed by `/draft` to propose related patterns. **Local-first workflow:** proto-patterns and annotated drafts live in `_local/` (gitignored); clean drafts are exported to `drafts/patterns/` for commit.
+Astro + content collections. Zod schemas in `src/content.config.ts` are the single source of truth. Validation via `scripts/validate.js` (used by CI and AI skill). GitHub Actions for PR gating and deployment. Patterns are classified by type — Implementation (I), Architectural (A), Design (D), Process (P) — see `docs/pattern_typology.md`. Type is encoded in the pattern ID (`{I|A|D|P}-NNN`) and cross-validated with `pattern_type` in the schema. A published pattern index (`drafts/pattern-index.md`) is maintained by the `/publish` command. **Simplified template:** 9 required H2 sections (Intent, Context, Issues, Motivating Example, Solution, Implementation Examples, Consequences, Known Uses, References) — every section attestable from practitioner experience. Site-level boilerplate (Key References, Citation, License, Acknowledgments) is rendered by the Astro detail page template, not included in pattern markdown. **Local-first workflow:** proto-patterns and annotated drafts live in `_local/` (gitignored); clean drafts are exported to `drafts/patterns/` for commit.
 
 ## Key Constraints
 
@@ -44,10 +44,10 @@ Feature branches → PR to `master` → CI (validate + build) → merge → auto
 ## AI Authorship Commands
 
 - **`/extract`** — Mine proto-patterns from source documents. Identifies candidate patterns, matches against existing proto-patterns, creates or updates lightweight evidence files in `_local/protopatterns/` (gitignored).
-- **`/draft`** — Create a full pattern draft. Four stages: classify → extract → elaborate → validate. Accepts either a source document (from `_sources/`) or a proto-pattern (from `_local/protopatterns/`). Reads `drafts/pattern-index.md` during elaboration to propose related patterns. Purely local — annotated draft to `_local/drafts/` (gitignored), no git operations.
+- **`/draft`** — Create a full pattern draft. Four stages: classify → extract → elaborate → validate. Accepts either a source document (from `_sources/`) or a proto-pattern (from `_local/protopatterns/`). Purely local — annotated draft to `_local/drafts/` (gitignored), no git operations.
 - **`/export`** — Export a verified draft for commit. Branch gate (creates feature branch if on master), annotation check (halts if annotations remain), strip residual markers, copy clean file to `drafts/patterns/`, verify, offer to commit.
 - **`/publish`** — Validate a draft and move it from `drafts/patterns/` to `src/content/patterns/`. Pre-flight annotation check blocks if annotations remain (directs operator to `/export`). Checks: schema validation, annotation removal, section completeness, URL verification, quality review. On success, appends the pattern to the published pattern index (`drafts/pattern-index.md`).
-- **`/update`** — Edit a published pattern in-place. Accepts file path or pattern ID. Operator-directed edits are unannotated; model-generated substantive content uses `[ELABORATED | basis: "..."]` annotations. Exit gate enforces schema validation, section completeness, and annotation review. Syncs `drafts/pattern-index.md` and cross-references on change.
+- **`/update`** — Edit a published pattern in-place. Accepts file path or pattern ID. Operator-directed edits are unannotated; model-generated substantive content uses `[ELABORATED | basis: "..."]` annotations. Exit gate enforces schema validation, section completeness, and annotation review. Syncs `drafts/pattern-index.md` on change.
 
 ### Workflow
 
@@ -55,7 +55,7 @@ Feature branches → PR to `master` → CI (validate + build) → merge → auto
 
 **Direct drafting:** source doc in `_sources/` → `/draft` → annotated draft in `_local/drafts/` → review & strip annotations → `/export` → clean draft in `drafts/patterns/` → `/publish` → production.
 
-**Post-publication:** `/update` for in-place editing of published patterns with selective annotation and index/cross-reference maintenance.
+**Post-publication:** `/update` for in-place editing of published patterns with selective annotation and index maintenance.
 
 Draft annotations use structured syntax: `[EXTRACTED | source: "..." | ptr: "_sources/file.txt:start:end" | basis: "short description"]` and `[ELABORATED | basis: "..."]`. EXTRACTED annotations use pointers to text renditions in `_sources/` — no quoted source text is embedded in drafts. All annotations must be removed before publishing or finishing an update.
 

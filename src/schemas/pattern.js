@@ -50,10 +50,10 @@ export const EXPECTED_SECTIONS = [
   'Intent',
   'Context',
   'Issues',
+  'Motivating Example',
   'Solution',
   'Implementation Examples',
-  'Context-Specific Guidance',
   'Consequences',
   'Known Uses',
-  'Related Patterns',
+  'References',
 ];

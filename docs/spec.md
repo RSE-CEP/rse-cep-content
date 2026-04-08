@@ -113,6 +113,9 @@ source_ref: "Interview with J. Example, 2026-02-15"
 ### Issue 1: [Name]
 [Extracted/elaborated prose...]
 
+## Motivating Example
+[Extracted/elaborated prose...]
+
 ## Solution
 
 ### Core Idea
@@ -121,15 +124,13 @@ source_ref: "Interview with J. Example, 2026-02-15"
 ### Key Principles
 [Extracted/elaborated prose...]
 
+### Solution Structure
+[Extracted/elaborated prose...]
+
+### How the Issues Are Balanced
+[Extracted/elaborated prose...]
+
 ## Implementation Examples
-[Extracted/elaborated prose...]
-
-## Context-Specific Guidance
-
-### For HASS Research
-[Extracted/elaborated prose...]
-
-### For Indigenous Research
 [Extracted/elaborated prose...]
 
 ## Consequences
@@ -138,8 +139,8 @@ source_ref: "Interview with J. Example, 2026-02-15"
 ## Known Uses
 [Extracted/elaborated prose...]
 
-## Related Patterns
-[Extracted/elaborated prose...]
+## References
+[Pattern-specific citations, tools, code examples...]
 ```
 
 ### Frontmatter Fields (Common)
@@ -169,7 +170,7 @@ Note: `source_type` and `source_ref` are extraction-pipeline provenance fields, 
 
 ### Body Conventions
 
-Patterns follow the structure defined in the pattern template (`docs/patterns/2 - Pattern_Template.md`). The essential H2 sections are: Intent, Context, Issues, Solution, Implementation Examples, Context-Specific Guidance, Consequences, Known Uses, Related Patterns. Additional sections (Motivating Example, Common Variations, Pitfalls, Resources, Validation Checklist, Citation, Acknowledgments, Key References) are encouraged but optional.
+Patterns follow the structure defined in the pattern template (`docs/patterns/2 - Pattern_Template.md`). The 9 required H2 sections are: Intent, Context, Issues, Motivating Example, Solution, Implementation Examples, Consequences, Known Uses, References. Every section is fillable from interviews, project documentation, or practitioner knowledge. Site-level boilerplate (Key References, Citation, License, Acknowledgments) is rendered by the Astro detail page template, not included in the pattern markdown.
 
 Roadmap items and principles will have their own section conventions (TBD when schemas are finalised). Section presence should be validated with a soft warning, not a hard failure.
 
@@ -269,8 +270,6 @@ The 4-stage extraction flow that produces a full structured pattern draft. Accep
 
 Stages: classify source → template-aware extraction → guided elaboration → output with annotations and validation. The `/draft` command is purely local — no git operations. Annotated drafts are written to `_local/drafts/` (gitignored) with inline `[EXTRACTED]` and `[ELABORATED]` annotations. EXTRACTED annotations use pointer-based references to text renditions in `_sources/` (see §4 Draft Annotation Syntax) — no source text is embedded in draft files.
 
-**Related pattern proposals:** During Stage 3 (guided elaboration), the `/draft` command reads the published pattern index (`drafts/pattern-index.md`) and proposes related patterns for the Related Patterns section (section 9 of the template). The index contains agent-written summaries alongside structured metadata (ID, type, keywords, domains), enabling semantic matching. Proposed relationships are presented to the operator for confirmation before inclusion.
-
 When drafting from a proto-pattern, the proto-pattern entry is removed from the index and the file deleted after successful drafting.
 
 ### `/export` — Draft Export
@@ -303,8 +302,7 @@ Flow:
    - Annotation check via `scripts/check-draft.js` — if annotations remain, the operator must review and remove them before finishing, same as the `/publish` workflow
    - URL verification on new or changed URLs only (diff-aware)
 4. **Index sync** — If title, keywords, domains, type, or the pattern's essence changed, update the corresponding row in `drafts/pattern-index.md` (including summary rewrite if warranted).
-5. **Cross-reference maintenance** — If Related Patterns changed, update back-references in affected published patterns.
-6. **Commit offer** — Feature branch and commit for PR review.
+5. **Commit offer** — Feature branch and commit for PR review.
 
 Key design decisions:
 - **Annotations for generated content only.** Unlike `/draft` (where everything is annotated), `/update` only annotates model-generated substantive content. Operator-directed edits are not annotated — the operator is the author. This keeps the annotation overhead proportional to the AI contribution.

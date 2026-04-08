@@ -1,6 +1,6 @@
 # /update — Edit a Published Pattern
 
-Interactively edit a published pattern in `src/content/patterns/`, with validation checks and index/cross-reference maintenance. The pattern remains published throughout — no return to draft status.
+Interactively edit a published pattern in `src/content/patterns/`, with validation checks and index maintenance. The pattern remains published throughout — no return to draft status.
 
 ## Arguments
 
@@ -59,8 +59,7 @@ These are changes where the model generates narrative content:
 - Adding a new Known Use
 - Expanding a section to cover a new topic
 - Writing a new Implementation Example
-- Adding new Context-Specific Guidance
-- Proposing new Related Patterns entries
+- Adding new context or guidance
 
 Use `[ELABORATED | basis: "..."]` annotations — the same syntax as `/draft`. Place the annotation immediately after the generated content.
 
@@ -86,12 +85,12 @@ Verify all 9 expected body sections are present (H2 headings):
 - Intent
 - Context
 - Issues
+- Motivating Example
 - Solution
 - Implementation Examples
-- Context-Specific Guidance
 - Consequences
 - Known Uses
-- Related Patterns
+- References
 
 #### 3c. Annotation Check
 
@@ -133,21 +132,7 @@ If any of these changed:
 
 If nothing index-relevant changed, report: "No index-relevant changes — pattern index unchanged."
 
-### 5. Cross-Reference Maintenance
-
-Check whether the Related Patterns section was modified during editing. If it was:
-
-1. **Identify added references:** For each newly referenced pattern (by ID), check whether that published pattern's own Related Patterns section already references this pattern back.
-   - If not, **add a back-reference** under the appropriate relationship sub-heading (Works Well With / Alternative Approaches / Typical Sequence). Write a brief description from the perspective of the target pattern. Create the sub-heading if it doesn't exist.
-
-2. **Identify removed references:** For each reference that was removed, check whether the target published pattern has a back-reference to this pattern.
-   - If so, **remove the back-reference** from the target pattern. If the sub-heading is now empty, remove the sub-heading too.
-
-3. Report all cross-reference changes to the operator.
-
-If Related Patterns was not modified, report: "Related Patterns unchanged — no cross-reference updates needed."
-
-### 6. Git Integration
+### 5. Git Integration
 
 Before creating the feature branch, check the state of local master:
 
@@ -162,7 +147,7 @@ Interpret the output:
 
 After the check (or operator confirmation), offer to:
 1. Create a feature branch (`feature/update-{slug}`)
-2. Commit all changed files (pattern file, updated index, any cross-referenced pattern files)
+2. Commit all changed files (pattern file, updated index)
 3. The operator decides — do not auto-commit without confirmation.
 
 ## What NOT To Do
@@ -171,6 +156,6 @@ After the check (or operator confirmation), offer to:
 - Do not run a quality review stage. The pattern already passed quality review at publication.
 - Do not annotate operator-directed edits. Only annotate model-generated substantive content.
 - Do not skip the exit gate. Always run all checks before finishing.
-- Do not silently update the index or cross-references. Always report changes to the operator.
+- Do not silently update the index. Always report changes to the operator.
 - Do not use `[square brackets]` in the pattern body except for annotation syntax (`[EXTRACTED | ...]` and `[ELABORATED | ...]`).
 - Do not invent Known Uses or Implementation Examples — these must be real.

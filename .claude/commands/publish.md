@@ -74,12 +74,12 @@ Verify all 9 expected body sections are present (H2 headings):
 - Intent
 - Context
 - Issues
+- Motivating Example
 - Solution
 - Implementation Examples
-- Context-Specific Guidance
 - Consequences
 - Known Uses
-- Related Patterns
+- References
 
 **FAIL if any section is missing.** This is a hard requirement for publication (unlike validation, which soft-warns).
 
@@ -138,13 +138,8 @@ Report quality concerns but do not block publication for them — the operator d
    - Append a row for the newly published pattern. The **Summary** column should be a concise one-line description you write capturing the pattern's essence — not mechanically extracted from a field, but written for semantic matching (i.e., another agent reading this summary should be able to judge whether this pattern is related to a different pattern). Keep it under ~150 characters.
    - **Keywords** and **HASS Domains** columns should be comma-separated values from the frontmatter fields.
    - Example row: `| I-001 | Implementation | Version Control for Research | version control, git | digital humanities, archaeology | Using Git-based version control workflows adapted for HASS research outputs and collaborative authoring |`
-4. **Cross-reference related patterns** in already-published pattern files:
-   - Read the newly published pattern's **Related Patterns** section. For each pattern referenced there (by ID), check whether that published pattern's own Related Patterns section already references the new pattern back.
-   - If not, **add a back-reference** to the already-published pattern's Related Patterns section, under the appropriate relationship sub-heading (Works Well With / Alternative Approaches / Typical Sequence). Write a brief description from the perspective of the existing pattern. Create the sub-heading if it doesn't exist.
-   - If the already-published pattern's Related Patterns section contains any operator status messages (e.g., "No published patterns in the index — skipping related pattern proposals."), **remove them**.
-   - Report all cross-reference updates to the operator.
-5. **Report success** with a summary of what was published
-6. **Offer to commit** — create a commit with the new pattern file, updated index, and any cross-referenced pattern files. The operator decides.
+4. **Report success** with a summary of what was published
+5. **Offer to commit** — create a commit with the new pattern file and updated index. The operator decides.
 
 ## On Check Failure
 

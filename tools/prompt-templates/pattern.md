@@ -48,38 +48,24 @@ The markdown body must follow the pattern template structure. Essential sections
    - H3: Issue 2: [Name]
    - Optionally: H3: Key Constraints
 
-4. **Solution** — The configuration or approach that balances the competing issues.
+4. **Motivating Example** — A concrete story illustrating the issues in a real research context.
+
+5. **Solution** — The configuration or approach that balances the competing issues.
    - H3: Core Idea
    - H3: Key Principles
+   - H3: Solution Structure
+   - H3: How the Issues Are Balanced
 
-5. **Implementation Examples** — Real examples showing how projects implemented this pattern.
+6. **Implementation Examples** — Real examples showing how projects implemented this pattern.
    - H3: Example 1: [Project Name/Context]
 
-6. **Context-Specific Guidance** — Guidance tailored to specific research contexts.
-   - H3: For HASS Research
-   - H3: For Indigenous Research (with CARE Principles Application)
-
-7. **Consequences** — What you gain, what you accept, risks to manage.
+7. **Consequences** — What you gain and what you accept.
    - H3: What You Gain
    - H3: What You Accept
-   - H3: Risks to Manage
 
 8. **Known Uses** — Real-world applications proving this pattern works.
 
-9. **Related Patterns** — How this pattern connects to others.
-   - H3: Works Well With
-   - H3: Alternative Approaches
-
-### Optional Sections
-
-- **Motivating Example** — A concrete story illustrating the issues.
-- **Common Variations** — Variations of this pattern for different contexts.
-- **Pitfalls to Avoid** — Anti-patterns and common mistakes.
-- **Resources** — Learning materials, code examples, tools, further reading.
-- **Validation Checklist** — How to verify appropriate application.
-- **Citation** — APA and BibTeX citation templates.
-- **Acknowledgments** — Contributors, reviewers, communities.
-- **Key References** — Foundational literature.
+9. **References** — Pattern-specific citations, tools, code examples, and further reading. Foundational references (Alexander, CARE, Gamma) are rendered site-wide by Astro and do not need to be included here.
 
 ## Extraction Provenance Conventions
 

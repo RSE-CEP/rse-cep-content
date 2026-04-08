@@ -157,19 +157,19 @@ Pattern IDs encode type and sequence:
 
 ## Section-by-Section Guidance Per Type
 
-All patterns use the same 9 essential sections. The difference is emphasis, not structure.
+All patterns use the same 9 required sections. The difference is emphasis, not structure.
 
 | Section | Implementation (I) | Architectural (A) | Design (D) | Process (P) |
 |---------|-------------------|-------------------|------------|-------------|
 | **Intent** | What this technology/technique achieves | What structural principle this embodies | What the artefact should be like for its users; what design problem this solves | What workflow, engagement, or governance challenge this addresses |
 | **Context** | When this technology is appropriate; prerequisites include specific tools/platforms | When this system shape is appropriate; prerequisites are structural/organisational | When this design approach is appropriate; prerequisites include user needs, cultural context, or domain expectations | When this way of working is appropriate; prerequisites include stakeholder relationships, project phase, or institutional setting |
 | **Issues** | Technical trade-offs (performance, compatibility, learning curve) | Systemic tensions (governance vs openness, flexibility vs consistency) | Design tensions (simplicity vs power, cultural specificity vs generality, progressive disclosure vs discoverability) | Human and procedural tensions (trust vs efficiency, inclusivity vs pace, sustainability vs innovation) |
+| **Motivating Example** | A real project that hit these technical trade-offs | A real project that faced these structural tensions | A real project where these design tensions emerged | A real project where these workflow/engagement challenges arose |
 | **Solution** | Names specific technologies; describes configuration, integration, deployment approaches | Describes structural principles, component relationships, data flows; technology-agnostic | Describes how the artefact should behave, what it should present, how it should handle user needs; may take the form of specification guidance | Describes practices, protocols, workflows, and engagement approaches; centres on human activity and human-AI collaboration |
 | **Implementation Examples** | Real configurations, code snippets, tool setups | Real system architectures showing how principles were realised | Real designs, specs, or interface approaches that embody this pattern | Real instances of this process in practice — how a team, community, or project applied the workflow |
-| **Context-Specific Guidance** | Tool selection for HASS contexts; Indigenous data considerations for specific technologies | Governance structures; CARE/OCAP embodiment in system design | Cultural appropriateness in artefact design; domain-specific user expectations; accessibility considerations | Cultural protocols; community expectations; disciplinary norms for engagement and communication |
 | **Consequences** | Concrete technical trade-offs (overhead, dependencies, lock-in) | Systemic consequences (trust, sustainability, adaptability) | Design consequences (usability, cultural appropriateness, fitness for purpose, what happens when the design is wrong) | Relational and sustainability consequences (trust built or eroded, capacity developed or extracted, long-term viability) |
 | **Known Uses** | Projects using this specific technology/technique | Projects embodying this architectural approach | Projects or artefacts that embody this design approach | Projects or communities that have followed this process |
-| **Related Patterns** | Links to A patterns this implements; sibling I patterns | Links to I patterns that implement this; D patterns that drive its requirements | Links to A patterns this drives; I patterns that realise it; P patterns that use the resulting design artefacts | Links to D patterns whose artefacts (specs) this process uses; A patterns whose governance requirements drive it |
+| **References** | Technology-specific citations, tools, code examples | Architectural literature, governance frameworks | Design literature, accessibility standards, domain guidelines | Process literature, community engagement resources |
 
 ## Cross-Type Relationships
 

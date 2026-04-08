@@ -13,6 +13,9 @@ export async function getStaticPaths() {
 const { pattern } = Astro.props;
 const { Content } = await render(pattern);
 const d = pattern.data;
+
+const citationDate = d.last_updated.toISOString().slice(0, 10);
+const citationYear = d.last_updated.getFullYear();
 ---
 
 <Base title={d.title}>
@@ -26,7 +29,7 @@ const d = pattern.data;
         <tr><th>Also known as</th><td>{d.alternative_names.join(', ')}</td></tr>
       )}
       <tr><th>Author</th><td>{d.author}</td></tr>
-      <tr><th>Last updated</th><td>{d.last_updated.toISOString().slice(0, 10)}</td></tr>
+      <tr><th>Last updated</th><td>{citationDate}</td></tr>
       {d.version && <tr><th>Version</th><td>{d.version}</td></tr>}
       <tr>
         <th>Keywords</th>
@@ -44,4 +47,64 @@ const d = pattern.data;
   <article>
     <Content />
   </article>
+
+  <hr class="boilerplate-divider" />
+
+  <aside class="site-boilerplate">
+    <h2>Key References</h2>
+    <ul>
+      <li>Alexander, C. (1977). <em>A Pattern Language: Towns, Buildings, Construction</em>. Oxford University Press.</li>
+      <li>Alexander, C. (1979). <em>The Timeless Way of Building</em>. Oxford University Press.</li>
+      <li>Carroll, S. R., Garba, I., Figueroa-Rodríguez, O. L., Holbrook, J., Lovett, R., Materechera, S., Parsons, M., Raseroka, K., Rodriguez-Lonebear, D., Rowe, R., Sara, R., Walker, J. D., Anderson, J., &amp; Hudson, M. (2020). The CARE Principles for Indigenous Data Governance. <em>Data Science Journal</em>, <em>19</em>(1), 43. <a href="https://doi.org/10.5334/dsj-2020-043">https://doi.org/10.5334/dsj-2020-043</a></li>
+      <li>Gamma, E., Helm, R., Johnson, R., &amp; Vlissides, J. (1994). <em>Design Patterns: Elements of Reusable Object-Oriented Software</em>. Addison-Wesley Professional.</li>
+      <li>Goth, F., Alves, R., Braun, M., et al. (2024). Foundational Competencies and Responsibilities of a Research Software Engineer. <em>F1000Research</em>, <em>13</em>:1429. <a href="https://doi.org/10.12688/f1000research.157778.1">https://doi.org/10.12688/f1000research.157778.1</a></li>
+    </ul>
+
+    <h2>Citation</h2>
+    <p>
+      {d.author} ({citationYear}). {d.title}. CDL Recommended Patterns in RSE for HASS &amp; Indigenous Research, {d.pattern_id}.
+    </p>
+
+    <h2>License and Repository</h2>
+    <p>
+      This pattern is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+      Source repository: <a href="https://github.com/rse-cep/content">rse-cep/content</a>.
+    </p>
+
+    <h2>Acknowledgments</h2>
+    <p>
+      This work is supported by the Australian Research Data Commons (ARDC) HASS and Indigenous Research Data Commons.
+    </p>
+  </aside>
 </Base>
+
+<style>
+  .boilerplate-divider {
+    margin-top: 3rem;
+    border: none;
+    border-top: 2px solid #ddd;
+  }
+  .site-boilerplate {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 0.9em;
+    color: #555;
+  }
+  .site-boilerplate h2 {
+    font-size: 1.1em;
+    color: #333;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .site-boilerplate h2:first-child {
+    margin-top: 0;
+  }
+  .site-boilerplate ul {
+    padding-left: 1.5rem;
+  }
+  .site-boilerplate li {
+    margin-bottom: 0.5rem;
+  }
+</style>
